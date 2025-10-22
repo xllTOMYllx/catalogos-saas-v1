@@ -15,7 +15,7 @@ function ProductCard({ id, ruta, nombre, precio, description, stock }) {
     <article className="flex flex-col w-full max-w-xs bg-[#171819] gap-2 items-center rounded-xl p-4 hover:shadow-lg transition-shadow">
       <img src={ruta} alt={nombre} className="w-full h-48 object-cover rounded-lg" />
       <h3 className="text-xl font-semibold text-white text-center">{nombre}</h3>
-      <p className="text-gray-400 text-xs sm:text-sm text-center line-clamp-2">{description}</p>  // line-clamp para truncar
+      <p className="text-gray-400 text-xs sm:text-sm text-center line-clamp-2">{description}</p>
       <p className="text-2xl font-bold text-[#f24427]">${precio}</p>
       {stock > 0 ? (
         <button
