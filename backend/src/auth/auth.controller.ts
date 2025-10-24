@@ -8,13 +8,13 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(@Body() loginDto: LoginDto): Promise<AuthResponse> {
+  login(@Body() loginDto: LoginDto): AuthResponse {
     return this.authService.login(loginDto);
   }
 
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  async logout(): Promise<{ success: boolean }> {
+  logout(): { success: boolean } {
     return this.authService.logout();
   }
 }

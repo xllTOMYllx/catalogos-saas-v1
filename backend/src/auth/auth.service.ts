@@ -9,9 +9,9 @@ export class AuthService {
     { email: 'user@test.com', password: '123', role: 'user' },
   ];
 
-  async login(loginDto: LoginDto): Promise<AuthResponse> {
+  login(loginDto: LoginDto): AuthResponse {
     const user = this.users.find(
-      u => u.email === loginDto.email && u.password === loginDto.password
+      (u) => u.email === loginDto.email && u.password === loginDto.password,
     );
 
     if (user) {
@@ -31,11 +31,11 @@ export class AuthService {
     };
   }
 
-  async logout(): Promise<{ success: boolean }> {
+  logout(): { success: boolean } {
     return { success: true };
   }
 
-  async validateToken(token: string): Promise<boolean> {
+  validateToken(token: string): boolean {
     // Simple mock validation
     return Boolean(token && token.startsWith('mock-token-'));
   }

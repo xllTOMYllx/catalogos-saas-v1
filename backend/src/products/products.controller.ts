@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { ProductsService } from './products.service';
 import type { Product } from './product.entity';
 
@@ -23,7 +33,10 @@ export class ProductsController {
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() updates: Partial<Product>): Product | null {
+  update(
+    @Param('id') id: string,
+    @Body() updates: Partial<Product>,
+  ): Product | null {
     return this.productsService.update(+id, updates);
   }
 
