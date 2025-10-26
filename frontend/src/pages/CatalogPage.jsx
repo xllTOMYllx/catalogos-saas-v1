@@ -10,8 +10,10 @@ function CatalogPage() {
   // Soporta tanto :id (vieja ruta) como :catalogSlug (nueva)
   const { id, catalogSlug } = useParams();
   const incoming = id || catalogSlug;
-  const { setActiveCatalogId, filterProducts, getActiveCatalog } = useAdminStore();
-  const activeCatalog = getActiveCatalog();
+  const { setActiveCatalogId, filterProducts, getActiveCatalog, catalogs } = useAdminStore();
+  
+  // If no slug, use default catalog directly, otherwise use active
+  const activeCatalog = incoming ? getActiveCatalog() : (catalogs?.default || getActiveCatalog());
   const activeProducts = activeCatalog.products || [];
 
   useEffect(() => {

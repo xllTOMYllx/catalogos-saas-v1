@@ -57,6 +57,13 @@ export default function Header({ negocio: defaultNegocio }) {
     setIsMobileMenuOpen(false);
   };
 
+  // Navigate to home and ensure default catalog is shown
+  const handleHomeNavigation = () => {
+    setActiveCatalogId('default');
+    navigate('/');
+    setIsMobileMenuOpen(false);
+  };
+
   // Logout: limpiar session y estado persistente
   const handleLogout = () => {
     if (logout && typeof logout === 'function') {
@@ -67,7 +74,10 @@ export default function Header({ negocio: defaultNegocio }) {
       localStorage.removeItem('userId');
       localStorage.removeItem('admin-storage'); // key del persist en adminStore
     } catch { /* ignore */ }
-    try { clearStorage(); } catch { /* ignore */ }
+    try { 
+      clearStorage(); 
+      setActiveCatalogId('default'); // Reset to default catalog
+    } catch { /* ignore */ }
 
     toast.success('Sesión cerrada. ¡Hasta pronto!', { duration: 2000 });
     navigate('/');
@@ -82,15 +92,15 @@ export default function Header({ negocio: defaultNegocio }) {
       <header className="fixed w-full top-0 z-50 bg-[#030506] border-b border-gray-800 px-2 sm:px-4 lg:px-6 py-2 shadow-lg">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center flex-shrink-0 relative">
-            <Link to="/" className="flex items-center" onClick={() => setIsMobileMenuOpen(false)}>
+            <button onClick={handleHomeNavigation} className="flex items-center">
               <img src={businessData.logo} alt={`${businessData.nombre} Logo`} className="w-8 h-8 sm:w-10 sm:h-10 mr-2 rounded" />
               <h1 className="font-serif text-white font-semibold text-lg sm:text-xl truncate">{businessData.nombre}</h1>
-            </Link>
+            </button>
             <LogoPortal onSwitch={handleCatalogSwitch} />
           </div>
 
           <nav className="hidden md:flex items-center gap-6 text-white">
-            <Link to="/" className="hover:text-[#f24427] transition-colors" onClick={handleColecciones}>INICIO</Link>
+            <button onClick={handleHomeNavigation} className="hover:text-[#f24427] transition-colors">INICIO</button>
             <Link to="/colecciones" className="hover:text-[#f24427] transition-colors" onClick={handleColecciones}>COLECCIONES</Link>
             <Link to="/nosotros" className="hover:text-[#f24427] transition-colors">SOBRE NOSOTROS</Link>
             <Link to="/contacto" className="hover:text-[#f24427] transition-colors">CONTACTO</Link>
@@ -151,7 +161,7 @@ export default function Header({ negocio: defaultNegocio }) {
         {isMobileMenuOpen && (
           <div className="md:hidden bg-[#030506] border-t border-gray-800 px-4 py-4 space-y-4">
             <nav className="space-y-2">
-              <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 hover:text-[#f24427]">INICIO</Link>
+              <button onClick={handleHomeNavigation} className="block py-2 hover:text-[#f24427] w-full text-left">INICIO</button>
               <Link to="/colecciones" onClick={() => { handleColecciones(); setIsMobileMenuOpen(false); }} className="block py-2 hover:text-[#f24427]">COLECCIONES</Link>
               <Link to="/nosotros" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 hover:text-[#f24427]">SOBRE NOSOTROS</Link>
               <Link to="/contacto" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 hover:text-[#f24427]">CONTACTO</Link>

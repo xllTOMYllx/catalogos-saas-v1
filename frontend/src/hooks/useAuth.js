@@ -4,7 +4,8 @@ import { authApi } from '../api/auth';
 // Hook Auth - now uses backend API
 export function useAuth() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return localStorage.getItem('authToken') !== null;
+    // Check both authToken and role for authentication status
+    return localStorage.getItem('authToken') !== null || localStorage.getItem('role') !== null;
   });
 
   const login = async (email, password) => {
@@ -33,6 +34,8 @@ export function useAuth() {
     } finally {
       localStorage.removeItem('authToken');
       localStorage.removeItem('user');
+      localStorage.removeItem('role');
+      localStorage.removeItem('userId');
       setIsAuthenticated(false);
     }
   };
