@@ -42,6 +42,8 @@ function LoginRole() {
     // Guardamos role y userId como slug (clave del catálogo)
     localStorage.setItem('role', 'cliente');
     localStorage.setItem('userId', slug);
+    // Set a simple auth token to indicate authenticated state
+    localStorage.setItem('authToken', 'local-client-' + slug);
 
     // Creamos catálogo vacío para este cliente (no clonar el default por defecto)
     try {
@@ -51,7 +53,7 @@ function LoginRole() {
 
       // Actualizamos datos del business para este catálogo (si updateBusiness existe)
       if (typeof updateBusiness === 'function') {
-        updateBusiness({ nombre: negocioNombre, email, userId: slug, slug });
+        await updateBusiness({ nombre: negocioNombre, email, userId: slug, slug });
       } else {
         // fallback: intenta setear business directamente en store
         const state = useAdminStore.getState();

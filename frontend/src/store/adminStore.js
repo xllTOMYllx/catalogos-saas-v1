@@ -31,13 +31,17 @@ export const useAdminStore = create(
           
           let newId = userId || 'default-clone';
           if (isClone && !state.catalogs[newId]) {
-            // Clone for new client
+            // Clone for new client - use empty initial array if provided, otherwise use initial products
             state.catalogs[newId] = {
-              products: products || initial || [...state.catalogs.default.products],
-              business: business || { ...state.catalogs.default.business }
+              products: Array.isArray(initial) && initial.length === 0 ? [] : (initial || products || []),
+              business: business || { ...initialBusiness, nombre: business?.nombre || 'Mi Negocio' }
             };
+          } else if (newId === 'default') {
+            // Update default catalog only
+            state.catalogs.default.products = products || initialProducts;
+            state.catalogs.default.business = business || initialBusiness;
           } else {
-            // Update existing catalog
+            // Update existing non-default catalog
             if (!state.catalogs[newId]) {
               state.catalogs[newId] = {
                 products: [],
@@ -60,8 +64,8 @@ export const useAdminStore = create(
           let newId = userId || 'default-clone';
           if (isClone && !state.catalogs[newId]) {
             state.catalogs[newId] = {
-              products: initial || [...state.catalogs.default.products],
-              business: { ...state.catalogs.default.business }
+              products: Array.isArray(initial) && initial.length === 0 ? [] : (initial || []),
+              business: { ...initialBusiness }
             };
           }
           set({ catalogs: { ...state.catalogs }, activeId: newId });
@@ -217,10 +221,38 @@ export const useAdminStore = create(
       getTotalProducts: () => get().getActiveCatalog().products.length,
       getTotalStock: () => get().getActiveCatalog().products.reduce((sum, p) => sum + (p.stock || 0), 0),
 
-      saveAll: () => {
+      saveAll: async () => {
         const state = get();
-        localStorage.setItem('admin-storage', JSON.stringify(state));
-        return state;
+        const activeId = state.activeId;
+        const activeCatalog = state.getActiveCatalog();
+        
+        try {
+          set({ loading: true, error: null });
+          
+          // Save business info
+          if (activeCatalog.business) {
+            await businessApi.update(activeCatalog.business);
+          }
+          
+          // Save all products (this is a simplified approach - in production you'd track changes)
+          // For now, we just ensure the state is persisted
+          localStorage.setItem('admin-storage', JSON.stringify({
+            activeId: state.activeId,
+            catalogs: state.catalogs
+          }));
+          
+          set({ loading: false });
+          return { success: true, message: 'Todos los cambios guardados correctamente' };
+        } catch (error) {
+          console.error('Error saving:', error);
+          set({ loading: false, error: error.message });
+          // Still save locally even if backend fails
+          localStorage.setItem('admin-storage', JSON.stringify({
+            activeId: state.activeId,
+            catalogs: state.catalogs
+          }));
+          return { success: false, message: 'Error al guardar en servidor, pero guardado localmente' };
+        }
       },
     }),
     { name: 'admin-storage' }

@@ -18,18 +18,31 @@ function AdminDashboard() {
   // Determinar el slug del catálogo actual
   const currentSlug = catalogSlug || activeId;
 
-  const handleSaveAll = () => {
-    saveAll();  // ✅ Llama store save (persiste localStorage)
-    toast.success('Todo guardado. Redirigiendo a tu catálogo...', { duration: 2000 });
-    
-    // Redirigir al catálogo personalizado después de guardar
-    setTimeout(() => {
-      if (currentSlug && currentSlug !== 'default') {
-        navigate(`/${currentSlug}`);
-      } else {
-        navigate('/colecciones');
-      }
-    }, 1500);
+  const handleSaveAll = async () => {
+    const result = await saveAll();
+    if (result.success) {
+      toast.success('✅ Todo guardado correctamente. Redirigiendo...', { duration: 2000 });
+      
+      // Redirigir al catálogo personalizado después de guardar
+      setTimeout(() => {
+        if (currentSlug && currentSlug !== 'default') {
+          navigate(`/${currentSlug}`);
+        } else {
+          navigate('/colecciones');
+        }
+      }, 1500);
+    } else {
+      toast.error('⚠️ ' + result.message, { duration: 3000 });
+    }
+  };
+
+  const handleGoHome = () => {
+    // If client has a catalog, go to their catalog page, otherwise go to landing
+    if (currentSlug && currentSlug !== 'default') {
+      navigate(`/${currentSlug}`);
+    } else {
+      navigate('/');
+    }
   };
 
   const business = activeCatalog.business;  // Del active catalog
@@ -56,9 +69,9 @@ function AdminDashboard() {
   <main className="flex-1 p-4 md:p-8">
     {/* Header con Back y Preview Info */}
     <div className="flex justify-between items-center mb-6">
-      <Link to="/" className="flex items-center gap-2 text-[#f24427] hover:underline">
+      <button onClick={handleGoHome} className="flex items-center gap-2 text-[#f24427] hover:underline cursor-pointer">
         <ArrowLeft size={20} /> Volver al Inicio
-      </Link>
+      </button>
       <div className="text-right">
         <h2 className="text-3xl font-bold">Panel de {business.nombre}</h2>
         <p className="text-gray-400">Productos: {getTotalProducts()} | Stock Total: {getTotalStock()}</p>

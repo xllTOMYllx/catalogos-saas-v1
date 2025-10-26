@@ -5,16 +5,17 @@ import ProductCard from '../components/ProductCard';
 import { useAdminStore } from '../store/adminStore';
 
 function LandingPage() {
-  const { getActiveCatalog } = useAdminStore();
-  const activeCatalog = getActiveCatalog();
-  const activeProducts = activeCatalog.products || [];
+  const { catalogs } = useAdminStore();
+  // Always show default catalog on landing page, regardless of logged-in state
+  const defaultCatalog = catalogs?.default || { products: [], business: { nombre: 'UrbanStreet', logo: '/logosinfondo.png', color: '#f24427' } };
+  const activeProducts = defaultCatalog.products || [];
   
   // Mostrar solo los primeros 4 productos como preview
   const previewProducts = activeProducts.slice(0, 4);
 
   return (
     <div className="bg-[#080c0e] min-h-screen flex flex-col">
-      <Header negocio={activeCatalog.business} />
+      <Header negocio={defaultCatalog.business} />
       
       <main className="flex-1 pt-16 sm:pt-20">
         {/* Hero Section */}
@@ -162,7 +163,7 @@ function LandingPage() {
       {/* Footer */}
       <footer className="bg-[#030506] border-t border-gray-800 py-8">
         <div className="container mx-auto px-4 sm:px-8 text-center text-gray-400">
-          <p>&copy; 2025 {activeCatalog.business?.nombre || 'UrbanStreet'}. Todos los derechos reservados.</p>
+          <p>&copy; 2025 {defaultCatalog.business?.nombre || 'UrbanStreet'}. Todos los derechos reservados.</p>
         </div>
       </footer>
     </div>

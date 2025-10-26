@@ -23,12 +23,22 @@ function LogoPortal({ onSwitch }) {
   const handleToggle = () => setIsOpen(!isOpen);
 
   // Construimos la lista de catálogos a mostrar (id = clave del objeto catalogs)
+  // Exclude 'default' catalog from the list if user is not admin
   const getCatalogList = () => {
     if (!catalogsFromStore) return [];
-    return Object.entries(catalogsFromStore).map(([id, value]) => ({
-      id,
-      name: value.business?.nombre || id
-    }));
+    return Object.entries(catalogsFromStore)
+      .filter(([id]) => {
+        // Only show 'default' if user is explicitly viewing it or is admin
+        // For clients, only show their own catalogs (non-default)
+        if (id === 'default') {
+          return role === 'admin' || role === 'user';
+        }
+        return true;
+      })
+      .map(([id, value]) => ({
+        id,
+        name: value.business?.nombre || id
+      }));
   };
 
   const catalogs = getCatalogList();
