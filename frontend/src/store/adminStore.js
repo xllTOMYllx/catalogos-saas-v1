@@ -138,6 +138,29 @@ export const useAdminStore = create(
         }
       },
 
+      // Protegemos al setear activeId: si no existe, forzamos default
+      setActiveCatalogId: (id) => {
+        const state = get();
+        if (!id || !state.catalogs[id]) {
+          // resetea a default si el id no existe
+          set({ activeId: 'default' });
+        } else {
+          set({ activeId: id });
+        }
+      },
+
+      // getActiveCatalog: devuelve catálogo válido o fuerza default si hay inconsistencia
+      getActiveCatalog: () => {
+        const { activeId, catalogs } = get();
+        if (!catalogs) return { products: initialProducts, business: initialBusiness };
+        if (!catalogs[activeId]) {
+          // corregimos la inconsistencia guardada
+          set({ activeId: 'default' });
+          return catalogs.default || { products: initialProducts, business: initialBusiness };
+        }
+        return catalogs[activeId];
+      },
+
       // Delete product (with backend sync)
       deleteProduct: async (id) => {
         const state = get();

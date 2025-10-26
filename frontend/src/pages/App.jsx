@@ -9,31 +9,32 @@ import { useParams } from "react-router-dom";
 import cap1Placeholder from '../assets/images/cap1.png';
 
 function App() {
-  const {id} = useParams(); // Obtener id de la URL
-  const {setActiveCatalogId, filterProducts, getActiveCatalog} = useAdminStore();
+  // soporta tanto :id (vieja ruta) como :catalogSlug (nueva)
+  const { id, catalogSlug } = useParams(); // Obtener id/slug de la URL
+  const incoming = id || catalogSlug;
+  const { setActiveCatalogId, filterProducts, getActiveCatalog } = useAdminStore();
   const activeCatalog = getActiveCatalog();
-  const activeProducts = activeCatalog.products;
-  
+  const activeProducts = activeCatalog.products || [];
 
   useEffect(() => {
-    if (id) {
-      setActiveCatalogId(id);  // Switch a ID de URL
+    if (incoming) {
+      setActiveCatalogId(incoming);  // Switch a ID/slug de URL
+    } else {
+      // Si no hay slug en la URL, aseguramos default
+      setActiveCatalogId('default');
     }
     filterProducts('');  // Limpia filtro
-  }, [id, setActiveCatalogId, filterProducts]);
-
-  //const cap1Placeholder = 'https://via.placeholder.com/400x250/121516/ffffff?text=Coleccion+Urban';
-
+  }, [incoming, setActiveCatalogId, filterProducts]);
 
   return (
     <div className="bg-[#080c0e] min-h-screen flex flex-col">
-      <Header negocio={activeCatalog.business} />  // ✅ Business scopado
+      <Header negocio={activeCatalog.business} />
       <main className="flex-1 pt-16 sm:pt-20 overflow-x-hidden">
         <div className="container mx-auto px-2 sm:px-4 md:px-8 py-6 max-w-7xl">
           <CategoriesCard ruta={cap1Placeholder} />
           <section className="mt-6 sm:mt-8">
-            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6 text-center" style={{ color: activeCatalog.business.color }}>
-              Catálogo de {activeCatalog.business.nombre}
+            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6 text-center" style={{ color: activeCatalog.business?.color || '#f24427' }}>
+              Catálogo de {activeCatalog.business?.nombre || 'Tienda'}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 justify-items-center">
               {activeProducts.map(producto => (

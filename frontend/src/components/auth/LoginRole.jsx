@@ -1,8 +1,18 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAdminStore } from '../../store/adminStore';
-import { products as initialProducts } from '../../database/products';  // Tu mock inicial
 import toast from 'react-hot-toast';  // Para feedback
+
+// Helper simple para generar slug seguro a partir del nombre del negocio
+const makeSlug = (text) => {
+  return text
+    .toString()
+    .trim()
+    .replace(/\s+/g, '-')           // espacios → guiones
+    .replace(/[^A-Za-z0-9\-]/g, '') // quitar chars inválidos
+    .replace(/\-+/g, '-')          // múltiples guiones → 1
+    .toLowerCase();
+};
 
 function LoginRole() {
   const [role, setRole] = useState('');  // 'cliente' o 'user'
@@ -22,21 +32,41 @@ function LoginRole() {
     }
   };
 
-  const handleClienteRegister = (e) => {
+  const handleClienteRegister = async (e) => {
     e.preventDefault();
     if (!email || !negocioNombre) return toast.error('Completa email y nombre negocio.');
 
-    // Mock userId (hash simple de email)
-    const userId = btoa(email).substring(0, 8);  // 'YWRtaW4=' → 'YWRtaW4=' short
+    // Generamos slug a partir del nombre del negocio
+    const slug = makeSlug(negocioNombre) || btoa(email).substring(0, 8);
+
+    // Guardamos role y userId como slug (clave del catálogo)
     localStorage.setItem('role', 'cliente');
-    localStorage.setItem('userId', userId);  // Scoped por userId
+    localStorage.setItem('userId', slug);
 
-    // Clona template: Carga default products + custom business
-    loadProducts(initialProducts, userId, true);  // Carga inicial
-    updateBusiness({ nombre: negocioNombre, email, userId });  // Custom para este cliente
+    // Creamos catálogo vacío para este cliente (no clonar el default por defecto)
+    try {
+      // loadProducts(initialProducts, userId, isClone)
+      // Aquí pasamos [] como initial para crear un catálogo sin productos
+      await loadProducts([], slug, true);
 
-    toast.success(`Bienvenido, ${negocioNombre}! Catálogo clonado. Edita en /admin.`);
-    navigate('/admin');
+      // Actualizamos datos del business para este catálogo (si updateBusiness existe)
+      if (typeof updateBusiness === 'function') {
+        updateBusiness({ nombre: negocioNombre, email, userId: slug, slug });
+      } else {
+        // fallback: intenta setear business directamente en store
+        const state = useAdminStore.getState();
+        const catalogs = { ...(state.catalogs || {}) };
+        catalogs[slug] = catalogs[slug] || { products: [], business: { nombre: negocioNombre, email, slug } };
+        useAdminStore.setState({ catalogs, activeId: slug });
+      }
+
+      toast.success(`Bienvenido, ${negocioNombre}! Catálogo creado. Accediendo a tu panel.`);
+      // Navegamos al admin específico del catálogo
+      navigate(`/${slug}/admin`);
+    } catch (err) {
+      console.error('Error creando catálogo:', err);
+      toast.error('No se pudo crear el catálogo. Reintenta.');
+    }
   };
 
   if (role === 'cliente') {
@@ -62,10 +92,10 @@ function LoginRole() {
               required
             />
             <button type="submit" className="w-full bg-[#f24427] text-white py-3 rounded hover:bg-[#d6331a] font-semibold">
-              Crear y Editar Catálogo
+              Crear Catálogo y Acceder al Panel
             </button>
           </form>
-          <p className="text-gray-400 text-xs mt-4 text-center">Clonaremos un template para ti. Edita en admin.</p>
+          <p className="text-gray-400 text-xs mt-4 text-center">Crearemos tu catálogo vacío. Podrás agregar productos en tu panel.</p>
           <button onClick={() => setRole('')} className="w-full mt-4 bg-gray-500 text-white py-2 rounded">Cancelar</button>
         </div>
       </div>
