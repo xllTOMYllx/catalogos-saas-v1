@@ -6,6 +6,7 @@ import { useCartStore } from '../store/cartStore';
 import { useAuth } from '../hooks/useAuth';
 import { useAdminStore } from '../store/adminStore';
 import LogoPortal from '../components/LogoPortal';
+import toast from 'react-hot-toast';
 
 export default function Header({ negocio: defaultNegocio }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -59,15 +60,16 @@ export default function Header({ negocio: defaultNegocio }) {
   // Logout: limpiar session y estado persistente
   const handleLogout = () => {
     if (logout && typeof logout === 'function') {
-      try { logout(); } catch (e) { console.warn(e); }
+      try { logout(); } catch { /* ignore */ }
     }
     try {
       localStorage.removeItem('role');
       localStorage.removeItem('userId');
       localStorage.removeItem('admin-storage'); // key del persist en adminStore
-    } catch (e) { /* ignore */ }
-    try { clearStorage(); } catch (e) { /* ignore */ }
+    } catch { /* ignore */ }
+    try { clearStorage(); } catch { /* ignore */ }
 
+    toast.success('Sesión cerrada. ¡Hasta pronto!', { duration: 2000 });
     navigate('/');
     setIsMobileMenuOpen(false);
   };

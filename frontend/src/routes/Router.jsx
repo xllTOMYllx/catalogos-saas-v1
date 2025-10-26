@@ -1,9 +1,9 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ScrollToTop from "../components/ScrollToTop";
-import App from "../pages/App";
+import LandingPage from "../pages/LandingPage";
+import CatalogPage from "../pages/CatalogPage";
 import AdminDashboard from "../components/admin/AdminDashboard";
 import LoginRole from "../components/auth/LoginRole";
-import HomePage from "../pages/App"; // si usas App como landing
 // NOTA: define primero las rutas estáticas para que la ruta dinámica no haga "shadow"
 
 export function Router() {
@@ -12,8 +12,8 @@ export function Router() {
             <ScrollToTop />
             <Routes>
                 {/* Rutas estáticas / landing / info */}
-                <Route path="/" element={<App />} />
-                <Route path="/colecciones" element={<App />} />
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/colecciones" element={<CatalogPage />} />
                 <Route path="/nosotros" element={<div>Nosotros</div>} />
                 <Route path="/contacto" element={<div>Contacto</div>} />
                 <Route path="/login-role" element={<LoginRole />} />
@@ -22,7 +22,7 @@ export function Router() {
 
                 {/* Rutas por catálogo (amigables) */}
                 <Route path="/:catalogSlug/admin" element={<AdminDashboard />} />
-                <Route path="/:catalogSlug" element={<App />} />
+                <Route path="/:catalogSlug" element={<CatalogPage />} />
 
                 {/* Futuras rutas: /user, /cart, /checkout */}
             </Routes>
