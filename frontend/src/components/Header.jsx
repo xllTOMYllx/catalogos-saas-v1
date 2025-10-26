@@ -6,6 +6,7 @@ import { useCartStore } from '../store/cartStore';
 import { useAuth } from '../hooks/useAuth';
 import { useAdminStore } from '../store/adminStore';
 import LogoPortal from '../components/LogoPortal';
+import toast from 'react-hot-toast';
 
 export default function Header({ negocio: defaultNegocio }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -68,6 +69,7 @@ export default function Header({ negocio: defaultNegocio }) {
     } catch (e) { /* ignore */ }
     try { clearStorage(); } catch (e) { /* ignore */ }
 
+    toast.success('Sesión cerrada. ¡Hasta pronto!', { duration: 2000 });
     navigate('/');
     setIsMobileMenuOpen(false);
   };

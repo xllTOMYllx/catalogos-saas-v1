@@ -1,6 +1,6 @@
 import { useAdminStore } from '../../store/adminStore';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Save, Eye } from 'lucide-react';  // Íconos
 import ProductList from './ProductList';
 import ProductCard from '../ProductCard';
@@ -10,12 +10,26 @@ import toast from 'react-hot-toast';  // Para feedback
 function AdminDashboard() {
   // ✅ Reactive selector: Re-render al cambio de active catalog
   const activeCatalog = useAdminStore((state) => state.getActiveCatalog());
-  const { getTotalProducts, getTotalStock, saveAll } = useAdminStore();
+  const { getTotalProducts, getTotalStock, saveAll, activeId } = useAdminStore();
   const [activeTab, setActiveTab] = useState('products');
+  const navigate = useNavigate();
+  const { catalogSlug } = useParams();
+  
+  // Determinar el slug del catálogo actual
+  const currentSlug = catalogSlug || activeId;
 
   const handleSaveAll = () => {
     saveAll();  // ✅ Llama store save (persiste localStorage)
-    toast.success('Todo guardado. Cambios aplicados en tu catálogo.');  // ✅ Toast
+    toast.success('Todo guardado. Redirigiendo a tu catálogo...', { duration: 2000 });
+    
+    // Redirigir al catálogo personalizado después de guardar
+    setTimeout(() => {
+      if (currentSlug && currentSlug !== 'default') {
+        navigate(`/${currentSlug}`);
+      } else {
+        navigate('/colecciones');
+      }
+    }, 1500);
   };
 
   const business = activeCatalog.business;  // Del active catalog
