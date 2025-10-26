@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, ParseIntPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { ClientsService } from './clients.service';
 import { Client } from './client.entity';
 
@@ -17,7 +26,9 @@ export class ClientsController {
   }
 
   @Get('user/:userId')
-  async findByUserId(@Param('userId', ParseIntPipe) userId: number): Promise<Client[]> {
+  async findByUserId(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<Client[]> {
     return this.clientsService.findByUserId(userId);
   }
 
@@ -35,7 +46,9 @@ export class ClientsController {
   }
 
   @Delete(':id')
-  async delete(@Param('id', ParseIntPipe) id: number): Promise<{ success: boolean }> {
+  async delete(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<{ success: boolean }> {
     const success = await this.clientsService.delete(id);
     return { success };
   }

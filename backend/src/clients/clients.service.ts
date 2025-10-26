@@ -15,16 +15,16 @@ export class ClientsService {
   }
 
   async findOne(id: number): Promise<Client | null> {
-    return this.clientsRepository.findOne({ 
+    return this.clientsRepository.findOne({
       where: { id },
-      relations: ['user'] 
+      relations: ['user'],
     });
   }
 
   async findByUserId(userId: number): Promise<Client[]> {
-    return this.clientsRepository.find({ 
+    return this.clientsRepository.find({
       where: { userId },
-      relations: ['user'] 
+      relations: ['user'],
     });
   }
 

@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, ParseIntPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { CatalogsService } from './catalogs.service';
 import { Catalog } from './catalog.entity';
 
@@ -12,12 +21,16 @@ export class CatalogsController {
   }
 
   @Get(':id')
-  async findOne(@Param('id', ParseIntPipe) id: number): Promise<Catalog | null> {
+  async findOne(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<Catalog | null> {
     return this.catalogsService.findOne(id);
   }
 
   @Get('client/:clientId')
-  async findByClientId(@Param('clientId', ParseIntPipe) clientId: number): Promise<Catalog[]> {
+  async findByClientId(
+    @Param('clientId', ParseIntPipe) clientId: number,
+  ): Promise<Catalog[]> {
     return this.catalogsService.findByClientId(clientId);
   }
 
@@ -35,7 +48,9 @@ export class CatalogsController {
   }
 
   @Delete(':id')
-  async delete(@Param('id', ParseIntPipe) id: number): Promise<{ success: boolean }> {
+  async delete(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<{ success: boolean }> {
     const success = await this.catalogsService.delete(id);
     return { success };
   }

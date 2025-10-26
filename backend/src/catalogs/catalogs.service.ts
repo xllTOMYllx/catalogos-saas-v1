@@ -11,22 +11,22 @@ export class CatalogsService {
   ) {}
 
   async findAll(): Promise<Catalog[]> {
-    return this.catalogsRepository.find({ 
-      relations: ['client', 'product'] 
+    return this.catalogsRepository.find({
+      relations: ['client', 'product'],
     });
   }
 
   async findOne(id: number): Promise<Catalog | null> {
-    return this.catalogsRepository.findOne({ 
+    return this.catalogsRepository.findOne({
       where: { id },
-      relations: ['client', 'product'] 
+      relations: ['client', 'product'],
     });
   }
 
   async findByClientId(clientId: number): Promise<Catalog[]> {
-    return this.catalogsRepository.find({ 
+    return this.catalogsRepository.find({
       where: { clientId },
-      relations: ['client', 'product'] 
+      relations: ['client', 'product'],
     });
   }
 
