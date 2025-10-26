@@ -60,14 +60,14 @@ export default function Header({ negocio: defaultNegocio }) {
   // Logout: limpiar session y estado persistente
   const handleLogout = () => {
     if (logout && typeof logout === 'function') {
-      try { logout(); } catch (e) { console.warn(e); }
+      try { logout(); } catch { /* ignore */ }
     }
     try {
       localStorage.removeItem('role');
       localStorage.removeItem('userId');
       localStorage.removeItem('admin-storage'); // key del persist en adminStore
-    } catch (e) { /* ignore */ }
-    try { clearStorage(); } catch (e) { /* ignore */ }
+    } catch { /* ignore */ }
+    try { clearStorage(); } catch { /* ignore */ }
 
     toast.success('Sesión cerrada. ¡Hasta pronto!', { duration: 2000 });
     navigate('/');

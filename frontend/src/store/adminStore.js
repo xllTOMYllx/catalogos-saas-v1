@@ -77,11 +77,27 @@ export const useAdminStore = create(
         });
       },
 
-      setActiveCatalogId: (id) => set({ activeId: id }),
+      // Protegemos al setear activeId: si no existe, forzamos default
+      setActiveCatalogId: (id) => {
+        const state = get();
+        if (!id || !state.catalogs[id]) {
+          // resetea a default si el id no existe
+          set({ activeId: 'default' });
+        } else {
+          set({ activeId: id });
+        }
+      },
 
+      // getActiveCatalog: devuelve catálogo válido o fuerza default si hay inconsistencia
       getActiveCatalog: () => {
         const { activeId, catalogs } = get();
-        return catalogs[activeId] || catalogs.default;
+        if (!catalogs) return { products: initialProducts, business: initialBusiness };
+        if (!catalogs[activeId]) {
+          // corregimos la inconsistencia guardada
+          set({ activeId: 'default' });
+          return catalogs.default || { products: initialProducts, business: initialBusiness };
+        }
+        return catalogs[activeId];
       },
 
       // Add product (with backend sync)
@@ -136,29 +152,6 @@ export const useAdminStore = create(
           const newCatalogs = { ...state.catalogs, [activeId]: active };
           set({ catalogs: newCatalogs });
         }
-      },
-
-      // Protegemos al setear activeId: si no existe, forzamos default
-      setActiveCatalogId: (id) => {
-        const state = get();
-        if (!id || !state.catalogs[id]) {
-          // resetea a default si el id no existe
-          set({ activeId: 'default' });
-        } else {
-          set({ activeId: id });
-        }
-      },
-
-      // getActiveCatalog: devuelve catálogo válido o fuerza default si hay inconsistencia
-      getActiveCatalog: () => {
-        const { activeId, catalogs } = get();
-        if (!catalogs) return { products: initialProducts, business: initialBusiness };
-        if (!catalogs[activeId]) {
-          // corregimos la inconsistencia guardada
-          set({ activeId: 'default' });
-          return catalogs.default || { products: initialProducts, business: initialBusiness };
-        }
-        return catalogs[activeId];
       },
 
       // Delete product (with backend sync)
