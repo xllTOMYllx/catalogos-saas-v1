@@ -17,32 +17,32 @@ export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Get()
-  findAll(): Product[] {
+  async findAll(): Promise<Product[]> {
     return this.productsService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Product | null {
+  async findOne(@Param('id') id: string): Promise<Product | null> {
     return this.productsService.findOne(+id);
   }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() product: Omit<Product, 'id'>): Product {
+  async create(@Body() product: Partial<Product>): Promise<Product> {
     return this.productsService.create(product);
   }
 
   @Put(':id')
-  update(
+  async update(
     @Param('id') id: string,
     @Body() updates: Partial<Product>,
-  ): Product | null {
+  ): Promise<Product | null> {
     return this.productsService.update(+id, updates);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  delete(@Param('id') id: string): void {
-    this.productsService.delete(+id);
+  async delete(@Param('id') id: string): Promise<void> {
+    await this.productsService.delete(+id);
   }
 }
