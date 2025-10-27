@@ -101,6 +101,12 @@ INSERT INTO catalogs ("clientId", "productId", active)
 SELECT 1, id, true FROM products
 ON CONFLICT ("clientId", "productId") DO NOTHING;
 
+-- Fix sequences to avoid duplicate key errors
+SELECT setval('users_id_seq', (SELECT MAX(id) FROM users));
+SELECT setval('clients_id_seq', (SELECT MAX(id) FROM clients));
+SELECT setval('products_id_seq', (SELECT MAX(id) FROM products));
+SELECT setval('catalogs_id_seq', (SELECT MAX(id) FROM catalogs));
+
 -- Create a function to automatically update the updatedAt timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
