@@ -102,10 +102,11 @@ SELECT 1, id, true FROM products
 ON CONFLICT ("clientId", "productId") DO NOTHING;
 
 -- Fix sequences to avoid duplicate key errors
-SELECT setval('users_id_seq', (SELECT MAX(id) FROM users));
-SELECT setval('clients_id_seq', (SELECT MAX(id) FROM clients));
-SELECT setval('products_id_seq', (SELECT MAX(id) FROM products));
-SELECT setval('catalogs_id_seq', (SELECT MAX(id) FROM catalogs));
+-- Set sequences to current max + 1 so next insert gets the correct ID
+SELECT setval('users_id_seq', COALESCE((SELECT MAX(id) FROM users), 0) + 1, false);
+SELECT setval('clients_id_seq', COALESCE((SELECT MAX(id) FROM clients), 0) + 1, false);
+SELECT setval('products_id_seq', COALESCE((SELECT MAX(id) FROM products), 0) + 1, false);
+SELECT setval('catalogs_id_seq', COALESCE((SELECT MAX(id) FROM catalogs), 0) + 1, false);
 
 -- Create a function to automatically update the updatedAt timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()
