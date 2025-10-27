@@ -1,81 +1,186 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 import { products as initialProducts } from '../database/products';
 import { productsApi } from '../api/products';
 import { businessApi } from '../api/business';
+import { catalogsApi } from '../api/catalogs';
+import { clientsApi } from '../api/clients';
 
 const initialBusiness = { nombre: 'UrbanStreet', logo: '/logosinfondo.png', color: '#f24427', telefono: '1234567890' };
 
+// Helper to determine if we're viewing the default catalog
+const isDefaultCatalog = (catalogId) => {
+  return !catalogId || catalogId === 'default' || catalogId === '1';
+};
+
 export const useAdminStore = create(
-  persist(
     (set, get) => ({
       activeId: 'default',
+      clientId: null, // Backend client ID for current user
       catalogs: {
         default: { 
           products: initialProducts,
-          business: initialBusiness
+          business: initialBusiness,
+          isReadOnly: true // Mark default as read-only
         },
       },
       loading: false,
       error: null,
 
-      // Load products from backend
-      loadProducts: async (initial, userId = 'default', isClone = false) => {
+      // Load catalog data for a specific client
+      loadCatalog: async (clientId, slug = null) => {
         const state = get();
         try {
           set({ loading: true, error: null });
           
-          // Load products from backend
-          const products = await productsApi.getAll();
-          const business = await businessApi.get();
-          
-          let newId = userId || 'default-clone';
-          if (isClone && !state.catalogs[newId]) {
-            // Clone for new client - use empty initial array if provided, otherwise use initial products
-            state.catalogs[newId] = {
-              products: Array.isArray(initial) && initial.length === 0 ? [] : (initial || products || []),
-              business: business || { ...initialBusiness, nombre: business?.nombre || 'Mi Negocio' }
-            };
-          } else if (newId === 'default') {
-            // Update default catalog only
-            state.catalogs.default.products = products || initialProducts;
-            state.catalogs.default.business = business || initialBusiness;
+          if (isDefaultCatalog(clientId)) {
+            // For default catalog, load from products API (master catalog)
+            const products = await productsApi.getAll();
+            const business = await businessApi.get();
+            
+            set({ 
+              catalogs: { 
+                ...state.catalogs,
+                default: {
+                  products: products || initialProducts,
+                  business: business || initialBusiness,
+                  isReadOnly: true
+                }
+              },
+              activeId: 'default',
+              clientId: null,
+              loading: false 
+            });
           } else {
-            // Update existing non-default catalog
-            if (!state.catalogs[newId]) {
-              state.catalogs[newId] = {
-                products: [],
-                business: { ...initialBusiness }
-              };
+            // For client catalogs, load from catalogs API (client-specific)
+            const catalogSlug = slug || clientId;
+            
+            // Try to get client data by ID
+            let client = null;
+            try {
+              // If clientId is numeric, fetch by ID
+              if (!isNaN(clientId)) {
+                client = await clientsApi.getOne(parseInt(clientId));
+              }
+            } catch (err) {
+              console.warn('Could not load client by ID:', err);
             }
-            state.catalogs[newId].products = products || [];
-            state.catalogs[newId].business = business || { ...initialBusiness };
+            
+            // Load client's catalog entries (products they've added)
+            let catalogProducts = [];
+            if (client && client.id) {
+              const catalogEntries = await catalogsApi.getByClientId(client.id);
+              // Transform catalog entries to products format
+              catalogProducts = catalogEntries.map(entry => ({
+                id: entry.product.id,
+                nombre: entry.product.nombre,
+                precio: entry.customPrice || entry.product.precio,
+                description: entry.product.description,
+                ruta: entry.product.ruta,
+                stock: entry.product.stock,
+                category: entry.product.category,
+                catalogId: entry.id, // Store catalog entry ID for deletions
+                active: entry.active
+              }));
+            }
+            
+            const businessData = client ? {
+              nombre: client.nombre,
+              logo: client.logo,
+              color: client.color,
+              telefono: client.telefono
+            } : { ...initialBusiness, nombre: 'Mi Negocio' };
+            
+            set({ 
+              catalogs: { 
+                ...state.catalogs,
+                [catalogSlug]: {
+                  products: catalogProducts,
+                  business: businessData,
+                  isReadOnly: false
+                }
+              },
+              activeId: catalogSlug,
+              clientId: client?.id || null,
+              loading: false 
+            });
           }
+        } catch (error) {
+          console.error('Error loading catalog:', error);
+          set({ loading: false, error: error.message });
           
+          // Fallback: create empty catalog for non-default
+          if (!isDefaultCatalog(clientId)) {
+            const catalogSlug = slug || clientId;
+            set({ 
+              catalogs: { 
+                ...state.catalogs,
+                [catalogSlug]: {
+                  products: [],
+                  business: { ...initialBusiness, nombre: 'Mi Negocio' },
+                  isReadOnly: false
+                }
+              },
+              activeId: catalogSlug,
+              clientId: null
+            });
+          }
+        }
+      },
+
+      // Initialize a new client catalog
+      initializeClientCatalog: async (slug, businessName, email) => {
+        const state = get();
+        try {
+          set({ loading: true, error: null });
+          
+          // Create client in backend
+          const client = await clientsApi.create({
+            nombre: businessName,
+            logo: initialBusiness.logo,
+            color: initialBusiness.color,
+            telefono: initialBusiness.telefono,
+            userId: 1 // TODO: Replace with actual authenticated user ID
+          });
+          
+          // Create empty catalog entry in state
           set({ 
-            catalogs: { ...state.catalogs },
-            activeId: newId,
+            catalogs: { 
+              ...state.catalogs,
+              [slug]: {
+                products: [],
+                business: {
+                  nombre: client.nombre,
+                  logo: client.logo,
+                  color: client.color,
+                  telefono: client.telefono
+                },
+                isReadOnly: false
+              }
+            },
+            activeId: slug,
+            clientId: client.id,
             loading: false 
           });
+          
+          return client;
         } catch (error) {
-          console.error('Error loading products:', error);
+          console.error('Error initializing client catalog:', error);
           set({ loading: false, error: error.message });
-          // Fallback to local data
-          let newId = userId || 'default-clone';
-          if (isClone && !state.catalogs[newId]) {
-            state.catalogs[newId] = {
-              products: Array.isArray(initial) && initial.length === 0 ? [] : (initial || []),
-              business: { ...initialBusiness }
-            };
-          }
-          set({ catalogs: { ...state.catalogs }, activeId: newId });
+          throw error;
         }
       },
 
       clearStorage: () => {
         set({ 
           activeId: 'default',
-          catalogs: { default: { products: initialProducts, business: initialBusiness } },
+          clientId: null,
+          catalogs: { 
+            default: { 
+              products: initialProducts, 
+              business: initialBusiness,
+              isReadOnly: true 
+            } 
+          },
           loading: false,
           error: null
         });
@@ -95,39 +200,66 @@ export const useAdminStore = create(
       // getActiveCatalog: devuelve catálogo válido o fuerza default si hay inconsistencia
       getActiveCatalog: () => {
         const { activeId, catalogs } = get();
-        if (!catalogs) return { products: initialProducts, business: initialBusiness };
+        if (!catalogs) return { products: initialProducts, business: initialBusiness, isReadOnly: true };
         if (!catalogs[activeId]) {
           // corregimos la inconsistencia guardada
-          set({ activeId: 'default' });
-          return catalogs.default || { products: initialProducts, business: initialBusiness };
+          set({ activeId: 'default', clientId: null });
+          return catalogs.default || { products: initialProducts, business: initialBusiness, isReadOnly: true };
         }
         return catalogs[activeId];
+      },
+
+      // Check if current catalog is read-only (default catalog)
+      isReadOnly: () => {
+        const active = get().getActiveCatalog();
+        return active.isReadOnly === true;
       },
 
       // Add product (with backend sync)
       addProduct: async (product) => {
         const state = get();
         const activeId = state.activeId;
+        const clientId = state.clientId;
         const active = state.getActiveCatalog();
+        
+        // Prevent modifications to default catalog
+        if (active.isReadOnly) {
+          set({ error: 'No se puede modificar el catálogo por defecto' });
+          throw new Error('No se puede modificar el catálogo por defecto');
+        }
+        
+        if (!clientId) {
+          set({ error: 'No hay cliente activo para agregar productos' });
+          throw new Error('No hay cliente activo');
+        }
         
         try {
           set({ loading: true, error: null });
           
-          // Create in backend
+          // First, create the product in the master catalog
           const newProduct = await productsApi.create(product);
           
-          // Update local state
-          active.products = [...active.products, newProduct];
+          // Then, add it to this client's catalog
+          const catalogEntry = await catalogsApi.create({
+            clientId: clientId,
+            productId: newProduct.id,
+            active: true,
+            customPrice: product.precio // Use the price as custom price
+          });
+          
+          // Update local state with the new product
+          const productWithCatalogId = {
+            ...newProduct,
+            catalogId: catalogEntry.id
+          };
+          
+          active.products = [...active.products, productWithCatalogId];
           const newCatalogs = { ...state.catalogs, [activeId]: active };
           set({ catalogs: newCatalogs, loading: false });
         } catch (error) {
           console.error('Error adding product:', error);
           set({ loading: false, error: error.message });
-          
-          // Fallback to local
-          active.products = [...active.products, { id: Date.now(), ...product, stock: product.stock || 10 }];
-          const newCatalogs = { ...state.catalogs, [activeId]: active };
-          set({ catalogs: newCatalogs });
+          throw error;
         }
       },
       
@@ -135,13 +267,28 @@ export const useAdminStore = create(
       updateProduct: async (id, updated) => {
         const state = get();
         const activeId = state.activeId;
+        const clientId = state.clientId;
         const active = state.getActiveCatalog();
+        
+        // Prevent modifications to default catalog
+        if (active.isReadOnly) {
+          set({ error: 'No se puede modificar el catálogo por defecto' });
+          throw new Error('No se puede modificar el catálogo por defecto');
+        }
         
         try {
           set({ loading: true, error: null });
           
-          // Update in backend
+          // Update the product in master catalog
           await productsApi.update(id, updated);
+          
+          // If there's a custom price, update the catalog entry
+          const product = active.products.find(p => p.id === id);
+          if (product && product.catalogId && updated.precio) {
+            await catalogsApi.update(product.catalogId, {
+              customPrice: updated.precio
+            });
+          }
           
           // Update local state
           active.products = active.products.map(p => p.id === id ? { ...p, ...updated } : p);
@@ -150,11 +297,7 @@ export const useAdminStore = create(
         } catch (error) {
           console.error('Error updating product:', error);
           set({ loading: false, error: error.message });
-          
-          // Fallback to local
-          active.products = active.products.map(p => p.id === id ? { ...p, ...updated } : p);
-          const newCatalogs = { ...state.catalogs, [activeId]: active };
-          set({ catalogs: newCatalogs });
+          throw error;
         }
       },
 
@@ -162,13 +305,27 @@ export const useAdminStore = create(
       deleteProduct: async (id) => {
         const state = get();
         const activeId = state.activeId;
+        const clientId = state.clientId;
         const active = state.getActiveCatalog();
+        
+        // Prevent modifications to default catalog
+        if (active.isReadOnly) {
+          set({ error: 'No se puede modificar el catálogo por defecto' });
+          throw new Error('No se puede modificar el catálogo por defecto');
+        }
         
         try {
           set({ loading: true, error: null });
           
-          // Delete from backend
-          await productsApi.delete(id);
+          // Find the product to get its catalogId
+          const product = active.products.find(p => p.id === id);
+          
+          if (product && product.catalogId) {
+            // Delete from catalog (not from master products)
+            await catalogsApi.delete(product.catalogId);
+          } else {
+            console.warn('Product does not have catalogId, skipping backend delete');
+          }
           
           // Update local state
           active.products = active.products.filter(p => p.id !== id);
@@ -177,11 +334,7 @@ export const useAdminStore = create(
         } catch (error) {
           console.error('Error deleting product:', error);
           set({ loading: false, error: error.message });
-          
-          // Fallback to local
-          active.products = active.products.filter(p => p.id !== id);
-          const newCatalogs = { ...state.catalogs, [activeId]: active };
-          set({ catalogs: newCatalogs });
+          throw error;
         }
       },
 
@@ -189,26 +342,39 @@ export const useAdminStore = create(
       updateBusiness: async (updates) => {
         const state = get();
         const activeId = state.activeId;
+        const clientId = state.clientId;
         const active = state.getActiveCatalog();
+        
+        // Prevent modifications to default catalog
+        if (active.isReadOnly) {
+          set({ error: 'No se puede modificar el catálogo por defecto' });
+          throw new Error('No se puede modificar el catálogo por defecto');
+        }
+        
+        if (!clientId) {
+          set({ error: 'No hay cliente activo para actualizar' });
+          throw new Error('No hay cliente activo');
+        }
         
         try {
           set({ loading: true, error: null });
           
-          // Update in backend
-          const updatedBusiness = await businessApi.update(updates);
+          // Update client info in backend
+          const updatedClient = await clientsApi.update(clientId, updates);
           
           // Update local state
-          active.business = updatedBusiness;
+          active.business = {
+            nombre: updatedClient.nombre,
+            logo: updatedClient.logo,
+            color: updatedClient.color,
+            telefono: updatedClient.telefono
+          };
           const newCatalogs = { ...state.catalogs, [activeId]: active };
           set({ catalogs: newCatalogs, loading: false });
         } catch (error) {
           console.error('Error updating business:', error);
           set({ loading: false, error: error.message });
-          
-          // Fallback to local
-          active.business = { ...active.business, ...updates };
-          const newCatalogs = { ...state.catalogs, [activeId]: active };
-          set({ catalogs: newCatalogs });
+          throw error;
         }
       },
 
@@ -223,38 +389,25 @@ export const useAdminStore = create(
 
       saveAll: async () => {
         const state = get();
-        const activeId = state.activeId;
-        const activeCatalog = state.getActiveCatalog();
+        const active = state.getActiveCatalog();
+        
+        // Prevent modifications to default catalog
+        if (active.isReadOnly) {
+          return { success: false, message: 'No se puede modificar el catálogo por defecto' };
+        }
         
         try {
           set({ loading: true, error: null });
           
-          // Save business info
-          if (activeCatalog.business) {
-            await businessApi.update(activeCatalog.business);
-          }
-          
-          // Save all products (this is a simplified approach - in production you'd track changes)
-          // For now, we just ensure the state is persisted
-          localStorage.setItem('admin-storage', JSON.stringify({
-            activeId: state.activeId,
-            catalogs: state.catalogs
-          }));
-          
+          // All changes are already saved via individual operations
+          // This is just a confirmation action
           set({ loading: false });
           return { success: true, message: 'Todos los cambios guardados correctamente' };
         } catch (error) {
           console.error('Error saving:', error);
           set({ loading: false, error: error.message });
-          // Still save locally even if backend fails
-          localStorage.setItem('admin-storage', JSON.stringify({
-            activeId: state.activeId,
-            catalogs: state.catalogs
-          }));
-          return { success: false, message: 'Error al guardar en servidor, pero guardado localmente' };
+          return { success: false, message: 'Error al guardar: ' + error.message };
         }
       },
-    }),
-    { name: 'admin-storage' }
-  )
+    })
 );

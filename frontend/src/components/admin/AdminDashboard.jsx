@@ -1,7 +1,7 @@
 import { useAdminStore } from '../../store/adminStore';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Save, Eye } from 'lucide-react';  // Íconos
+import { ArrowLeft, Save, Eye, Lock } from 'lucide-react';  // Íconos
 import ProductList from './ProductList';
 import ProductCard from '../ProductCard';
 import CustomizationForm from './CustomizationForm';
@@ -10,15 +10,30 @@ import toast from 'react-hot-toast';  // Para feedback
 function AdminDashboard() {
   // ✅ Reactive selector: Re-render al cambio de active catalog
   const activeCatalog = useAdminStore((state) => state.getActiveCatalog());
-  const { getTotalProducts, getTotalStock, saveAll, activeId } = useAdminStore();
+  const { getTotalProducts, getTotalStock, saveAll, activeId, loadCatalog, isReadOnly } = useAdminStore();
   const [activeTab, setActiveTab] = useState('products');
   const navigate = useNavigate();
   const { catalogSlug } = useParams();
   
+  // Load catalog when component mounts or slug changes
+  useEffect(() => {
+    const userId = localStorage.getItem('userId');
+    const slug = catalogSlug || userId || 'default';
+    
+    // Load the catalog data for this slug
+    loadCatalog(slug, slug);
+  }, [catalogSlug, loadCatalog]);
+  
   // Determinar el slug del catálogo actual
   const currentSlug = catalogSlug || activeId;
+  const readOnly = isReadOnly();
 
   const handleSaveAll = async () => {
+    if (readOnly) {
+      toast.error('No se puede modificar el catálogo por defecto');
+      return;
+    }
+    
     const result = await saveAll();
     if (result.success) {
       toast.success('✅ Todo guardado correctamente. Redirigiendo...', { duration: 2000 });
@@ -51,18 +66,33 @@ function AdminDashboard() {
     <div className="min-h-screen bg-[#080c0e] text-white flex">
       {/* Sidebar responsive */}
       <aside className="w-64 bg-[#121516] p-4 hidden md:block">
-        <h1 className="text-2xl font-bold mb-6">{business.nombre} Admin</h1>
+        <h1 className="text-2xl font-bold mb-6">
+          {business.nombre} Admin
+          {readOnly && <Lock size={16} className="inline ml-2 text-yellow-400" title="Catálogo de solo lectura" />}
+        </h1>
+        {readOnly && (
+          <div className="mb-4 p-3 bg-yellow-900/30 border border-yellow-600 rounded text-sm">
+            <p className="text-yellow-300">Este es el catálogo por defecto (solo lectura). Crea tu propia cuenta para editar.</p>
+          </div>
+        )}
         <nav className="space-y-4">
           <button onClick={() => setActiveTab('products')} className={`w-full p-2 rounded ${activeTab === 'products' ? 'bg-[#f24427]' : 'hover:bg-gray-700'}`}>Gestión Productos</button>
-          <button onClick={() => setActiveTab('customization')} className={`w-full p-2 rounded ${activeTab === 'customization' ? 'bg-[#f24427]' : 'hover:bg-gray-700'}`}>Personalización</button>
+          <button 
+            onClick={() => setActiveTab('customization')} 
+            className={`w-full p-2 rounded ${activeTab === 'customization' ? 'bg-[#f24427]' : 'hover:bg-gray-700'} ${readOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+            disabled={readOnly}
+          >
+            Personalización
+          </button>
           <button onClick={() => setActiveTab('preview')} className={`w-full p-2 rounded ${activeTab === 'preview' ? 'bg-[#f24427]' : 'hover:bg-gray-700'}`}>
             <Eye size={16} className="inline mr-2" /> Vista Previa
           </button>
       </nav>
-      <button onClick={handleSaveAll} className="w-full mt-4 bg-green-500 hover:bg-green-600 p-2 rounded flex items-center justify-center gap-2">
-        <Save size={16} /> Guardar Todo
-
-      </button>
+      {!readOnly && (
+        <button onClick={handleSaveAll} className="w-full mt-4 bg-green-500 hover:bg-green-600 p-2 rounded flex items-center justify-center gap-2">
+          <Save size={16} /> Guardar Todo
+        </button>
+      )}
     </aside>
 
       {/* Main */ }

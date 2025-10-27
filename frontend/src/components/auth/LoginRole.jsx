@@ -19,7 +19,7 @@ function LoginRole() {
   const [email, setEmail] = useState('');
   const [negocioNombre, setNegocioNombre] = useState('');
   const navigate = useNavigate();
-  const { loadProducts, updateBusiness, clearStorage } = useAdminStore();  // Store actions
+  const { clearStorage } = useAdminStore();  // Store actions
 
   const handleRoleSelect = (selectedRole) => {
     setRole(selectedRole);
@@ -45,22 +45,9 @@ function LoginRole() {
     // Set a simple auth token to indicate authenticated state
     localStorage.setItem('authToken', 'local-client-' + slug);
 
-    // Creamos catálogo vacío para este cliente (no clonar el default por defecto)
     try {
-      // loadProducts(initialProducts, userId, isClone)
-      // Aquí pasamos [] como initial para crear un catálogo sin productos
-      await loadProducts([], slug, true);
-
-      // Actualizamos datos del business para este catálogo (si updateBusiness existe)
-      if (typeof updateBusiness === 'function') {
-        await updateBusiness({ nombre: negocioNombre, email, userId: slug, slug });
-      } else {
-        // fallback: intenta setear business directamente en store
-        const state = useAdminStore.getState();
-        const catalogs = { ...(state.catalogs || {}) };
-        catalogs[slug] = catalogs[slug] || { products: [], business: { nombre: negocioNombre, email, slug } };
-        useAdminStore.setState({ catalogs, activeId: slug });
-      }
+      // Create new client catalog using the new API
+      const client = await useAdminStore.getState().initializeClientCatalog(slug, negocioNombre, email);
 
       toast.success(`Bienvenido, ${negocioNombre}! Catálogo creado. Accediendo a tu panel.`);
       // Navegamos al admin específico del catálogo

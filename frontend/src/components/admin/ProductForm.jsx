@@ -5,16 +5,11 @@ import { useDropzone } from 'react-dropzone';
 import toast from 'react-hot-toast';  // Para feedback
 
 function ProductForm({ onClose, editingId }) {
-  const { products, addProduct, updateProduct, loadProducts } = useAdminStore();
+  const activeCatalog = useAdminStore((state) => state.getActiveCatalog());
+  const { addProduct, updateProduct } = useAdminStore();
   const { register, handleSubmit, reset, setValue } = useForm();
-  const editingProduct = (products || []).find(p => p.id === editingId);  // ✅ Fallback [] si undefined
-
-  // ✅ Force load initial si products vacío
-  useEffect(() => {
-    if (!products || products.length === 0) {
-      loadProducts();  // Carga default si null
-    }
-  }, [products, loadProducts]);
+  const products = activeCatalog.products || [];
+  const editingProduct = products.find(p => p.id === editingId);
 
   useEffect(() => {
     if (editingProduct) {
@@ -25,15 +20,19 @@ function ProductForm({ onClose, editingId }) {
   }, [editingProduct, reset, setValue]);
 
   // En onSubmit:
-const onSubmit = (data) => {
-    if (editingId) {
-      updateProduct(editingId, data);  // ✅ Actualiza stock del input
-      toast.success('Producto actualizado.');
-    } else {
-      addProduct(data);  // ✅ Usa data.stock del input
-      toast.success('Producto agregado.');
+  const onSubmit = async (data) => {
+    try {
+      if (editingId) {
+        await updateProduct(editingId, data);  // ✅ Actualiza stock del input
+        toast.success('Producto actualizado.');
+      } else {
+        await addProduct(data);  // ✅ Usa data.stock del input
+        toast.success('Producto agregado.');
+      }
+      onClose();
+    } catch (error) {
+      toast.error('Error: ' + error.message);
     }
-    onClose();
   };
 
   const { getRootProps, getInputProps } = useDropzone({
