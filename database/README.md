@@ -316,6 +316,34 @@ npm run typeorm migration:run
 - Check connection settings in `.env`
 - Ensure database exists: `psql -U postgres -l`
 
+### Duplicate Key Error on Client Registration
+If you encounter "duplicate key violates unique constraint clients_pkey" when creating new clients:
+
+1. **Verify sequences are properly set:**
+   ```bash
+   psql -U postgres -d catalogos_saas -f database/verify_sequences.sql
+   ```
+   The next sequence value should always be greater than the current max ID.
+
+2. **Reset the database:**
+   ```bash
+   psql -U postgres -c "DROP DATABASE IF EXISTS catalogos_saas;"
+   psql -U postgres -c "CREATE DATABASE catalogos_saas;"
+   psql -U postgres -d catalogos_saas -f database/init.sql
+   ```
+
+3. **Manual sequence fix (if needed):**
+   ```sql
+   -- Check current state
+   SELECT MAX(id) FROM clients;
+   SELECT last_value, is_called FROM clients_id_seq;
+   
+   -- Fix the sequence (replace X with MAX(id))
+   SELECT setval('clients_id_seq', X, true);
+   ```
+
+**Note:** The `init.sql` script now properly sets sequences using `setval(seq, max_id, true)` which ensures the next auto-generated ID will be `max_id + 1`.
+
 ### TypeORM Sync Issues
 - Set `synchronize: false` in production
 - Use migrations for schema changes
