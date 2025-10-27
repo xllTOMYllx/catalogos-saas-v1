@@ -11,7 +11,7 @@ import {
 import { ClientsService } from './clients.service';
 import { Client } from './client.entity';
 
-@Controller('api/clients')
+@Controller('clients')
 export class ClientsController {
   constructor(private readonly clientsService: ClientsService) {}
 
