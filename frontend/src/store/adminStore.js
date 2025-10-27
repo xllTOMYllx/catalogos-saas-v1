@@ -128,7 +128,7 @@ export const useAdminStore = create(
       },
 
       // Initialize a new client catalog
-      initializeClientCatalog: async (slug, businessName, email) => {
+      initializeClientCatalog: async (slug, businessName) => {
         const state = get();
         try {
           set({ loading: true, error: null });
@@ -267,7 +267,6 @@ export const useAdminStore = create(
       updateProduct: async (id, updated) => {
         const state = get();
         const activeId = state.activeId;
-        const clientId = state.clientId;
         const active = state.getActiveCatalog();
         
         // Prevent modifications to default catalog
@@ -305,7 +304,6 @@ export const useAdminStore = create(
       deleteProduct: async (id) => {
         const state = get();
         const activeId = state.activeId;
-        const clientId = state.clientId;
         const active = state.getActiveCatalog();
         
         // Prevent modifications to default catalog

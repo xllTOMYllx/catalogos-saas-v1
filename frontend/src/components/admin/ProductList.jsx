@@ -8,7 +8,7 @@ function ProductList() {
 
   const activeCatalog = useAdminStore((state) => state.getActiveCatalog());
   const products = activeCatalog.products;  // ✅ Del active catalog
-  const { addProduct, deleteProduct, isReadOnly } = useAdminStore();  // Actions
+  const { deleteProduct, isReadOnly } = useAdminStore();  // Actions
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const readOnly = isReadOnly();

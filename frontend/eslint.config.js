@@ -8,6 +8,7 @@ export default defineConfig([
   globalIgnores(['dist']),
   {
     files: ['**/*.{js,jsx}'],
+    ignores: ['tailwind.config.js'], // Ignore CommonJS config files
     extends: [
       js.configs.recommended,
       reactHooks.configs['recommended-latest'],

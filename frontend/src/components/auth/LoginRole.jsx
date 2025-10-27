@@ -9,8 +9,8 @@ const makeSlug = (text) => {
     .toString()
     .trim()
     .replace(/\s+/g, '-')           // espacios → guiones
-    .replace(/[^A-Za-z0-9\-]/g, '') // quitar chars inválidos
-    .replace(/\-+/g, '-')          // múltiples guiones → 1
+    .replace(/[^A-Za-z0-9-]/g, '') // quitar chars inválidos
+    .replace(/-+/g, '-')          // múltiples guiones → 1
     .toLowerCase();
 };
 
@@ -47,7 +47,7 @@ function LoginRole() {
 
     try {
       // Create new client catalog using the new API
-      const client = await useAdminStore.getState().initializeClientCatalog(slug, negocioNombre, email);
+      await useAdminStore.getState().initializeClientCatalog(slug, negocioNombre, email);
 
       toast.success(`Bienvenido, ${negocioNombre}! Catálogo creado. Accediendo a tu panel.`);
       // Navegamos al admin específico del catálogo
