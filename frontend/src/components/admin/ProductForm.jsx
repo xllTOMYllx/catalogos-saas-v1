@@ -49,6 +49,7 @@ function ProductForm({ onClose, editingId }) {
           <textarea {...register('description')} placeholder="Descripción" className="w-full p-2 bg-[#171819] text-white rounded h-20" />
           <input {...register('precio', { required: true, min: 0 })} type="number" placeholder="Precio" className="w-full p-2 bg-[#171819] text-white rounded" />
           <input {...register('stock', { required: true, min: 0 })} type="number" placeholder="Stock" className="w-full p-2 bg-[#171819] text-white rounded" />
+          <input {...register('category')} placeholder="Categoría (ej: Ropa, Accesorios)" className="w-full p-2 bg-[#171819] text-white rounded" />
           
           <div {...getRootProps()} className="border-2 border-dashed border-gray-600 p-4 rounded cursor-pointer">
             <input {...getInputProps()} />

@@ -1,13 +1,20 @@
 import { Link } from 'react-router-dom';
 import { ShoppingBag, Users, Shield, Zap } from 'lucide-react';
+import { useEffect } from 'react';
 import Header from '../components/Header';
 import ProductCard from '../components/ProductCard';
 import { useAdminStore } from '../store/adminStore';
 
 function LandingPage() {
-  const { catalogs } = useAdminStore();
-  // Always show default catalog on landing page, regardless of logged-in state
-  const defaultCatalog = catalogs?.default || { products: [], business: { nombre: 'UrbanStreet', logo: '/logosinfondo.png', color: '#f24427' } };
+  const { getActiveCatalog, loadCatalog } = useAdminStore();
+  
+  // Load default catalog on mount
+  useEffect(() => {
+    loadCatalog('default', 'default');
+  }, [loadCatalog]);
+  
+  // Always show default catalog on landing page
+  const defaultCatalog = getActiveCatalog();
   const activeProducts = defaultCatalog.products || [];
   
   // Mostrar solo los primeros 4 productos como preview
