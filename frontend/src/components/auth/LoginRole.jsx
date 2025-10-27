@@ -47,7 +47,7 @@ function LoginRole() {
 
     try {
       // Create new client catalog using the new API
-      await useAdminStore.getState().initializeClientCatalog(slug, negocioNombre, email);
+      await useAdminStore.getState().initializeClientCatalog(slug, negocioNombre);
 
       toast.success(`Bienvenido, ${negocioNombre}! Catálogo creado. Accediendo a tu panel.`);
       // Navegamos al admin específico del catálogo
