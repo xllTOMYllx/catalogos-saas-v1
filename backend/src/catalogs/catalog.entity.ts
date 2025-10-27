@@ -5,22 +5,27 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
+  JoinColumn,
+  Unique,
 } from 'typeorm';
 import { Client } from '../clients/client.entity';
 import { Product } from '../products/product.entity';
 
 @Entity('catalogs')
+@Unique(['clientId', 'productId'])
 export class Catalog {
   @PrimaryGeneratedColumn()
   id: number;
 
   @ManyToOne(() => Client, (client) => client.catalogs)
+  @JoinColumn({ name: 'clientId' })
   client: Client;
 
   @Column()
   clientId: number;
 
   @ManyToOne(() => Product, (product) => product.catalogs)
+  @JoinColumn({ name: 'productId' })
   product: Product;
 
   @Column()
@@ -29,7 +34,7 @@ export class Catalog {
   @Column({ default: true })
   active: boolean;
 
-  @Column({ nullable: true })
+  @Column('decimal', { precision: 10, scale: 2, nullable: true })
   customPrice: number;
 
   @CreateDateColumn()

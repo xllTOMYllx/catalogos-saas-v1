@@ -6,6 +6,7 @@ import {
   UpdateDateColumn,
   ManyToOne,
   OneToMany,
+  JoinColumn,
 } from 'typeorm';
 import { User } from '../users/user.entity';
 import { Catalog } from '../catalogs/catalog.entity';
@@ -34,9 +35,10 @@ export class Client {
   descripcion: string;
 
   @ManyToOne(() => User, (user) => user.clients)
+  @JoinColumn({ name: 'userId' })
   user: User;
 
-  @Column()
+  @Column({ nullable: true })
   userId: number;
 
   @OneToMany(() => Catalog, (catalog) => catalog.client)

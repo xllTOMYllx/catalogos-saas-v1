@@ -12,6 +12,6 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
   password: process.env.DB_PASSWORD || 'postgres',
   database: process.env.DB_NAME || 'catalogos_saas',
   entities: [User, Client, Product, Catalog],
-  synchronize: process.env.NODE_ENV !== 'production', // Auto-sync in dev, use migrations in prod
+  synchronize: false, // Disable auto-sync to use existing database schema
   logging: process.env.NODE_ENV !== 'production',
 };
