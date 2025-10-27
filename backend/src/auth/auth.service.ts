@@ -1,20 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { LoginDto, AuthResponse } from './auth.dto';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class AuthService {
-  // Mock users database
-  private users = [
-    { email: 'admin@test.com', password: '123', role: 'admin' },
-    { email: 'user@test.com', password: '123', role: 'user' },
-  ];
+  constructor(private readonly usersService: UsersService) {}
 
-  login(loginDto: LoginDto): AuthResponse {
-    const user = this.users.find(
-      (u) => u.email === loginDto.email && u.password === loginDto.password,
-    );
+  async login(loginDto: LoginDto): Promise<AuthResponse> {
+    const user = await this.usersService.findByEmail(loginDto.email);
 
-    if (user) {
+    if (user && user.password === loginDto.password) {
       return {
         success: true,
         token: 'mock-token-' + Date.now(),

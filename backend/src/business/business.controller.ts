@@ -7,12 +7,12 @@ export class BusinessController {
   constructor(private readonly businessService: BusinessService) {}
 
   @Get()
-  getBusiness(): Business {
+  async getBusiness(): Promise<Business> {
     return this.businessService.getBusiness();
   }
 
   @Put()
-  updateBusiness(@Body() updates: Partial<Business>): Business {
+  async updateBusiness(@Body() updates: Partial<Business>): Promise<Business> {
     return this.businessService.updateBusiness(updates);
   }
 }
