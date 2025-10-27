@@ -11,7 +11,7 @@ import {
 import { CatalogsService } from './catalogs.service';
 import { Catalog } from './catalog.entity';
 
-@Controller('api/catalogs')
+@Controller('catalogs')
 export class CatalogsController {
   constructor(private readonly catalogsService: CatalogsService) {}
 
