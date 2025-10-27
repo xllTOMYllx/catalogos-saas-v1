@@ -10,21 +10,16 @@ function CatalogPage() {
   // Soporta tanto :id (vieja ruta) como :catalogSlug (nueva)
   const { id, catalogSlug } = useParams();
   const incoming = id || catalogSlug;
-  const { setActiveCatalogId, filterProducts, getActiveCatalog, catalogs } = useAdminStore();
+  const { loadCatalog, getActiveCatalog } = useAdminStore();
   
-  // If no slug, use default catalog directly, otherwise use active
-  const activeCatalog = incoming ? getActiveCatalog() : (catalogs?.default || getActiveCatalog());
-  const activeProducts = activeCatalog.products || [];
-
+  // Load catalog when component mounts or slug changes
   useEffect(() => {
-    if (incoming) {
-      setActiveCatalogId(incoming);
-    } else {
-      // Si no hay slug en la URL, aseguramos default
-      setActiveCatalogId('default');
-    }
-    filterProducts('');  // Limpia filtro
-  }, [incoming, setActiveCatalogId, filterProducts]);
+    const slug = incoming || 'default';
+    loadCatalog(slug, slug);
+  }, [incoming, loadCatalog]);
+  
+  const activeCatalog = getActiveCatalog();
+  const activeProducts = activeCatalog.products || [];
 
   return (
     <div className="bg-[#080c0e] min-h-screen flex flex-col">
@@ -36,19 +31,26 @@ function CatalogPage() {
             <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6 text-center" style={{ color: activeCatalog.business?.color || '#f24427' }}>
               Catálogo de {activeCatalog.business?.nombre || 'Tienda'}
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 justify-items-center">
-              {activeProducts.map(producto => (
-                <ProductCard
-                  key={producto.id || producto.nombre}
-                  id={producto.id || Math.random()}
-                  ruta={producto.ruta || 'https://via.placeholder.com/300x400/171819/f24427?text=Producto'}
-                  nombre={producto.nombre}
-                  precio={producto.precio}
-                  description={producto.description || 'Descripción temporal'}
-                  stock={producto.stock || 10}
-                />
-              ))}
-            </div>
+            {activeProducts.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-gray-400 text-lg">Este catálogo aún no tiene productos.</p>
+                <p className="text-gray-500 text-sm mt-2">Los clientes pueden agregar productos desde su panel de administración.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 justify-items-center">
+                {activeProducts.map(producto => (
+                  <ProductCard
+                    key={producto.id || producto.nombre}
+                    id={producto.id || Math.random()}
+                    ruta={producto.ruta || 'https://via.placeholder.com/300x400/171819/f24427?text=Producto'}
+                    nombre={producto.nombre}
+                    precio={producto.precio}
+                    description={producto.description || 'Descripción temporal'}
+                    stock={producto.stock || 10}
+                  />
+                ))}
+              </div>
+            )}
           </section>
         </div>
       </main>

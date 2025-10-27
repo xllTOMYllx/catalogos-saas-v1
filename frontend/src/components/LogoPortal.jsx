@@ -4,7 +4,7 @@ import { useAdminStore } from '../store/adminStore';
 
 function LogoPortal({ onSwitch }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [role, setRole] = useState(localStorage.getItem('role') || 'user');
+  const role = localStorage.getItem('role') || 'user';
   const dropdownRef = useRef(null);
 
   // obtenemos catálogos desde el store en tiempo real

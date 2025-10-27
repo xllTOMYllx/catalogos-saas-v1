@@ -2,27 +2,37 @@ import { useForm } from 'react-hook-form';
 import { useAdminStore } from '../../store/adminStore';
 import { useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Save } from 'lucide-react';
+import { Save, Lock } from 'lucide-react';
 import toast from 'react-hot-toast';  // Para feedback
 
 function CustomizationForm() {
-  const { business, updateBusiness, loadProducts } = useAdminStore();
+  const activeCatalog = useAdminStore((state) => state.getActiveCatalog());
+  const { updateBusiness, isReadOnly } = useAdminStore();
+  const business = activeCatalog.business;
+  const readOnly = isReadOnly();
+  
   // ✅ Destructuring completo: incluye reset
   const { register, handleSubmit, setValue, reset, watch } = useForm({ defaultValues: business });
 
   // ✅ Force load initial si business vacío
   useEffect(() => {
-    if (!business) {
-      loadProducts();  // Carga default si null
-    }
-    reset(business || {});  // Reset con fallback
-  }, [business, reset, loadProducts]);
+    reset(business || {});  // Reset with fallback
+  }, [business, reset]);
 
-  const onSubmit = (data) => {
-    updateBusiness(data);  // Actualiza store (persiste local)
-    // Aplica CSS vars global inmediatamente
-    document.documentElement.style.setProperty('--primary-color', data.color);
-    toast.success('Personalización guardada y aplicada en vivo.');  // Toast confirm
+  const onSubmit = async (data) => {
+    if (readOnly) {
+      toast.error('No se puede modificar el catálogo por defecto');
+      return;
+    }
+    
+    try {
+      await updateBusiness(data);  // Actualiza store (persiste en BD)
+      // Aplica CSS vars global inmediatamente
+      document.documentElement.style.setProperty('--primary-color', data.color);
+      toast.success('Personalización guardada y aplicada en vivo.');  // Toast confirm
+    } catch (error) {
+      toast.error('Error al guardar personalización: ' + error.message);
+    }
   };
 
   const { getRootProps, getInputProps } = useDropzone({
@@ -36,22 +46,49 @@ function CustomizationForm() {
 
   return (
     <div>
-      <h3 className="text-xl font-bold mb-4">Personaliza tu Catálogo</h3>
+      <h3 className="text-xl font-bold mb-4">
+        Personaliza tu Catálogo
+        {readOnly && <Lock size={16} className="inline ml-2 text-yellow-400" title="Solo lectura" />}
+      </h3>
+      {readOnly && (
+        <div className="mb-4 p-3 bg-yellow-900/30 border border-yellow-600 rounded">
+          <p className="text-yellow-300 text-sm">Este es el catálogo por defecto y no se puede modificar. Crea tu propia cuenta de cliente para personalizar tu catálogo.</p>
+        </div>
+      )}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <input {...register('nombre')} placeholder="Nombre del Negocio" className="w-full p-2 bg-[#171819] text-white rounded border border-gray-600 focus:border-[var(--primary-color)]" />
+        <input 
+          {...register('nombre')} 
+          placeholder="Nombre del Negocio" 
+          className="w-full p-2 bg-[#171819] text-white rounded border border-gray-600 focus:border-[var(--primary-color)]" 
+          disabled={readOnly}
+        />
         
-        <input {...register('color', { required: true })} type="color" className="w-full h-10 rounded" />
+        <input 
+          {...register('color', { required: true })} 
+          type="color" 
+          className="w-full h-10 rounded" 
+          disabled={readOnly}
+        />
         
-        <input {...register('telefono')} placeholder="Teléfono WhatsApp" className="w-full p-2 bg-[#171819] text-white rounded border border-gray-600 focus:border-[var(--primary-color)]" />
+        <input 
+          {...register('telefono')} 
+          placeholder="Teléfono WhatsApp" 
+          className="w-full p-2 bg-[#171819] text-white rounded border border-gray-600 focus:border-[var(--primary-color)]" 
+          disabled={readOnly}
+        />
         
-        <div {...getRootProps()} className="border-2 border-dashed border-gray-600 p-4 rounded cursor-pointer hover:border-[var(--primary-color)]">
-          <input {...getInputProps()} />
-          <p className="text-gray-400">Arrastra logo o clic para subir</p>
+        <div {...getRootProps()} className={`border-2 border-dashed border-gray-600 p-4 rounded ${readOnly ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-[var(--primary-color)]'}`}>
+          <input {...getInputProps()} disabled={readOnly} />
+          <p className="text-gray-400">
+            {readOnly ? 'Vista previa del logo' : 'Arrastra logo o clic para subir'}
+          </p>
         </div>
 
-        <button type="submit" className="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded font-semibold flex items-center justify-center gap-2">
-          <Save size={20} /> Guardar Cambios
-        </button>
+        {!readOnly && (
+          <button type="submit" className="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded font-semibold flex items-center justify-center gap-2">
+            <Save size={20} /> Guardar Cambios
+          </button>
+        )}
       </form>
 
      {/* Preview en vivo */}
