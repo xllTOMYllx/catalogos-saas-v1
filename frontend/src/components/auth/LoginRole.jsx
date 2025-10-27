@@ -54,7 +54,8 @@ function LoginRole() {
       navigate(`/${slug}/admin`);
     } catch (err) {
       console.error('Error creando catálogo:', err);
-      toast.error('No se pudo crear el catálogo. Reintenta.');
+      const errorMessage = err.response?.data?.message || err.message || 'Error desconocido';
+      toast.error(`No se pudo crear el catálogo: ${errorMessage}. Reintenta.`);
     }
   };
 
