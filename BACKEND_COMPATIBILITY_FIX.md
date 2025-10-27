@@ -49,12 +49,15 @@ The NestJS backend was experiencing TypeORM configuration issues when trying to 
 If you haven't already, initialize the database:
 
 ```bash
-# Create the database
+# Create the database (use your PostgreSQL user)
 sudo -u postgres psql -c "CREATE DATABASE catalogos_saas;"
 
 # Run the initialization script
+# Replace 'postgres' with your database username if different
 psql -U postgres -d catalogos_saas -f database/init.sql
 ```
+
+**Note:** Use the same credentials in your `.env` file that you use to connect to PostgreSQL.
 
 ### 2. Configure Environment Variables
 
@@ -135,15 +138,18 @@ Since `synchronize` is now disabled, for future schema changes:
 3. If needed, create a migration SQL script
 4. Apply the migration to the database manually
 
-OR use TypeORM migrations:
+OR use TypeORM migrations (requires additional setup):
 
 ```bash
-# Generate migration
-npm run typeorm migration:generate -- -n MigrationName
+# First, add TypeORM CLI to package.json scripts if not present:
+# "typeorm": "typeorm-ts-node-commonjs"
 
-# Run migrations
-npm run typeorm migration:run
+# Then generate and run migrations:
+npx typeorm-ts-node-commonjs migration:generate ./src/migrations/MigrationName -d ./src/database/database.config.ts
+npx typeorm-ts-node-commonjs migration:run -d ./src/database/database.config.ts
 ```
+
+For most cases, manually updating `init.sql` and re-running it on a fresh database is simpler.
 
 ## Additional Notes
 
