@@ -23,15 +23,16 @@ function CatalogPage() {
       
       // If the slug matches our stored slug, use the stored clientId
       if (storedSlug === slug && storedClientId) {
-        loadCatalog(parseInt(storedClientId), slug);
-      } else {
-        // Otherwise, try to load by slug (will need to map slug to clientId in backend)
-        // For now, fall back to default if we don't have a matching client
-        loadCatalog('default', 'default');
+        const parsedClientId = parseInt(storedClientId, 10);
+        if (!isNaN(parsedClientId) && parsedClientId > 0) {
+          loadCatalog(parsedClientId, slug);
+          return;
+        }
       }
-    } else {
-      loadCatalog('default', 'default');
     }
+    
+    // Default to loading the default catalog
+    loadCatalog('default', 'default');
   }, [incoming, loadCatalog]);
   
   const activeCatalog = getActiveCatalog();

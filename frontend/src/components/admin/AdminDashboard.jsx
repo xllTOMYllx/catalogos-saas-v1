@@ -23,12 +23,20 @@ function AdminDashboard() {
     
     // Load the catalog data - pass clientId if available
     if (clientId && slug !== 'default') {
-      loadCatalog(parseInt(clientId), slug);
-    } else if (slug !== 'default') {
-      // If we have a slug but no clientId, still try to load it
-      loadCatalog(slug, slug);
-    } else {
+      const parsedClientId = parseInt(clientId, 10);
+      if (!isNaN(parsedClientId) && parsedClientId > 0) {
+        loadCatalog(parsedClientId, slug);
+        return;
+      }
+    }
+    
+    // For non-default slugs without valid clientId, or default catalog
+    if (slug === 'default') {
       loadCatalog('default', 'default');
+    } else {
+      // Slug-only fallback: loadCatalog will try to resolve it
+      // This is for backwards compatibility with old URLs
+      loadCatalog(slug, slug);
     }
   }, [catalogSlug, loadCatalog]);
   
