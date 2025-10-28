@@ -68,19 +68,23 @@ export const useAdminStore = create(
             // Load client's catalog entries (products they've added)
             let catalogProducts = [];
             if (client && client.id) {
-              const catalogEntries = await catalogsApi.getByClientId(client.id);
-              // Transform catalog entries to products format
-              catalogProducts = catalogEntries.map(entry => ({
-                id: entry.product.id,
-                nombre: entry.product.nombre,
-                precio: entry.customPrice || entry.product.precio,
-                description: entry.product.description,
-                ruta: entry.product.ruta,
-                stock: entry.product.stock,
-                category: entry.product.category,
-                catalogId: entry.id, // Store catalog entry ID for deletions
-                active: entry.active
-              }));
+              try {
+                const catalogEntries = await catalogsApi.getByClientId(client.id);
+                // Transform catalog entries to products format
+                catalogProducts = catalogEntries.map(entry => ({
+                  id: entry.product.id,
+                  nombre: entry.product.nombre,
+                  precio: entry.customPrice || entry.product.precio,
+                  description: entry.product.description,
+                  ruta: entry.product.ruta,
+                  stock: entry.product.stock,
+                  category: entry.product.category,
+                  catalogId: entry.id, // Store catalog entry ID for deletions
+                  active: entry.active
+                }));
+              } catch (err) {
+                console.error('Error loading catalog entries:', err);
+              }
             }
             
             const businessData = client ? {

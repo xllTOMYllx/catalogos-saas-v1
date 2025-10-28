@@ -15,7 +15,23 @@ function CatalogPage() {
   // Load catalog when component mounts or slug changes
   useEffect(() => {
     const slug = incoming || 'default';
-    loadCatalog(slug, slug);
+    
+    // If we have a slug that's not default, try to get clientId from localStorage
+    if (slug !== 'default') {
+      const storedClientId = localStorage.getItem('clientId');
+      const storedSlug = localStorage.getItem('userId');
+      
+      // If the slug matches our stored slug, use the stored clientId
+      if (storedSlug === slug && storedClientId) {
+        loadCatalog(parseInt(storedClientId), slug);
+      } else {
+        // Otherwise, try to load by slug (will need to map slug to clientId in backend)
+        // For now, fall back to default if we don't have a matching client
+        loadCatalog('default', 'default');
+      }
+    } else {
+      loadCatalog('default', 'default');
+    }
   }, [incoming, loadCatalog]);
   
   const activeCatalog = getActiveCatalog();

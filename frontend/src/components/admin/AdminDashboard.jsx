@@ -23,9 +23,12 @@ function AdminDashboard() {
     
     // Load the catalog data - pass clientId if available
     if (clientId && slug !== 'default') {
-      loadCatalog(clientId, slug);
-    } else {
+      loadCatalog(parseInt(clientId), slug);
+    } else if (slug !== 'default') {
+      // If we have a slug but no clientId, still try to load it
       loadCatalog(slug, slug);
+    } else {
+      loadCatalog('default', 'default');
     }
   }, [catalogSlug, loadCatalog]);
   
