@@ -39,15 +39,21 @@ function LoginRole() {
     // Generamos slug a partir del nombre del negocio
     const slug = makeSlug(negocioNombre) || btoa(email).substring(0, 8);
 
-    // Guardamos role y userId como slug (clave del catálogo)
-    localStorage.setItem('role', 'cliente');
-    localStorage.setItem('userId', slug);
-    // Set a simple auth token to indicate authenticated state
-    localStorage.setItem('authToken', 'local-client-' + slug);
-
     try {
       // Create new client catalog using the new API
-      await useAdminStore.getState().initializeClientCatalog(slug, negocioNombre);
+      const client = await useAdminStore.getState().initializeClientCatalog(slug, negocioNombre);
+
+      // Store client information in localStorage for session management
+      localStorage.setItem('role', 'cliente');
+      localStorage.setItem('userId', slug);
+      localStorage.setItem('clientId', client.id.toString());
+      localStorage.setItem('authToken', 'local-client-' + slug);
+      localStorage.setItem('user', JSON.stringify({
+        email: email,
+        role: 'cliente',
+        clientId: client.id,
+        nombre: negocioNombre
+      }));
 
       toast.success(`Bienvenido, ${negocioNombre}! Catálogo creado. Accediendo a tu panel.`);
       // Navegamos al admin específico del catálogo

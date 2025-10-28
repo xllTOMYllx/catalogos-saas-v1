@@ -219,13 +219,22 @@ export const useAdminStore = create(
       addProduct: async (product) => {
         const state = get();
         const activeId = state.activeId;
-        const clientId = state.clientId;
+        let clientId = state.clientId;
         const active = state.getActiveCatalog();
         
         // Prevent modifications to default catalog
         if (active.isReadOnly) {
           set({ error: 'No se puede modificar el catálogo por defecto' });
           throw new Error('No se puede modificar el catálogo por defecto');
+        }
+        
+        // Try to get clientId from localStorage if not in state
+        if (!clientId) {
+          const storedClientId = localStorage.getItem('clientId');
+          if (storedClientId) {
+            clientId = parseInt(storedClientId);
+            set({ clientId }); // Update state with the clientId
+          }
         }
         
         if (!clientId) {
@@ -340,13 +349,22 @@ export const useAdminStore = create(
       updateBusiness: async (updates) => {
         const state = get();
         const activeId = state.activeId;
-        const clientId = state.clientId;
+        let clientId = state.clientId;
         const active = state.getActiveCatalog();
         
         // Prevent modifications to default catalog
         if (active.isReadOnly) {
           set({ error: 'No se puede modificar el catálogo por defecto' });
           throw new Error('No se puede modificar el catálogo por defecto');
+        }
+        
+        // Try to get clientId from localStorage if not in state
+        if (!clientId) {
+          const storedClientId = localStorage.getItem('clientId');
+          if (storedClientId) {
+            clientId = parseInt(storedClientId);
+            set({ clientId }); // Update state with the clientId
+          }
         }
         
         if (!clientId) {
