@@ -18,10 +18,15 @@ function AdminDashboard() {
   // Load catalog when component mounts or slug changes
   useEffect(() => {
     const userId = localStorage.getItem('userId');
+    const clientId = localStorage.getItem('clientId');
     const slug = catalogSlug || userId || 'default';
     
-    // Load the catalog data for this slug
-    loadCatalog(slug, slug);
+    // Load the catalog data - pass clientId if available
+    if (clientId && slug !== 'default') {
+      loadCatalog(clientId, slug);
+    } else {
+      loadCatalog(slug, slug);
+    }
   }, [catalogSlug, loadCatalog]);
   
   // Determinar el slug del catálogo actual
