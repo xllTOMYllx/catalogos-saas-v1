@@ -2,12 +2,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
+import { ClientsService } from '../clients/clients.service';
 import * as bcrypt from 'bcrypt';
 
 describe('AuthService', () => {
   let authService: AuthService;
-  let usersService: UsersService;
-  let jwtService: JwtService;
 
   const mockUser = {
     id: 1,
@@ -25,6 +24,11 @@ describe('AuthService', () => {
     findOne: jest.fn(),
   };
 
+  const mockClientsService = {
+    findByUserId: jest.fn(),
+    create: jest.fn(),
+  };
+
   const mockJwtService = {
     sign: jest.fn(),
     verify: jest.fn(),
@@ -39,6 +43,10 @@ describe('AuthService', () => {
           useValue: mockUsersService,
         },
         {
+          provide: ClientsService,
+          useValue: mockClientsService,
+        },
+        {
           provide: JwtService,
           useValue: mockJwtService,
         },
@@ -46,8 +54,6 @@ describe('AuthService', () => {
     }).compile();
 
     authService = module.get<AuthService>(AuthService);
-    usersService = module.get<UsersService>(UsersService);
-    jwtService = module.get<JwtService>(JwtService);
   });
 
   afterEach(() => {
@@ -147,7 +153,10 @@ describe('AuthService', () => {
       const password = 'password123';
       const hashed = await bcrypt.hash(password, 10);
 
-      const result = await authService.validatePassword('wrongpassword', hashed);
+      const result = await authService.validatePassword(
+        'wrongpassword',
+        hashed,
+      );
 
       expect(result).toBe(false);
     });

@@ -1,4 +1,10 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  MinLength,
+  IsOptional,
+} from 'class-validator';
 
 export class LoginDto {
   @IsEmail()
@@ -11,6 +17,29 @@ export class LoginDto {
   password: string;
 }
 
+export class RegisterDto {
+  @IsEmail()
+  @IsNotEmpty()
+  email: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(6)
+  password: string;
+
+  @IsString()
+  @IsNotEmpty()
+  nombre: string;
+
+  @IsString()
+  @IsNotEmpty()
+  businessName: string;
+
+  @IsString()
+  @IsOptional()
+  telefono?: string;
+}
+
 export interface AuthResponse {
   success: boolean;
   token?: string;
@@ -19,6 +48,13 @@ export interface AuthResponse {
     email: string;
     role: string;
     nombre?: string;
+  };
+  client?: {
+    id: number;
+    nombre: string;
+    logo?: string;
+    color?: string;
+    telefono?: string;
   };
   message?: string;
 }

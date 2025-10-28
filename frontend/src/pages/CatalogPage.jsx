@@ -15,7 +15,24 @@ function CatalogPage() {
   // Load catalog when component mounts or slug changes
   useEffect(() => {
     const slug = incoming || 'default';
-    loadCatalog(slug, slug);
+    
+    // If we have a slug that's not default, try to get clientId from localStorage
+    if (slug !== 'default') {
+      const storedClientId = localStorage.getItem('clientId');
+      const storedSlug = localStorage.getItem('userId');
+      
+      // If the slug matches our stored slug, use the stored clientId
+      if (storedSlug === slug && storedClientId) {
+        const parsedClientId = parseInt(storedClientId, 10);
+        if (!isNaN(parsedClientId) && parsedClientId > 0) {
+          loadCatalog(parsedClientId, slug);
+          return;
+        }
+      }
+    }
+    
+    // Default to loading the default catalog
+    loadCatalog('default', 'default');
   }, [incoming, loadCatalog]);
   
   const activeCatalog = getActiveCatalog();
