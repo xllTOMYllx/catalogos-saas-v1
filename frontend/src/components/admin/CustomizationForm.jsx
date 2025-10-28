@@ -77,6 +77,21 @@ function CustomizationForm() {
           disabled={readOnly}
         />
         
+        <input 
+          {...register('direccion')} 
+          placeholder="Dirección del Negocio" 
+          className="w-full p-2 bg-[#171819] text-white rounded border border-gray-600 focus:border-[var(--primary-color)]" 
+          disabled={readOnly}
+        />
+        
+        <textarea 
+          {...register('descripcion')} 
+          placeholder="Descripción del Negocio" 
+          rows="3"
+          className="w-full p-2 bg-[#171819] text-white rounded border border-gray-600 focus:border-[var(--primary-color)]" 
+          disabled={readOnly}
+        />
+        
         <div {...getRootProps()} className={`border-2 border-dashed border-gray-600 p-4 rounded ${readOnly ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-[var(--primary-color)]'}`}>
           <input {...getInputProps()} disabled={readOnly} />
           <p className="text-gray-400">
@@ -96,8 +111,18 @@ function CustomizationForm() {
         <h4 className="font-bold mb-2">Preview:</h4>
         <div className="flex items-center gap-4">
           <img src={currentLogo} alt="Logo Preview" className="w-32 h-32 object-cover rounded" onError={(e) => { e.target.src = '/logosinfondo.png'; }} />
-          <span style={{ color: watch('color') || business?.color || '#f24427', fontWeight: 'bold' }}>Hola, {watch('nombre') || business?.nombre || 'UrbanStreet'}!</span>
-          <span className="text-sm text-gray-400 ml-4">Tel: {watch('telefono') || business?.telefono || '1234567890'}</span>
+          <div className="flex-1">
+            <span style={{ color: watch('color') || business?.color || '#f24427', fontWeight: 'bold' }}>
+              {watch('nombre') || business?.nombre || 'UrbanStreet'}
+            </span>
+            <p className="text-sm text-gray-400 mt-1">Tel: {watch('telefono') || business?.telefono || '1234567890'}</p>
+            {(watch('direccion') || business?.direccion) && (
+              <p className="text-sm text-gray-400 mt-1">Dir: {watch('direccion') || business?.direccion}</p>
+            )}
+            {(watch('descripcion') || business?.descripcion) && (
+              <p className="text-sm text-gray-300 mt-2">{watch('descripcion') || business?.descripcion}</p>
+            )}
+          </div>
         </div>
       </div>
     </div>

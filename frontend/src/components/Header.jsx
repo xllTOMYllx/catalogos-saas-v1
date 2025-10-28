@@ -65,13 +65,24 @@ export default function Header({ negocio: defaultNegocio }) {
   };
 
   // Logout: limpiar session y estado persistente
-  const handleLogout = () => {
+  const handleLogout = async () => {
     if (logout && typeof logout === 'function') {
       try { logout(); } catch { /* ignore */ }
     }
     try {
+      // Call backend logout endpoint
+      const { authApi } = await import('../api/auth');
+      await authApi.logout();
+    } catch (err) {
+      console.error('Error calling logout endpoint:', err);
+    }
+    
+    try {
       localStorage.removeItem('role');
       localStorage.removeItem('userId');
+      localStorage.removeItem('clientId');
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('user');
       localStorage.removeItem('admin-storage'); // key del persist en adminStore
     } catch { /* ignore */ }
     try { 

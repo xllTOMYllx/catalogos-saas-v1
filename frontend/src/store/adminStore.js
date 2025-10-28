@@ -87,7 +87,9 @@ export const useAdminStore = create(
               nombre: client.nombre,
               logo: client.logo,
               color: client.color,
-              telefono: client.telefono
+              telefono: client.telefono,
+              direccion: client.direccion,
+              descripcion: client.descripcion
             } : { ...initialBusiness, nombre: 'Mi Negocio' };
             
             set({ 
@@ -383,7 +385,9 @@ export const useAdminStore = create(
             nombre: updatedClient.nombre,
             logo: updatedClient.logo,
             color: updatedClient.color,
-            telefono: updatedClient.telefono
+            telefono: updatedClient.telefono,
+            direccion: updatedClient.direccion,
+            descripcion: updatedClient.descripcion
           };
           const newCatalogs = { ...state.catalogs, [activeId]: active };
           set({ catalogs: newCatalogs, loading: false });
