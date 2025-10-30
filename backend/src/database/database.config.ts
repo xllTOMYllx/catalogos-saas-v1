@@ -13,5 +13,5 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
   database: process.env.DB_NAME || 'catalogos_saas',
   entities: [User, Client, Product, Catalog],
   synchronize: false, // Disable auto-sync to use existing database schema
-  logging: process.env.NODE_ENV !== 'production',
+  logging: process.env.NODE_ENV !== 'production' ? ['query', 'error'] : false,
 };
