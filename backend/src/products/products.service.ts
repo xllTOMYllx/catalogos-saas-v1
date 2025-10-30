@@ -24,7 +24,17 @@ export class ProductsService {
   }
 
   async update(id: number, updates: Partial<Product>): Promise<Product | null> {
-    await this.productsRepository.update(id, updates);
+    // Remove fields that should not be updated to prevent issues
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const {
+      id: _,
+      createdAt,
+      updatedAt,
+      catalogs,
+      ...cleanUpdates
+    } = updates as any;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    await this.productsRepository.update(id, cleanUpdates);
     return this.findOne(id);
   }
 

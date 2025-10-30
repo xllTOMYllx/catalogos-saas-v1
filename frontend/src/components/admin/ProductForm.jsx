@@ -22,11 +22,14 @@ function ProductForm({ onClose, editingId }) {
   // En onSubmit:
   const onSubmit = async (data) => {
     try {
+      // Filter out metadata fields that shouldn't be sent to the backend
+      const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, catalogId: _catalogId, catalogs: _catalogs, active: _active, ...productData } = data;
+      
       if (editingId) {
-        await updateProduct(editingId, data);  // ✅ Actualiza stock del input
+        await updateProduct(editingId, productData);  // ✅ Actualiza stock del input
         toast.success('Producto actualizado.');
       } else {
-        await addProduct(data);  // ✅ Usa data.stock del input
+        await addProduct(productData);  // ✅ Usa data.stock del input
         toast.success('Producto agregado.');
       }
       onClose();
@@ -36,7 +39,17 @@ function ProductForm({ onClose, editingId }) {
   };
 
   const { getRootProps, getInputProps } = useDropzone({
-    onDrop: (acceptedFiles) => setValue('ruta', URL.createObjectURL(acceptedFiles[0])),  // Preview local
+    onDrop: (acceptedFiles) => {
+      const file = acceptedFiles[0];
+      if (file) {
+        // Convert image to base64 data URL instead of blob URL
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setValue('ruta', reader.result);
+        };
+        reader.readAsDataURL(file);
+      }
+    },
     accept: { 'image/*': [] }
   });
 

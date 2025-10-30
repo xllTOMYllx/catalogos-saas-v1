@@ -66,33 +66,27 @@ export default function Header({ negocio: defaultNegocio }) {
 
   // Logout: limpiar session y estado persistente
   const handleLogout = async () => {
-    if (logout && typeof logout === 'function') {
-      try { logout(); } catch { /* ignore */ }
-    }
     try {
-      // Call backend logout endpoint
-      const { authApi } = await import('../api/auth');
-      await authApi.logout();
+      // Use the logout function from useAuth hook which handles everything
+      if (logout && typeof logout === 'function') {
+        await logout();
+      }
+      
+      // Clear admin store state and reset to default catalog
+      clearStorage();
+      setActiveCatalogId('default');
+      
+      toast.success('Sesión cerrada. ¡Hasta pronto!', { duration: 2000 });
+      navigate('/');
+      setIsMobileMenuOpen(false);
     } catch (err) {
-      console.error('Error calling logout endpoint:', err);
+      console.error('Error during logout:', err);
+      // Ensure cleanup even if there's an error
+      clearStorage();
+      setActiveCatalogId('default');
+      navigate('/');
+      setIsMobileMenuOpen(false);
     }
-    
-    try {
-      localStorage.removeItem('role');
-      localStorage.removeItem('userId');
-      localStorage.removeItem('clientId');
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('user');
-      localStorage.removeItem('admin-storage'); // key del persist en adminStore
-    } catch { /* ignore */ }
-    try { 
-      clearStorage(); 
-      setActiveCatalogId('default'); // Reset to default catalog
-    } catch { /* ignore */ }
-
-    toast.success('Sesión cerrada. ¡Hasta pronto!', { duration: 2000 });
-    navigate('/');
-    setIsMobileMenuOpen(false);
   };
 
   // Mostrar Admin si es admin OR si es cliente y visita su catálogo (activeId === slug)
