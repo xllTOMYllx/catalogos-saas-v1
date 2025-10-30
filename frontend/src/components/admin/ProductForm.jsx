@@ -23,7 +23,7 @@ function ProductForm({ onClose, editingId }) {
   const onSubmit = async (data) => {
     try {
       // Filter out metadata fields that shouldn't be sent to the backend
-      const { id, createdAt, updatedAt, catalogId, catalogs, active, ...productData } = data;
+      const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, catalogId: _catalogId, catalogs: _catalogs, active: _active, ...productData } = data;
       
       if (editingId) {
         await updateProduct(editingId, productData);  // ✅ Actualiza stock del input

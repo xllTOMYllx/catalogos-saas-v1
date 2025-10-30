@@ -37,7 +37,16 @@ export class CatalogsService {
 
   async update(id: number, updates: Partial<Catalog>): Promise<Catalog | null> {
     // Remove fields that should not be updated to prevent issues
-    const { id: _, createdAt, updatedAt, client, product, ...cleanUpdates } = updates as any;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const {
+      id: _,
+      createdAt,
+      updatedAt,
+      client,
+      product,
+      ...cleanUpdates
+    } = updates as any;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     await this.catalogsRepository.update(id, cleanUpdates);
     return this.findOne(id);
   }

@@ -35,7 +35,15 @@ export class ClientsService {
 
   async update(id: number, updates: Partial<Client>): Promise<Client | null> {
     // Remove fields that should not be updated to prevent issues
-    const { id: _, createdAt, updatedAt, user, ...cleanUpdates } = updates as any;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const {
+      id: _,
+      createdAt,
+      updatedAt,
+      user,
+      ...cleanUpdates
+    } = updates as any;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     await this.clientsRepository.update(id, cleanUpdates);
     return this.findOne(id);
   }
