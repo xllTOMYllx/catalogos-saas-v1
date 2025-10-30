@@ -32,10 +32,13 @@ export function useAuth() {
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
+      // Clear all authentication-related data
       localStorage.removeItem('authToken');
       localStorage.removeItem('user');
       localStorage.removeItem('role');
       localStorage.removeItem('userId');
+      localStorage.removeItem('clientId');
+      localStorage.removeItem('admin-storage');
       setIsAuthenticated(false);
     }
   };

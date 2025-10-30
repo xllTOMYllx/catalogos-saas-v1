@@ -36,7 +36,17 @@ function CustomizationForm() {
   };
 
   const { getRootProps, getInputProps } = useDropzone({
-    onDrop: (acceptedFiles) => setValue('logo', URL.createObjectURL(acceptedFiles[0])),
+    onDrop: (acceptedFiles) => {
+      const file = acceptedFiles[0];
+      if (file) {
+        // Convert image to base64 data URL instead of blob URL
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setValue('logo', reader.result);
+        };
+        reader.readAsDataURL(file);
+      }
+    },
     accept: { 'image/*': [] }
   });
 

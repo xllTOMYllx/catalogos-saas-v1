@@ -36,7 +36,17 @@ function ProductForm({ onClose, editingId }) {
   };
 
   const { getRootProps, getInputProps } = useDropzone({
-    onDrop: (acceptedFiles) => setValue('ruta', URL.createObjectURL(acceptedFiles[0])),  // Preview local
+    onDrop: (acceptedFiles) => {
+      const file = acceptedFiles[0];
+      if (file) {
+        // Convert image to base64 data URL instead of blob URL
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setValue('ruta', reader.result);
+        };
+        reader.readAsDataURL(file);
+      }
+    },
     accept: { 'image/*': [] }
   });
 
