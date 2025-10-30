@@ -19,7 +19,7 @@ export class Client {
   @Column()
   nombre: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'text', nullable: true })
   logo: string;
 
   @Column({ default: '#f24427' })

@@ -13,7 +13,7 @@ export class Product {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column('text')
   ruta: string;
 
   @Column()
