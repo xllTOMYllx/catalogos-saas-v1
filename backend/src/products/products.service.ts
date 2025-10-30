@@ -24,7 +24,9 @@ export class ProductsService {
   }
 
   async update(id: number, updates: Partial<Product>): Promise<Product | null> {
-    await this.productsRepository.update(id, updates);
+    // Remove fields that should not be updated to prevent issues
+    const { id: _, createdAt, updatedAt, catalogs, ...cleanUpdates } = updates as any;
+    await this.productsRepository.update(id, cleanUpdates);
     return this.findOne(id);
   }
 

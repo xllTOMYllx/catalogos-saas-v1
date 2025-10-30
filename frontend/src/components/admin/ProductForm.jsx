@@ -22,11 +22,14 @@ function ProductForm({ onClose, editingId }) {
   // En onSubmit:
   const onSubmit = async (data) => {
     try {
+      // Filter out metadata fields that shouldn't be sent to the backend
+      const { id, createdAt, updatedAt, catalogId, catalogs, active, ...productData } = data;
+      
       if (editingId) {
-        await updateProduct(editingId, data);  // ✅ Actualiza stock del input
+        await updateProduct(editingId, productData);  // ✅ Actualiza stock del input
         toast.success('Producto actualizado.');
       } else {
-        await addProduct(data);  // ✅ Usa data.stock del input
+        await addProduct(productData);  // ✅ Usa data.stock del input
         toast.success('Producto agregado.');
       }
       onClose();
