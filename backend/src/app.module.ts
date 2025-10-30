@@ -9,6 +9,7 @@ import { BusinessModule } from './business/business.module';
 import { UsersModule } from './users/users.module';
 import { ClientsModule } from './clients/clients.module';
 import { CatalogsModule } from './catalogs/catalogs.module';
+import { UploadModule } from './upload/upload.module';
 import { typeOrmConfig } from './database/database.config';
 
 @Module({
@@ -23,6 +24,7 @@ import { typeOrmConfig } from './database/database.config';
     UsersModule,
     ClientsModule,
     CatalogsModule,
+    UploadModule,
   ],
   controllers: [AppController],
   providers: [AppService],

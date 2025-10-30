@@ -3,6 +3,7 @@ import { useAdminStore } from '../../store/adminStore';
 import { useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import toast from 'react-hot-toast';  // Para feedback
+import { uploadApi } from '../../api/upload';
 
 function ProductForm({ onClose, editingId }) {
   const activeCatalog = useAdminStore((state) => state.getActiveCatalog());
@@ -39,15 +40,20 @@ function ProductForm({ onClose, editingId }) {
   };
 
   const { getRootProps, getInputProps } = useDropzone({
-    onDrop: (acceptedFiles) => {
+    onDrop: async (acceptedFiles) => {
       const file = acceptedFiles[0];
       if (file) {
-        // Convert image to base64 data URL instead of blob URL
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setValue('ruta', reader.result);
-        };
-        reader.readAsDataURL(file);
+        try {
+          toast.loading('Subiendo imagen...');
+          const result = await uploadApi.uploadImage(file);
+          // Store just the relative URL path (proxied in dev, absolute in prod)
+          setValue('ruta', result.url);
+          toast.dismiss();
+          toast.success('Imagen cargada correctamente');
+        } catch (error) {
+          toast.dismiss();
+          toast.error('Error al subir imagen: ' + error.message);
+        }
       }
     },
     accept: { 'image/*': [] }

@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS clients (
     id SERIAL PRIMARY KEY,
     nombre VARCHAR(255) NOT NULL,
-    logo VARCHAR(500),
+    logo TEXT,
     color VARCHAR(7) DEFAULT '#f24427',
     telefono VARCHAR(20),
     direccion TEXT,
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS clients (
 -- Stores product catalog information
 CREATE TABLE IF NOT EXISTS products (
     id SERIAL PRIMARY KEY,
-    ruta VARCHAR(500) NOT NULL,
+    ruta TEXT NOT NULL,
     nombre VARCHAR(255) NOT NULL,
     precio DECIMAL(10, 2) NOT NULL,
     description TEXT NOT NULL,
