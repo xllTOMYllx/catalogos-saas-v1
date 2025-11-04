@@ -4,6 +4,8 @@ import LandingPage from "../pages/LandingPage";
 import CatalogPage from "../pages/CatalogPage";
 import AdminDashboard from "../components/admin/AdminDashboard";
 import LoginRole from "../components/auth/LoginRole";
+import Nosotros from "../pages/Nosotros";
+import Contacto from "../pages/Contacto";
 // NOTA: define primero las rutas estáticas para que la ruta dinámica no haga "shadow"
 
 export function Router() {
@@ -14,8 +16,8 @@ export function Router() {
                 {/* Rutas estáticas / landing / info */}
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/colecciones" element={<CatalogPage />} />
-                <Route path="/nosotros" element={<div>Nosotros</div>} />
-                <Route path="/contacto" element={<div>Contacto</div>} />
+                <Route path="/nosotros" element={<Nosotros />} />
+                <Route path="/contacto" element={<Contacto />} />
                 <Route path="/login-role" element={<LoginRole />} />
                 {/* Admin genérico si lo necesitas */}
                 <Route path="/admin" element={<AdminDashboard />} />
