@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { ShoppingBag, Users, Shield, Zap } from 'lucide-react';
 import { useEffect } from 'react';
-import Header from '../components/Header';
+//import Header from '../components/Header';
 import ProductCard from '../components/ProductCard';
 import { useAdminStore } from '../store/adminStore';
 
@@ -22,7 +22,7 @@ function LandingPage() {
 
   return (
     <div className="bg-[#080c0e] min-h-screen flex flex-col">
-      <Header negocio={defaultCatalog.business} />
+      
       
       <main className="flex-1 pt-16 sm:pt-20">
         {/* Hero Section */}
