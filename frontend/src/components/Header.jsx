@@ -6,6 +6,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useAdminStore } from '../store/adminStore';
 import LogoPortal from '../components/LogoPortal';
 import toast from 'react-hot-toast';
+import CartPreview from '../components/CartPreview'; // si ya lo creaste
 
 export default function Header({ negocio: defaultNegocio }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -85,6 +86,9 @@ export default function Header({ negocio: defaultNegocio }) {
 
   const showAdminButton = isAdminRole || (isClienteRole && currentCatalogSlug && currentCatalogSlug === activeId);
 
+  // Helper para marcar "Inicio" activo (opcional)
+  const isHome = location.pathname === '/';
+
   return (
     <>
       <header className="fixed w-full top-0 z-50 bg-[#030506] border-b border-gray-800 px-2 sm:px-4 lg:px-6 py-2 shadow-lg">
@@ -98,7 +102,7 @@ export default function Header({ negocio: defaultNegocio }) {
           </div>
 
           <nav className="hidden md:flex items-center gap-6 text-white">
-            <button onClick={handleHomeNavigation} className="hover:text-[#f24427] transition-colors">INICIO</button>
+            <button onClick={handleHomeNavigation} className={`hover:text-[#f24427] transition-colors ${isHome ? 'text-[#f24427]' : ''}`}>INICIO</button>
 
             <NavLink
               to="/colecciones"
@@ -180,9 +184,31 @@ export default function Header({ negocio: defaultNegocio }) {
           <div className="md:hidden bg-[#030506] border-t border-gray-800 px-4 py-4 space-y-4">
             <nav className="space-y-2">
               <button onClick={handleHomeNavigation} className="block py-2 hover:text-[#f24427] w-full text-left">INICIO</button>
-              <Link to="/colecciones" onClick={() => { handleColecciones(); setIsMobileMenuOpen(false); }} className="block py-2 hover:text-[#f24427]">COLECCIONES</Link>
-              <Link to="/nosotros" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 hover:text-[#f24427]">SOBRE NOSOTROS</Link>
-              <Link to="/contacto" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 hover:text-[#f24427]">CONTACTO</Link>
+
+              {/* Mobile NavLinks para que se marquen como activos */}
+              <NavLink
+                to="/colecciones"
+                onClick={() => { handleColecciones(); setIsMobileMenuOpen(false); }}
+                className={({ isActive }) => isActive ? 'block py-2 text-[#f24427]' : 'block py-2 hover:text-[#f24427]'}
+              >
+                COLECCIONES
+              </NavLink>
+
+              <NavLink
+                to="/nosotros"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={({ isActive }) => isActive ? 'block py-2 text-[#f24427]' : 'block py-2 hover:text-[#f24427]'}
+              >
+                SOBRE NOSOTROS
+              </NavLink>
+
+              <NavLink
+                to="/contacto"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={({ isActive }) => isActive ? 'block py-2 text-[#f24427]' : 'block py-2 hover:text-[#f24427]'}
+              >
+                CONTACTO
+              </NavLink>
 
               {isAuthenticated ? (
                 <>
@@ -222,31 +248,8 @@ export default function Header({ negocio: defaultNegocio }) {
         )}
       </header>
 
-      {showCartModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-[#121516] p-6 rounded-lg w-full max-w-md max-h-96 overflow-y-auto">
-            <h3 className="text-xl font-bold mb-4">Carrito ({totalItems} items)</h3>
-            <ul className="space-y-2 mb-4">
-              {items.map(item => (
-                <li key={item.id} className="flex justify-between">
-                  <span>{item.nombre} x{item.quantity || 1}</span>
-                  <span>${item.precio * (item.quantity || 1)}</span>
-                </li>
-              ))}
-            </ul>
-            <div className="text-lg font-bold mb-4">Total: ${getTotal()}</div>
-            <div className="flex gap-2">
-              <button onClick={() => setShowCartModal(false)} className="flex-1 bg-gray-500 text-white py-2 rounded">Cerrar</button>
-              <button onClick={() => {
-                const message = `¡Hola! Mi pedido de ${businessData.nombre}: ${items.map(i => `${i.nombre} x${i.quantity || 1} - $${i.precio}`).join('\n')} Total: $${getTotal()}`;
-                const url = `https://wa.me/${businessData.telefono || '1234567890'}?text=${encodeURIComponent(message)}`;
-                window.open(url, '_blank');
-                setShowCartModal(false);
-              }} className="flex-1 bg-green-500 text-white py-2 rounded">Enviar por WhatsApp</button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Cart preview modal -> ahora usa componente separado para mantener el header limpio */}
+      {showCartModal && <CartPreview onClose={() => setShowCartModal(false)} />}
     </>
   );
 }
