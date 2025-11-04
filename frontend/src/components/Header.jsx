@@ -1,6 +1,5 @@
-// Header.jsx
 import { useState } from 'react'; 
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { ShoppingCartIcon, PhoneIcon, Menu, X } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
 import { useAuth } from '../hooks/useAuth';
@@ -67,21 +66,16 @@ export default function Header({ negocio: defaultNegocio }) {
   // Logout: limpiar session y estado persistente
   const handleLogout = async () => {
     try {
-      // Use the logout function from useAuth hook which handles everything
       if (logout && typeof logout === 'function') {
         await logout();
       }
-      
-      // Clear admin store state and reset to default catalog
       clearStorage();
       setActiveCatalogId('default');
-      
       toast.success('Sesión cerrada. ¡Hasta pronto!', { duration: 2000 });
       navigate('/');
       setIsMobileMenuOpen(false);
     } catch (err) {
       console.error('Error during logout:', err);
-      // Ensure cleanup even if there's an error
       clearStorage();
       setActiveCatalogId('default');
       navigate('/');
@@ -89,7 +83,6 @@ export default function Header({ negocio: defaultNegocio }) {
     }
   };
 
-  // Mostrar Admin si es admin OR si es cliente y visita su catálogo (activeId === slug)
   const showAdminButton = isAdminRole || (isClienteRole && currentCatalogSlug && currentCatalogSlug === activeId);
 
   return (
@@ -106,11 +99,29 @@ export default function Header({ negocio: defaultNegocio }) {
 
           <nav className="hidden md:flex items-center gap-6 text-white">
             <button onClick={handleHomeNavigation} className="hover:text-[#f24427] transition-colors">INICIO</button>
-            <Link to="/colecciones" className="hover:text-[#f24427] transition-colors" onClick={handleColecciones}>COLECCIONES</Link>
-            <Link to="/nosotros" className="hover:text-[#f24427] transition-colors">SOBRE NOSOTROS</Link>
-            <Link to="/contacto" className="hover:text-[#f24427] transition-colors">CONTACTO</Link>
 
-            {/* Si hay sesión: mostrar CERRAR SESIÓN; si no, INICIAR SESIÓN */}
+            <NavLink
+              to="/colecciones"
+              className={({ isActive }) => (isActive ? 'text-[#f24427] transition-colors' : 'hover:text-[#f24427] transition-colors')}
+              onClick={handleColecciones}
+            >
+              COLECCIONES
+            </NavLink>
+
+            <NavLink
+              to="/nosotros"
+              className={({ isActive }) => (isActive ? 'text-[#f24427] transition-colors' : 'hover:text-[#f24427] transition-colors')}
+            >
+              SOBRE NOSOTROS
+            </NavLink>
+
+            <NavLink
+              to="/contacto"
+              className={({ isActive }) => (isActive ? 'text-[#f24427] transition-colors' : 'hover:text-[#f24427] transition-colors')}
+            >
+              CONTACTO
+            </NavLink>
+
             {isAuthenticated ? (
               <>
                 {showAdminButton && (
@@ -129,6 +140,7 @@ export default function Header({ negocio: defaultNegocio }) {
             )}
           </nav>
 
+          {/* ...el resto del header no se modifica (buscador, botones, mobile menu) ... */}
           <div className="hidden md:flex items-center gap-4">
             <div className="border border-gray-600 rounded-full flex bg-[#121516] p-1 max-w-xs">
               <input
@@ -163,6 +175,7 @@ export default function Header({ negocio: defaultNegocio }) {
           </button>
         </div>
 
+        {/* Mobile menu kept as-is to avoid changes in behaviour */}
         {isMobileMenuOpen && (
           <div className="md:hidden bg-[#030506] border-t border-gray-800 px-4 py-4 space-y-4">
             <nav className="space-y-2">
