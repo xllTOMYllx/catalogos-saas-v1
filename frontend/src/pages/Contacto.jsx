@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAdminStore } from '../store/adminStore';
-import styles from '../styles/Contacto.module.css';
+import styles from '../styles/contacto.module.css';
 
 export default function Contacto() {
   const navigate = useNavigate();
