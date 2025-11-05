@@ -141,10 +141,10 @@ function CatalogPage() {
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 justify-items-center">
-                {filteredProducts.map(producto => (
+                {filteredProducts.map((producto, index) => (
                   <ProductCard
-                    key={`${producto.id}-${producto.catalogId || producto.clientId || Math.random()}`}
-                    id={producto.id || Math.random()}
+                    key={producto.id ? `${producto.id}-${producto.catalogId || producto.clientId || index}` : `product-${index}`}
+                    id={producto.id || index}
                     ruta={producto.ruta || producto.image || 'https://via.placeholder.com/300x400/171819/f24427?text=Producto'}
                     nombre={producto.nombre}
                     precio={producto.precio}
