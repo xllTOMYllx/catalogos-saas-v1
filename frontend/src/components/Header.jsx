@@ -1,4 +1,4 @@
-import { useState } from 'react'; 
+import { useState, useEffect } from 'react'; 
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { ShoppingCartIcon, PhoneIcon, Menu, X } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
@@ -20,6 +20,10 @@ export default function Header({ negocio: defaultNegocio }) {
   const location = useLocation();
 
   const totalItems = items.reduce((sum, item) => sum + (item.quantity || 1), 0);
+  // total seguro y formateador
+  const total = typeof getTotal === 'function' ? getTotal() : 0;
+  const fmt = (v) => `$${Number(v || 0).toFixed(2)}`;
+
   const businessData = defaultNegocio || business || { nombre: 'Tienda', logo: '', telefono: '' };
 
   // Determinar slug actual (primer segmento) y si es ruta catálogo (evitar static pages)
@@ -33,15 +37,38 @@ export default function Header({ negocio: defaultNegocio }) {
   const isAdminRole = storedRole === 'admin';
   const isClienteRole = storedRole === 'cliente';
 
-  // Search y colecciones
+  // Sincronizar searchQuery si estamos en /colecciones y viene q en la url
+  useEffect(() => {
+    if (location.pathname === '/colecciones') {
+      const params = new URLSearchParams(location.search);
+      const q = params.get('q') || '';
+      setSearchQuery(q);
+    }
+  }, [location.pathname, location.search]);
+
+  // Search en vivo (mientras escribe)
   const handleSearch = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
-    filterProducts(query);
+    if (typeof filterProducts === 'function') filterProducts(query);
+  };
+
+  // Cuando el usuario envía la búsqueda (Enter o botón)
+  const handleSearchSubmit = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    const q = (searchQuery || '').trim();
+    // Asegurarnos de mostrar el catálogo por defecto
+    if (typeof setActiveCatalogId === 'function') setActiveCatalogId('default');
+    // Aplicar filtro en el store
+    if (typeof filterProducts === 'function') filterProducts(q);
+    // Navegar a /colecciones con query param
+    navigate(`/colecciones${q ? `?q=${encodeURIComponent(q)}` : ''}`);
+    setIsMobileMenuOpen(false);
   };
 
   const handleColecciones = () => {
-    filterProducts('');
+    if (typeof setActiveCatalogId === 'function') setActiveCatalogId('default');
+    if (typeof filterProducts === 'function') filterProducts('');
     setIsMobileMenuOpen(false);
   };
 
@@ -146,7 +173,8 @@ export default function Header({ negocio: defaultNegocio }) {
 
           {/* ...el resto del header no se modifica (buscador, botones, mobile menu) ... */}
           <div className="hidden md:flex items-center gap-4">
-            <div className="border border-gray-600 rounded-full flex bg-[#121516] p-1 max-w-xs">
+            {/* Form de búsqueda (escritorio) */}
+            <form onSubmit={handleSearchSubmit} className="border border-gray-600 rounded-full flex bg-[#121516] p-1 max-w-xs">
               <input
                 type="text"
                 value={searchQuery}
@@ -155,10 +183,8 @@ export default function Header({ negocio: defaultNegocio }) {
                 className="bg-transparent text-white px-3 py-1 outline-none w-full text-sm"
                 onKeyDown={(e) => e.key === 'Escape' && setSearchQuery('')}
               />
-              <svg className="w-4 h-4 text-white ml-2" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
-              </svg>
-            </div>
+              <button type="submit" className="px-3 text-gray-200 hover:text-white">🔎</button>
+            </form>
 
             <button onClick={() => setShowCartModal(true)} className="relative p-2 text-white hover:bg-[#f24427] rounded-full">
               <ShoppingCartIcon className="w-5 h-5" />
@@ -166,8 +192,20 @@ export default function Header({ negocio: defaultNegocio }) {
             </button>
 
             <button onClick={() => {
-              const msg = `¡Hola! Mi pedido de ${businessData.nombre}: ${items.map(i => `${i.nombre} x${i.quantity || 1} - $${i.precio}`).join('\n')} Total: $${getTotal()}`;
-              const url = `https://wa.me/${businessData.telefono || '1234567890'}?text=${encodeURIComponent(msg)}`;
+              // Construye mensaje distinto si hay items o si es contacto general
+              const phone = String(businessData.telefono || businessData.phone || '1234567890').replace(/\D/g, '');
+              let msg;
+              if (items && items.length > 0) {
+                msg = `¡Hola! Mi pedido de ${businessData.nombre}: ${items.map(i => {
+                  const name = i.nombre ?? i.name ?? 'Producto';
+                  const qty = i.quantity ?? 1;
+                  const priceNum = Number(i.price ?? i.precio ?? 0) || 0;
+                  return `${name} x${qty} - ${fmt(priceNum)}`;
+                }).join('\n')} Total: ${fmt(total)}`;
+              } else {
+                msg = `¡Hola! Me interesa información sobre los catálogos de ${businessData.nombre}. ¿Me pueden ayudar, por favor?`;
+              }
+              const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
               window.open(url, '_blank');
             }} className="p-2 text-white hover:bg-green-500 rounded-full">
               <PhoneIcon className="w-5 h-5" />
@@ -226,15 +264,26 @@ export default function Header({ negocio: defaultNegocio }) {
                 {totalItems > 0 && <span className="absolute -top-1 -right-1 bg-red-500 text-xs rounded-full h-3 w-3 flex items-center justify-center ml-4">{totalItems}</span>}
               </button>
               <button onClick={() => {
-                const msg = `¡Hola! Mi pedido de ${businessData.nombre}: ${items.map(i => `${i.nombre} x${i.quantity || 1} - $${i.precio}`).join('\n')} Total: $${getTotal()}`;
-                const url = `https://wa.me/${businessData.telefono || '1234567890'}?text=${encodeURIComponent(msg)}`;
+                const phone = String(businessData.telefono || businessData.phone || '1234567890').replace(/\D/g, '');
+                let msg;
+                if (items && items.length > 0) {
+                  msg = `¡Hola! Mi pedido de ${businessData.nombre}: ${items.map(i => {
+                    const name = i.nombre ?? i.name ?? 'Producto';
+                    const qty = i.quantity ?? 1;
+                    const priceNum = Number(i.price ?? i.precio ?? 0) || 0;
+                    return `${name} x${qty} - ${fmt(priceNum)}`;
+                  }).join('\n')} Total: ${fmt(total)}`;
+                } else {
+                  msg = `¡Hola! Me interesa información sobre los catálogos de ${businessData.nombre}. ¿Me pueden ayudar, por favor?`;
+                }
+                const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
                 window.open(url, '_blank');
               }} className="p-2 text-white hover:bg-green-500 rounded-full">
                 <PhoneIcon className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="border border-gray-600 rounded-full flex bg-[#121516] p-1 mt-4">
+            <form onSubmit={(e) => { e.preventDefault(); handleSearchSubmit(); }} className="border border-gray-600 rounded-full flex bg-[#121516] p-1 mt-4">
               <input
                 type="text"
                 value={searchQuery}
@@ -243,7 +292,8 @@ export default function Header({ negocio: defaultNegocio }) {
                 className="bg-transparent text-white px-3 py-1 outline-none flex-1 text-sm"
                 onKeyDown={(e) => e.key === 'Escape' && setSearchQuery('')}
               />
-            </div>
+              <button type="submit" className="px-3 text-gray-200">🔎</button>
+            </form>
           </div>
         )}
       </header>
