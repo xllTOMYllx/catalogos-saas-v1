@@ -41,6 +41,7 @@ catalogos-saas-v1/
 - ✅ Módulo de Catálogos (vincular clientes y productos)
 - ✅ Módulo de Autenticación (login/logout)
 - ✅ Módulo de Negocios (personalización legacy)
+- ✅ **Módulo de Suscripciones (planes y límites)** 🆕
 - ✅ TypeScript con tipado estricto
 
 ### Frontend (React + Vite)
@@ -51,14 +52,17 @@ catalogos-saas-v1/
 - ✅ Panel de administración completo
 - ✅ Carrito de compras
 - ✅ Catálogo de productos
+- ✅ **Página de Planes de Suscripción** 🆕
+- ✅ **Badge de Plan Actual** 🆕
 
 ### Base de Datos (PostgreSQL)
 - ✅ Esquema relacional normalizado
-- ✅ 4 tablas principales: users, clients, products, catalogs
+- ✅ 6 tablas principales: users, clients, products, catalogs, **subscription_plans, subscriptions** 🆕
 - ✅ Relaciones many-to-many entre clientes y productos
 - ✅ Timestamps automáticos (createdAt, updatedAt)
 - ✅ Índices para mejor rendimiento
 - ✅ Datos de prueba incluidos
+- ✅ **Sistema de suscripciones con 4 planes (FREE, BASIC, PRO, ENTERPRISE)** 🆕
 
 ## Instalación
 
@@ -192,6 +196,51 @@ El frontend estará disponible en `http://localhost:5173`
 ### Negocios (Legacy)
 - `GET /api/business` - Obtener información del negocio por defecto
 - `PUT /api/business` - Actualizar información del negocio
+
+### Planes de Suscripción 🆕
+- `GET /api/subscription-plans` - Obtener todos los planes disponibles
+- `GET /api/subscription-plans/:id` - Obtener un plan específico
+- `POST /api/subscription-plans` - Crear un plan (admin)
+- `PUT /api/subscription-plans/:id` - Actualizar un plan (admin)
+- `DELETE /api/subscription-plans/:id` - Eliminar un plan (admin)
+
+### Suscripciones 🆕
+- `GET /api/subscriptions` - Obtener todas las suscripciones
+- `GET /api/subscriptions/:id` - Obtener una suscripción específica
+- `GET /api/subscriptions/user/:userId` - Obtener suscripción de un usuario
+- `GET /api/subscriptions/user/:userId/limits` - Obtener límites del usuario
+- `POST /api/subscriptions` - Crear una suscripción
+- `PUT /api/subscriptions/:id` - Actualizar suscripción
+- `PUT /api/subscriptions/user/:userId/change-plan` - Cambiar plan de usuario
+- `PUT /api/subscriptions/user/:userId/cancel` - Cancelar suscripción
+- `DELETE /api/subscriptions/:id` - Eliminar suscripción
+
+## Sistema de Suscripciones 🆕
+
+Este proyecto incluye un **sistema completo de suscripciones** con 4 planes:
+
+| Plan | Precio | Catálogos | Productos | Características |
+|------|--------|-----------|-----------|-----------------|
+| FREE | $0/mes | 1 | 20 | Básico, soporte comunitario |
+| BASIC | $299/mes | 3 | 100 | Personalización avanzada, analytics |
+| PRO | $799/mes | 10 | Ilimitados | API access, soporte prioritario |
+| ENTERPRISE | $1,999/mes | Ilimitados | Ilimitados | White label, soporte dedicado |
+
+**Para más información:**
+- 📚 [Documentación Completa de Suscripciones](SUBSCRIPTIONS.md)
+- 🚀 [Guía de Implementación](IMPLEMENTACION_SUSCRIPCIONES.md)
+
+### Instalación del Sistema de Suscripciones
+
+```bash
+# 1. Migrar la base de datos
+psql -U postgres -d catalogos_saas -f database/subscriptions_schema.sql
+
+# 2. El backend ya incluye los módulos, solo reiniciar
+cd backend && npm run start:dev
+
+# 3. Agregar ruta en el frontend (ver IMPLEMENTACION_SUSCRIPCIONES.md)
+```
 
 ## Datos de Prueba
 
