@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { ShoppingCartIcon, PhoneIcon, Menu, X } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../contexts/useAuth';
 import { useAdminStore } from '../store/adminStore';
 import LogoPortal from '../components/LogoPortal';
 import toast from 'react-hot-toast';
