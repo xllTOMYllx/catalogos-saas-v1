@@ -10,6 +10,8 @@ import { UsersModule } from './users/users.module';
 import { ClientsModule } from './clients/clients.module';
 import { CatalogsModule } from './catalogs/catalogs.module';
 import { UploadModule } from './upload/upload.module';
+import { SubscriptionPlansModule } from './subscription-plans/subscription-plans.module';
+import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { typeOrmConfig } from './database/database.config';
 
 @Module({
@@ -25,6 +27,8 @@ import { typeOrmConfig } from './database/database.config';
     ClientsModule,
     CatalogsModule,
     UploadModule,
+    SubscriptionPlansModule,
+    SubscriptionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
