@@ -15,7 +15,7 @@ export default function Header({ negocio: defaultNegocio }) {
   const [showCartModal, setShowCartModal] = useState(false);
 
   const { items, getTotal } = useCartStore();
-  const { business, filterProducts, setActiveCatalogId, activeId, clearStorage } = useAdminStore();
+  const { getActiveCatalog, filterProducts, setActiveCatalogId, activeId, clearStorage } = useAdminStore();
   // ahora también tomamos `user` desde useAuth
   const { isAuthenticated, logout, user } = useAuth();
   const navigate = useNavigate();
@@ -26,7 +26,9 @@ export default function Header({ negocio: defaultNegocio }) {
   const total = typeof getTotal === 'function' ? getTotal() : 0;
   const fmt = (v) => `$${Number(v || 0).toFixed(2)}`;
 
-  const businessData = defaultNegocio || business || { nombre: 'Tienda', logo: '', telefono: '' };
+  // Get business data from active catalog or use defaultNegocio prop as fallback
+  const activeCatalog = getActiveCatalog();
+  const businessData = defaultNegocio || activeCatalog?.business || { nombre: 'UrbanStreet', logo: '/logosinfondo.png', telefono: '1234567890' };
 
   // Determinar slug actual (primer segmento) y si es ruta catálogo (evitar static pages)
   const parts = location.pathname.split('/').filter(Boolean);
