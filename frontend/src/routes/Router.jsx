@@ -26,7 +26,7 @@ export function Router() {
                     <Route path="/contacto" element={<Contacto />} />
                     <Route path="/carrito" element={<Carrito />} />
                     <Route path="/login-role" element={<LoginRole />} />
-                    <Route path="/subscription-plan" element={<SubscriptionPlans />} />
+                    <Route path="/subscription-plans" element={<SubscriptionPlans />} />
                     {/* Admin genérico si lo necesitas */}
                     <Route path="/admin" element={<AdminDashboard />} />
 
