@@ -8,6 +8,7 @@ import Nosotros from "../pages/Nosotros";
 import Contacto from "../pages/Contacto";
 import Carrito from "../pages/Carrito";
 import Header from "../components/Header";
+import SubscriptionPlans from "../pages/SubscriptionPlans";
 // NOTA: define primero las rutas estáticas para que la ruta dinámica no haga "shadow"
 
 export function Router() {
@@ -23,6 +24,7 @@ export function Router() {
                 <Route path="/contacto" element={<Contacto />} />
                 <Route path="/carrito" element={<Carrito />} />
                 <Route path="/login-role" element={<LoginRole />} />
+                <Route path="/subscription-plan" element={<SubscriptionPlans />} />
                 {/* Admin genérico si lo necesitas */}
                 <Route path="/admin" element={<AdminDashboard />} />
 

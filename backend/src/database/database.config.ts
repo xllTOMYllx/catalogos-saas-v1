@@ -3,6 +3,8 @@ import { User } from '../users/user.entity';
 import { Client } from '../clients/client.entity';
 import { Product } from '../products/product.entity';
 import { Catalog } from '../catalogs/catalog.entity';
+import { Subscription } from '../subscriptions/subscription.entity';
+import { SubscriptionPlan } from '../subscription-plans/subscription-plan.entity';
 
 export const typeOrmConfig: TypeOrmModuleOptions = {
   type: 'postgres',
@@ -11,7 +13,7 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
   username: process.env.DB_USERNAME || 'postgres',
   password: process.env.DB_PASSWORD || 'Nirvana123',
   database: process.env.DB_NAME || 'catalogos_saas',
-  entities: [User, Client, Product, Catalog],
+  entities: [User, Client, Product, Catalog, Subscription, SubscriptionPlan],
   synchronize: false, // Disable auto-sync to use existing database schema
   logging: process.env.NODE_ENV !== 'production' ? ['error'] : false,
 };

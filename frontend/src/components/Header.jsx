@@ -6,7 +6,8 @@ import { useAuth } from '../hooks/useAuth';
 import { useAdminStore } from '../store/adminStore';
 import LogoPortal from '../components/LogoPortal';
 import toast from 'react-hot-toast';
-import CartPreview from '../components/CartPreview'; // si ya lo creaste
+import CartPreview from '../components/CartPreview';
+import SubscriptionBadge from '../components/SubscriptionBadge';
 
 export default function Header({ negocio: defaultNegocio }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -15,7 +16,8 @@ export default function Header({ negocio: defaultNegocio }) {
 
   const { items, getTotal } = useCartStore();
   const { business, filterProducts, setActiveCatalogId, activeId, clearStorage } = useAdminStore();
-  const { isAuthenticated, logout } = useAuth();
+  // ahora también tomamos `user` desde useAuth
+  const { isAuthenticated, logout, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -186,6 +188,13 @@ export default function Header({ negocio: defaultNegocio }) {
               <button type="submit" className="px-3 text-gray-200 hover:text-white">🔎</button>
             </form>
 
+            {/* Subscription badge: se muestra sólo si hay user */}
+            {user && (
+              <div className="hidden sm:flex items-center">
+                <SubscriptionBadge userId={user?.id} />
+              </div>
+            )}
+
             <button onClick={() => setShowCartModal(true)} className="relative p-2 text-white hover:bg-[#f24427] rounded-full">
               <ShoppingCartIcon className="w-5 h-5" />
               {totalItems > 0 && <span className="absolute -top-1 -right-1 bg-red-500 text-xs rounded-full h-4 w-4 flex items-center justify-center">{totalItems}</span>}
@@ -247,6 +256,13 @@ export default function Header({ negocio: defaultNegocio }) {
               >
                 CONTACTO
               </NavLink>
+
+              {/* Mostrar SubscriptionBadge también en mobile si hay usuario */}
+              {user && (
+                <div className="py-2">
+                  <SubscriptionBadge userId={user?.id} />
+                </div>
+              )}
 
               {isAuthenticated ? (
                 <>
