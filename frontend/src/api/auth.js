@@ -24,4 +24,10 @@ export const authApi = {
     const response = await api.post('/auth/logout');
     return response.data;
   },
+
+  // Get current user profile (validates token)
+  me: async () => {
+    const response = await api.get('/auth/me');
+    return response.data;
+  },
 };

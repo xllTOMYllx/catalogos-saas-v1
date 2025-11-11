@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAdminStore } from '../../store/adminStore';
-import { authApi } from '../../api/auth';
+import { useAuth } from '../../contexts/useAuth';
 import toast from 'react-hot-toast';
 
 // Helper simple para generar slug seguro a partir del nombre del negocio
@@ -24,6 +24,7 @@ function LoginRole() {
   const [telefono, setTelefono] = useState('');
   const navigate = useNavigate();
   const { clearStorage, loadCatalog } = useAdminStore();
+  const { login: authLogin, register: authRegister } = useAuth();
 
   const handleRoleSelect = (selectedRole) => {
     if (selectedRole === 'user') {
@@ -51,20 +52,14 @@ function LoginRole() {
     }
 
     try {
-      // Register new client with authentication
-      const response = await authApi.register(email, password, nombre, negocioNombre, telefono);
+      // Register new client with authentication using AuthContext
+      const response = await authRegister(email, password, nombre, negocioNombre, telefono);
       
       if (!response.success) {
         toast.error(response.message || 'Error al registrar.');
         return;
       }
 
-      // Store authentication data
-      localStorage.setItem('role', 'cliente');
-      localStorage.setItem('authToken', response.token);
-      localStorage.setItem('user', JSON.stringify(response.user));
-      localStorage.setItem('clientId', response.client.id.toString());
-      
       // Generate slug for navigation
       const slug = makeSlug(negocioNombre) || 'client-' + response.client.id;
       localStorage.setItem('userId', slug);
@@ -90,8 +85,8 @@ function LoginRole() {
     }
 
     try {
-      // Login existing client
-      const response = await authApi.login(email, password);
+      // Login existing client using AuthContext
+      const response = await authLogin(email, password);
       
       if (!response.success) {
         toast.error(response.message || 'Credenciales inválidas.');
@@ -103,12 +98,6 @@ function LoginRole() {
         return;
       }
 
-      // Store authentication data
-      localStorage.setItem('role', 'cliente');
-      localStorage.setItem('authToken', response.token);
-      localStorage.setItem('user', JSON.stringify(response.user));
-      localStorage.setItem('clientId', response.client.id.toString());
-      
       // Generate slug for navigation
       const slug = makeSlug(response.client.nombre) || 'client-' + response.client.id;
       localStorage.setItem('userId', slug);

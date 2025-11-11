@@ -148,6 +148,52 @@ export class AuthService {
     return { success: true };
   }
 
+  async getProfile(userId: number): Promise<AuthResponse> {
+    const user = await this.usersService.findOne(userId);
+
+    if (!user) {
+      return {
+        success: false,
+        message: 'User not found',
+      };
+    }
+
+    // Get client info if user is a client
+    let clientData:
+      | {
+          id: number;
+          nombre: string;
+          logo: string;
+          color: string;
+          telefono: string;
+        }
+      | undefined = undefined;
+    if (user.role === 'client') {
+      const clients = await this.clientsService.findByUserId(user.id);
+      if (clients && clients.length > 0) {
+        const client = clients[0]; // Get first client for this user
+        clientData = {
+          id: client.id,
+          nombre: client.nombre,
+          logo: client.logo,
+          color: client.color,
+          telefono: client.telefono,
+        };
+      }
+    }
+
+    return {
+      success: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        nombre: user.nombre,
+      },
+      client: clientData,
+    };
+  }
+
   async hashPassword(password: string): Promise<string> {
     const saltRounds = 10;
     return bcrypt.hash(password, saltRounds);
