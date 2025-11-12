@@ -132,12 +132,12 @@ export default function Header({ negocio: defaultNegocio }) {
             <LogoPortal onSwitch={handleCatalogSwitch} />
           </div>
 
-          <nav className="hidden md:flex items-center gap-6 text-white">
-            <button onClick={handleHomeNavigation} className={`hover:text-[#f24427] transition-colors ${isHome ? 'text-[#f24427]' : ''}`}>INICIO</button>
+          <nav className="hidden md:flex items-center gap-3 lg:gap-4 text-white text-sm">
+            <button onClick={handleHomeNavigation} className={`hover:text-[#f24427] transition-colors whitespace-nowrap ${isHome ? 'text-[#f24427]' : ''}`}>INICIO</button>
 
             <NavLink
               to="/colecciones"
-              className={({ isActive }) => (isActive ? 'text-[#f24427] transition-colors' : 'hover:text-[#f24427] transition-colors')}
+              className={({ isActive }) => (isActive ? 'text-[#f24427] transition-colors whitespace-nowrap' : 'hover:text-[#f24427] transition-colors whitespace-nowrap')}
               onClick={handleColecciones}
             >
               COLECCIONES
@@ -145,14 +145,14 @@ export default function Header({ negocio: defaultNegocio }) {
 
             <NavLink
               to="/nosotros"
-              className={({ isActive }) => (isActive ? 'text-[#f24427] transition-colors' : 'hover:text-[#f24427] transition-colors')}
+              className={({ isActive }) => (isActive ? 'text-[#f24427] transition-colors whitespace-nowrap' : 'hover:text-[#f24427] transition-colors whitespace-nowrap')}
             >
-              SOBRE NOSOTROS
+              NOSOTROS
             </NavLink>
 
             <NavLink
               to="/contacto"
-              className={({ isActive }) => (isActive ? 'text-[#f24427] transition-colors' : 'hover:text-[#f24427] transition-colors')}
+              className={({ isActive }) => (isActive ? 'text-[#f24427] transition-colors whitespace-nowrap' : 'hover:text-[#f24427] transition-colors whitespace-nowrap')}
             >
               CONTACTO
             </NavLink>
@@ -160,23 +160,23 @@ export default function Header({ negocio: defaultNegocio }) {
             {isAuthenticated ? (
               <>
                 {showAdminButton && (
-                  <button onClick={() => { navigate(currentCatalogSlug ? `/${currentCatalogSlug}/admin` : '/admin'); setIsMobileMenuOpen(false); }} className="bg-[#f24427] hover:bg-[#d6331a] px-4 py-2 rounded-md text-sm font-semibold transition-colors">
+                  <button onClick={() => { navigate(currentCatalogSlug ? `/${currentCatalogSlug}/admin` : '/admin'); setIsMobileMenuOpen(false); }} className="bg-[#f24427] hover:bg-[#d6331a] px-3 py-1.5 rounded-md text-xs font-semibold transition-colors whitespace-nowrap">
                     ADMIN
                   </button>
                 )}
-                <button onClick={handleLogout} className="bg-gray-500 hover:bg-gray-600 px-4 py-2 rounded-md text-sm font-semibold transition-colors">
-                  CERRAR SESIÓN
+                <button onClick={handleLogout} className="bg-gray-500 hover:bg-gray-600 px-3 py-1.5 rounded-md text-xs font-semibold transition-colors whitespace-nowrap">
+                  SALIR
                 </button>
               </>
             ) : (
-              <button onClick={() => { navigate('/login-role'); setIsMobileMenuOpen(false); }} className="bg-[#f24427] hover:bg-[#d6331a] px-4 py-2 rounded-md text-sm font-semibold transition-colors">
-                INICIAR SESIÓN
+              <button onClick={() => { navigate('/login-role'); setIsMobileMenuOpen(false); }} className="bg-[#f24427] hover:bg-[#d6331a] px-3 py-1.5 rounded-md text-xs font-semibold transition-colors whitespace-nowrap">
+                ENTRAR
               </button>
             )}
           </nav>
 
           {/* ...el resto del header no se modifica (buscador, botones, mobile menu) ... */}
-          <div className="hidden md:flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-2">
             {/* Form de búsqueda (escritorio) */}
             <form onSubmit={handleSearchSubmit} className="border border-gray-600 rounded-full flex bg-[#121516] p-1 max-w-xs">
               <input
