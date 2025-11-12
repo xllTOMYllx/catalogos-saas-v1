@@ -26,7 +26,7 @@ export function Router() {
                     <Route path="/contacto" element={<Contacto />} />
                     <Route path="/carrito" element={<Carrito />} />
                     <Route path="/login-role" element={<LoginRole />} />
-                    <Route path="/subscription-plan" element={<SubscriptionPlans />} />
+                    
                     {/* Admin genérico si lo necesitas */}
                     <Route path="/admin" element={<AdminDashboard />} />
 
@@ -35,6 +35,7 @@ export function Router() {
                     <Route path="/:catalogSlug" element={<CatalogPage />} />
 
                     {/* Futuras rutas: /user, /cart, /checkout */}
+                    <Route path="/subscription-plans" element={<SubscriptionPlans />} />
                 </Routes>
             </AuthProvider>
         </BrowserRouter>

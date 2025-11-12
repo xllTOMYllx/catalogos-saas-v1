@@ -1,4 +1,5 @@
-function CategoriesCard({ ruta, titulo = "COLECCIÓN DE", subtitulo = "PRODUCTOS", btnText = "Ver nuevas colecciones" }) {
+function CategoriesCard({ ruta, titulo = "COLECCIÓN DE", subtitulo = "PRODUCTOS", 
+  btnText = "Ver nuevas colecciones"  }) {
   return (
     <section className="w-full bg-[#121516] rounded-2xl p-4 sm:p-6 md:p-8 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0 h-auto sm:h-64">
       {/* Contenido texto —izquierda en desktop, full en mobile */}
