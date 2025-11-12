@@ -79,7 +79,7 @@ function AdminDashboard() {
   const business = activeCatalog.business;  // Del active catalog
 
   return (
-    <div className="min-h-screen bg-[#080c0e] text-white flex">
+    <div className="min-h-screen bg-[#080c0e] text-white flex pt-16 sm:pt-20">
       {/* Sidebar responsive */}
       <aside className="w-64 bg-[#121516] p-4 hidden md:block">
         <h1 className="text-2xl font-bold mb-6">
