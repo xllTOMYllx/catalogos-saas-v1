@@ -1,7 +1,12 @@
 @media (max-width: 767px) {
   /* altura segura del header (ajusta si tu header cambia) */
   :root { --app-header-height: 64px; }
-  body { padding-top: var(--app-header-height); }
+  
+  /* Ensure body doesn't have extra padding that could interfere */
+  body { 
+    padding-top: 0;
+    overflow-x: hidden;
+  }
 
   /* Permitir que hijos de flex se encojan y no provoquen overflow */
   .flex > * { min-width: 0; }
@@ -71,6 +76,20 @@
 
   /* Mejor touch-targets */
   button, a {
-    tap-highlight-color: transparent;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Ensure header doesn't overlap with page content */
+  header[class*="fixed"] {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+  }
+  
+  /* Adjust main content padding for mobile */
+  main {
+    padding-top: calc(var(--app-header-height) + 1rem);
   }
 }

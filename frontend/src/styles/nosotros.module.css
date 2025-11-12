@@ -1,5 +1,5 @@
 :root{
-  --header-height: 72px; /* ajusta si tu header es diferente */
+  --header-height: 64px; /* standardized header height */
   --bg-dark-1: #080c0e; /* coincide con landing */
   --bg-dark-2: #121516;
   --accent: #f24427;
@@ -198,4 +198,37 @@
   .valuesInner { grid-template-columns: 1fr; }
   .hero { padding: 22px; }
   .container { padding: calc(var(--header-height) + 18px) 14px 36px; }
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding: calc(var(--header-height) + 12px) 12px 24px;
+  }
+  
+  .title {
+    font-size: 1.5rem;
+  }
+  
+  .subtitle {
+    font-size: 0.95rem;
+  }
+  
+  .hero {
+    padding: 16px 12px;
+  }
+  
+  .card {
+    padding: 16px;
+  }
+  
+  .cta {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .primary,
+  .secondary {
+    width: 100%;
+    text-align: center;
+  }
 }

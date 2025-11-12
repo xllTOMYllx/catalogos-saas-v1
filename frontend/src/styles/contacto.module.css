@@ -132,7 +132,34 @@
   .title { font-size: 1.8rem; }
   .card { padding: 16px; }
   .container { padding: calc(var(--header-height) + 18px) 14px 36px; }
-  .cta { width: 100%; }
-  .primary { width: 100%; text-align: center; }
-  .secondary { width: 100%; text-align: center; }
+  .cta { 
+    width: 100%;
+    flex-direction: column;
+  }
+  .primary { 
+    width: 100%; 
+    text-align: center;
+  }
+  .secondary { 
+    width: 100%; 
+    text-align: center;
+  }
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding: calc(var(--header-height) + 12px) 12px 24px;
+  }
+  
+  .title {
+    font-size: 1.5rem;
+  }
+  
+  .subtitle {
+    font-size: 0.95rem;
+  }
+  
+  .hero {
+    padding: 20px 12px;
+  }
 }

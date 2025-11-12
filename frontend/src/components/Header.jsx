@@ -129,7 +129,7 @@ export default function Header({ negocio: defaultNegocio }) {
 
   return (
     <>
-      <header className="fixed w-full top-0 z-50 bg-[#030506] border-b border-gray-800 px-2 sm:px-4 lg:px-6 py-2 shadow-lg">
+      <header className="fixed w-full top-0 z-[100] bg-[#030506] border-b border-gray-800 px-2 sm:px-4 lg:px-6 py-2 shadow-lg">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center flex-shrink-0 relative">
             <button onClick={handleHomeNavigation} className="flex items-center">
@@ -235,9 +235,17 @@ export default function Header({ negocio: defaultNegocio }) {
           </button>
         </div>
 
+        {/* Mobile menu backdrop */}
+        {isMobileMenuOpen && (
+          <div 
+            className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-[55] top-[64px]" 
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+        )}
+        
         {/* Mobile menu: premium dark gradient + glass effect */}
         {isMobileMenuOpen && (
-          <div className="md:hidden fixed inset-x-3 top-16 z-50 rounded-xl bg-gradient-to-br from-[#0a0e10]/95 via-[#121516]/90 to-[#080c0e]/95 backdrop-blur-md border border-gray-800 shadow-2xl px-4 py-4 space-y-4">
+          <div className="md:hidden fixed left-3 right-3 top-[68px] z-[60] rounded-xl bg-gradient-to-br from-[#0a0e10]/95 via-[#121516]/90 to-[#080c0e]/95 backdrop-blur-md border border-gray-800 shadow-2xl px-4 py-4 space-y-4 max-h-[calc(100vh-80px)] overflow-y-auto">
             {/* Mobile header inside menu: logo + nombre + close */}
             <div className="flex items-center justify-between">
               <button onClick={handleHomeNavigation} className="flex items-center gap-3">
