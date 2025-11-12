@@ -6,6 +6,7 @@ import ProductList from './ProductList';
 import ProductCard from '../ProductCard';
 import CustomizationForm from './CustomizationForm';
 import toast from 'react-hot-toast';  // Para feedback
+import './../../styles/adminDashboard.css';  // Estilos específicos del dashboard
 
 function AdminDashboard() {
   // ✅ Reactive selector: Re-render al cambio de active catalog
@@ -79,7 +80,7 @@ function AdminDashboard() {
   const business = activeCatalog.business;  // Del active catalog
 
   return (
-    <div className="min-h-screen bg-[#080c0e] text-white flex pt-16 sm:pt-20">
+    <div className="min-h-screen bg-[#080c0e] text-white flex pt-5 md:pt-10">
       {/* Sidebar responsive */}
       <aside className="w-64 bg-[#121516] p-4 hidden md:block">
         <h1 className="text-2xl font-bold mb-6">
