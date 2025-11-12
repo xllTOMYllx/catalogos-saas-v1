@@ -48,7 +48,7 @@ export default function CartPreview({ onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-start justify-end p-4">
+    <div className="fixed inset-0 bg-black bg-opacity-40 z-[110] flex items-start justify-end p-4 pt-20">
       <div className="w-full max-w-md bg-[#0b0e10] rounded-lg shadow-xl border border-gray-800 overflow-hidden">
         <div className="flex items-center justify-between p-4 border-b border-gray-800">
           <h3 className="text-lg font-semibold text-white">Carrito ({items.length})</h3>

@@ -80,9 +80,45 @@ function AdminDashboard() {
   const business = activeCatalog.business;  // Del active catalog
 
   return (
-    <div className="min-h-screen bg-[#080c0e] text-white flex pt-5 md:pt-10">
-      {/* Sidebar responsive */}
-      <aside className="w-64 bg-[#121516] p-4 hidden md:block">
+    <div className="min-h-screen bg-[#080c0e] text-white flex flex-col md:flex-row pt-16 md:pt-20">
+      {/* Mobile header with tabs */}
+      <div className="md:hidden bg-[#121516] border-b border-gray-800 px-4 py-3 sticky top-16 z-10">
+        <div className="flex items-center justify-between mb-3">
+          <h1 className="text-lg font-bold">
+            {business.nombre} Admin
+            {readOnly && <Lock size={14} className="inline ml-2 text-yellow-400" />}
+          </h1>
+          {!readOnly && (
+            <button onClick={handleSaveAll} className="bg-green-500 hover:bg-green-600 px-3 py-1.5 rounded text-sm flex items-center gap-1">
+              <Save size={14} /> Guardar
+            </button>
+          )}
+        </div>
+        <nav className="flex gap-2 overflow-x-auto">
+          <button 
+            onClick={() => setActiveTab('products')} 
+            className={`px-4 py-2 rounded whitespace-nowrap text-sm ${activeTab === 'products' ? 'bg-[#f24427]' : 'bg-gray-700 hover:bg-gray-600'}`}
+          >
+            Productos
+          </button>
+          <button 
+            onClick={() => setActiveTab('customization')} 
+            className={`px-4 py-2 rounded whitespace-nowrap text-sm ${activeTab === 'customization' ? 'bg-[#f24427]' : 'bg-gray-700 hover:bg-gray-600'} ${readOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+            disabled={readOnly}
+          >
+            Personalización
+          </button>
+          <button 
+            onClick={() => setActiveTab('preview')} 
+            className={`px-4 py-2 rounded whitespace-nowrap text-sm ${activeTab === 'preview' ? 'bg-[#f24427]' : 'bg-gray-700 hover:bg-gray-600'}`}
+          >
+            Vista Previa
+          </button>
+        </nav>
+      </div>
+
+      {/* Desktop Sidebar */}
+      <aside className="w-64 bg-[#121516] p-4 hidden md:block fixed left-0 top-16 md:top-20 bottom-0 overflow-y-auto">
         <h1 className="text-2xl font-bold mb-6">
           {business.nombre} Admin
           {readOnly && <Lock size={16} className="inline ml-2 text-yellow-400" title="Catálogo de solo lectura" />}
@@ -113,15 +149,15 @@ function AdminDashboard() {
     </aside>
 
       {/* Main */ }
-  <main className="flex-1 p-4 md:p-8">
+  <main className="flex-1 p-4 md:p-8 md:ml-64">
     {/* Header con Back y Preview Info */}
-    <div className="flex justify-between items-center mb-6">
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
       <button onClick={handleGoHome} className="flex items-center gap-2 text-[#f24427] hover:underline cursor-pointer">
         <ArrowLeft size={20} /> Volver al Inicio
       </button>
-      <div className="text-right">
-        <h2 className="text-3xl font-bold">Panel de {business.nombre}</h2>
-        <p className="text-gray-400">Productos: {getTotalProducts()} | Stock Total: {getTotalStock()}</p>
+      <div className="text-left sm:text-right w-full sm:w-auto">
+        <h2 className="text-2xl sm:text-3xl font-bold">Panel de {business.nombre}</h2>
+        <p className="text-gray-400 text-sm sm:text-base">Productos: {getTotalProducts()} | Stock Total: {getTotalStock()}</p>
       </div>
     </div>
 
