@@ -6,7 +6,7 @@ import ProductList from './ProductList';
 import ProductCard from '../ProductCard';
 import CustomizationForm from './CustomizationForm';
 import toast from 'react-hot-toast';  // Para feedback
-import './../../styles/adminDashboard.css';  // Estilos específicos del dashboard
+import './../../styles/AdminDashboard.css';  // Estilos específicos del dashboard
 
 function AdminDashboard() {
   // ✅ Reactive selector: Re-render al cambio de active catalog
