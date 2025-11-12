@@ -6,6 +6,12 @@ import { Catalog } from '../catalogs/catalog.entity';
 import { Subscription } from '../subscriptions/subscription.entity';
 import { SubscriptionPlan } from '../subscription-plans/subscription-plan.entity';
 
+/**
+ * Database configuration for TypeORM
+ * SECURITY: DB credentials must be provided via environment variables
+ * No default values are provided for DB_USERNAME and DB_PASSWORD to prevent
+ * accidental exposure of credentials in version control
+ */
 export const typeOrmConfig: TypeOrmModuleOptions = {
   type: 'postgres',
   host: process.env.DB_HOST || 'localhost',
