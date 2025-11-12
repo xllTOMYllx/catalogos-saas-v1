@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ProductsModule } from './products/products.module';
@@ -12,14 +12,41 @@ import { CatalogsModule } from './catalogs/catalogs.module';
 import { UploadModule } from './upload/upload.module';
 import { SubscriptionPlansModule } from './subscription-plans/subscription-plans.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
-import { typeOrmConfig } from './database/database.config';
+import { User } from './users/user.entity';
+import { Client } from './clients/client.entity';
+import { Product } from './products/product.entity';
+import { Catalog } from './catalogs/catalog.entity';
+import { Subscription } from './subscriptions/subscription.entity';
+import { SubscriptionPlan } from './subscription-plans/subscription-plan.entity';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    TypeOrmModule.forRoot(typeOrmConfig),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+        host: configService.get('DB_HOST', 'localhost'),
+        port: configService.get('DB_PORT', 5432),
+        username: configService.get('DB_USERNAME'),
+        password: configService.get('DB_PASSWORD'),
+        database: configService.get('DB_NAME', 'catalogos_saas'),
+        entities: [
+          User,
+          Client,
+          Product,
+          Catalog,
+          Subscription,
+          SubscriptionPlan,
+        ],
+        synchronize: false,
+        logging:
+          configService.get('NODE_ENV') !== 'production' ? ['error'] : false,
+      }),
+    }),
     ProductsModule,
     AuthModule,
     BusinessModule,
