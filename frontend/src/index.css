@@ -1,1 +1,42 @@
 @import "tailwindcss";
+
+/* Global styles for mobile responsiveness */
+:root {
+  --header-height: 64px;
+}
+
+/* Ensure body has no unexpected padding that could interfere with fixed header */
+body {
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Mobile-specific improvements */
+@media (max-width: 767px) {
+  /* Ensure all main containers have proper top spacing */
+  main {
+    min-height: calc(100vh - var(--header-height));
+  }
+  
+  /* Better touch targets for mobile */
+  button,
+  a {
+    min-height: 44px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Prevent horizontal scroll on mobile */
+  html,
+  body {
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+  
+  /* Better input handling on mobile */
+  input,
+  textarea,
+  select {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+}
