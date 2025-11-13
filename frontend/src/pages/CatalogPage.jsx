@@ -27,6 +27,7 @@ function CatalogPage() {
   // State for all products across all catalogs (for /colecciones route)
   const [allCatalogProducts, setAllCatalogProducts] = useState([]);
   const [loadingAll, setLoadingAll] = useState(false);
+  const [showRecentOnly, setShowRecentOnly] = useState(false);
 
   // Determine if we're on the public collections page
   const isPublicCollections = location.pathname === '/colecciones';
@@ -37,7 +38,10 @@ function CatalogPage() {
       const fetchAllProducts = async () => {
         try {
           setLoadingAll(true);
-          const products = await catalogsApi.getAllProducts();
+          // Fetch recent or all products based on toggle
+          const products = showRecentOnly 
+            ? await catalogsApi.getRecentProducts() 
+            : await catalogsApi.getAllProducts();
           setAllCatalogProducts(products);
         } catch (error) {
           console.error('Error loading all catalog products:', error);
@@ -48,7 +52,7 @@ function CatalogPage() {
       };
       fetchAllProducts();
     }
-  }, [isPublicCollections]);
+  }, [isPublicCollections, showRecentOnly]);
 
   // Load catalog when component mounts or slug changes (for specific catalog routes)
   useEffect(() => {
@@ -114,11 +118,20 @@ function CatalogPage() {
     });
   }, [isPublicCollections, allCatalogProducts, activeCatalog.products, q]);
 
+  // Handler to toggle between recent and all products
+  const handleShowRecentCollections = () => {
+    setShowRecentOnly(!showRecentOnly);
+  };
+
   return (
     <div className="bg-[#080c0e] min-h-screen flex flex-col">
       <main className="flex-1 pt-16 sm:pt-20 overflow-x-hidden">
         <div className="container mx-auto px-2 sm:px-4 md:px-8 py-6 max-w-7xl">
-          <CategoriesCard ruta={cap1Placeholder} />
+          <CategoriesCard 
+            ruta={cap1Placeholder} 
+            onButtonClick={isPublicCollections ? handleShowRecentCollections : undefined}
+            btnText={isPublicCollections ? (showRecentOnly ? "Ver todas las colecciones" : "Ver nuevas colecciones") : "Ver nuevas colecciones"}
+          />
           <section className="mt-6 sm:mt-8">
             <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6 text-center" style={{ color: activeCatalog.business?.color || '#f24427' }}>
               {isPublicCollections ? 'Todas las Colecciones' : `Catálogo de ${activeCatalog.business?.nombre || 'Tienda'}`}

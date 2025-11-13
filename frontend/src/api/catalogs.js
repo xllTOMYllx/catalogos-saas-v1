@@ -23,12 +23,49 @@ export const catalogsApi = {
         category: entry.product.category,
         catalogId: entry.id,
         active: entry.active,
+        createdAt: entry.createdAt, // Include creation date for sorting
         // Client/store information
         clientId: entry.clientId,
         clientName: entry.client?.nombre || 'Tienda',
         clientLogo: entry.client?.logo,
         clientColor: entry.client?.color || '#f24427',
       }));
+  },
+
+  // Get recent products (newest catalog entries, within last 30 days or latest batch)
+  getRecentProducts: async () => {
+    const response = await api.get('/catalogs');
+    const allEntries = response.data
+      .filter(entry => entry.active && entry.product)
+      .map(entry => ({
+        id: entry.product.id,
+        nombre: entry.product.nombre,
+        precio: entry.customPrice || entry.product.precio,
+        description: entry.product.description,
+        ruta: entry.product.ruta,
+        stock: entry.product.stock,
+        category: entry.product.category,
+        catalogId: entry.id,
+        active: entry.active,
+        createdAt: entry.createdAt,
+        // Client/store information
+        clientId: entry.clientId,
+        clientName: entry.client?.nombre || 'Tienda',
+        clientLogo: entry.client?.logo,
+        clientColor: entry.client?.color || '#f24427',
+      }));
+
+    // Sort by creation date (newest first)
+    allEntries.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    // Get products from last 30 days, or at least the 10 most recent if none in last 30 days
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const recentProducts = allEntries.filter(entry => new Date(entry.createdAt) >= thirtyDaysAgo);
+    
+    // If no products in last 30 days, return the 10 most recent
+    return recentProducts.length > 0 ? recentProducts : allEntries.slice(0, 10);
   },
 
   // Get single catalog entry
