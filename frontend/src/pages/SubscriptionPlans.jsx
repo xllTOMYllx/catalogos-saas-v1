@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Check } from 'lucide-react';
+import { Check, MessageCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import useSubscriptionStore from '../store/subscriptionStore';
+import { CONTACT_CONFIG, getWhatsAppURL } from '../config/contact';
 
 const SubscriptionPlans = () => {
   const navigate = useNavigate();
-  const { plans, currentSubscription, fetchPlans, fetchUserSubscription, changePlan, loading } = useSubscriptionStore();
-  const [selectedPlanId, setSelectedPlanId] = useState(null);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const { plans, currentSubscription, fetchPlans, fetchUserSubscription, loading } = useSubscriptionStore();
+  const [selectedPlan, setSelectedPlan] = useState(null);
+  const [showContactModal, setShowContactModal] = useState(false);
 
   // Get user from localStorage (assuming auth stores user info there)
   const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -21,20 +22,29 @@ const SubscriptionPlans = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleSelectPlan = (planId) => {
-    setSelectedPlanId(planId);
-    setShowConfirmModal(true);
+  const handleSelectPlan = (plan) => {
+    setSelectedPlan(plan);
+    setShowContactModal(true);
   };
 
-  const handleConfirmPlanChange = async () => {
-    try {
-      await changePlan(user.id, selectedPlanId);
-      toast.success('Plan actualizado exitosamente');
-      setShowConfirmModal(false);
-      setSelectedPlanId(null);
-    } catch (error) {
-      toast.error('Error al actualizar el plan: ' + error.message);
-    }
+  const handleContactSupport = () => {
+    if (!selectedPlan) return;
+
+    // Generate WhatsApp message with plan details
+    const message = CONTACT_CONFIG.messages.planChangeRequest(
+      selectedPlan.name,
+      user.name || user.email,
+      user.email
+    );
+
+    // Open WhatsApp in new tab
+    const whatsappURL = getWhatsAppURL(message);
+    window.open(whatsappURL, '_blank');
+
+    // Close modal and show toast
+    setShowContactModal(false);
+    toast.success('Redirigiendo a WhatsApp para contactar con soporte...');
+    setSelectedPlan(null);
   };
 
   const getPlanFeatures = (features) => {
@@ -144,10 +154,11 @@ const SubscriptionPlans = () => {
                     </button>
                   ) : (
                     <button
-                      onClick={() => handleSelectPlan(plan.id)}
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-semibold transition-colors"
+                      onClick={() => handleSelectPlan(plan)}
+                      className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
                     >
-                      Seleccionar Plan
+                      <MessageCircle className="w-5 h-5" />
+                      Contactar Soporte
                     </button>
                   )}
                 </div>
@@ -167,30 +178,47 @@ const SubscriptionPlans = () => {
         </div>
       </div>
 
-      {/* Confirmation Modal */}
-      {showConfirmModal && (
+      {/* Contact Support Modal */}
+      {showContactModal && selectedPlan && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-            <h3 className="text-xl font-bold mb-4">Confirmar Cambio de Plan</h3>
-            <p className="text-gray-600 mb-6">
-              ¿Estás seguro que deseas cambiar a este plan? Los cambios se aplicarán inmediatamente.
-            </p>
-            <div className="flex gap-4">
+            <div className="flex items-center gap-2 mb-4">
+              <MessageCircle className="w-6 h-6 text-green-600" />
+              <h3 className="text-xl font-bold">Contactar con Soporte</h3>
+            </div>
+            <div className="mb-6">
+              <p className="text-gray-700 mb-3">
+                Has seleccionado el plan <span className="font-bold text-blue-600">{selectedPlan.name}</span>.
+              </p>
+              <p className="text-gray-600 mb-3">
+                Para cambiar tu plan, uno de nuestros agentes te atenderá por WhatsApp para:
+              </p>
+              <ul className="list-disc list-inside text-gray-600 space-y-1 mb-3">
+                <li>Verificar la disponibilidad del plan</li>
+                <li>Coordinar el proceso de pago</li>
+                <li>Activar tu nuevo plan</li>
+                <li>Resolver cualquier duda</li>
+              </ul>
+              <p className="text-sm text-gray-500 bg-blue-50 p-3 rounded-lg border border-blue-200">
+                💡 Al hacer clic en "Abrir WhatsApp", se abrirá una conversación con un mensaje predefinido con los detalles de tu solicitud.
+              </p>
+            </div>
+            <div className="flex gap-3">
               <button
                 onClick={() => {
-                  setShowConfirmModal(false);
-                  setSelectedPlanId(null);
+                  setShowContactModal(false);
+                  setSelectedPlan(null);
                 }}
-                className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded-lg font-semibold"
+                className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded-lg font-semibold transition-colors"
               >
                 Cancelar
               </button>
               <button
-                onClick={handleConfirmPlanChange}
-                disabled={loading}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-semibold disabled:opacity-50"
+                onClick={handleContactSupport}
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg font-semibold flex items-center justify-center gap-2 transition-colors"
               >
-                {loading ? 'Procesando...' : 'Confirmar'}
+                <MessageCircle className="w-5 h-5" />
+                Abrir WhatsApp
               </button>
             </div>
           </div>
