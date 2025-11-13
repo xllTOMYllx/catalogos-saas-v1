@@ -16,7 +16,9 @@ describe('AppController', () => {
 
   describe('root', () => {
     it('should return backend status message', () => {
-      expect(appController.getHello()).toBe('Backend API is running on port 3000');
+      expect(appController.getHello()).toBe(
+        'Backend API is running on port 3000',
+      );
     });
   });
 });
