@@ -143,7 +143,21 @@ import SubscriptionBadge from '../components/SubscriptionBadge';
 <SubscriptionBadge userId={currentUser?.id} />
 ```
 
-### Paso 5: Iniciar Frontend
+### Paso 5: Configurar WhatsApp para Cambios de Plan 🆕
+
+Los cambios de plan se gestionan manualmente a través de WhatsApp. Configura tu número:
+
+```bash
+# Editar el archivo de configuración
+nano frontend/src/config/contact.js
+
+# Cambiar el número de WhatsApp (incluye código de país sin +)
+whatsappNumber: '521234567890'  # Ejemplo: México
+```
+
+**Ver guía completa:** [CONFIGURACION_WHATSAPP.md](CONFIGURACION_WHATSAPP.md)
+
+### Paso 6: Iniciar Frontend
 
 ```bash
 cd frontend
@@ -166,10 +180,13 @@ npm run dev
    - Ver detalles de cada plan
    - Comparar características y precios
 
-2. **Cambiar de Plan**
-   - Click en "Seleccionar Plan" del plan deseado
-   - Confirmar en el modal
-   - El cambio es inmediato
+2. **Cambiar de Plan** 🆕
+   - Click en "Contactar Soporte" del plan deseado
+   - Se muestra modal informativo
+   - Click en "Abrir WhatsApp"
+   - WhatsApp se abre con mensaje predefinido
+   - Enviar mensaje al soporte
+   - El desarrollador procesa el cambio manualmente
 
 3. **Ver Plan Actual**
    - Badge visible en el header/navbar

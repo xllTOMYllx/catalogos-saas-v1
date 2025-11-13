@@ -310,13 +310,28 @@ function Header() {
 }
 ```
 
-### Paso 5: Probar
+### Paso 5: Configurar WhatsApp 🆕
+
+**Importante**: Los cambios de plan ahora se gestionan manualmente vía WhatsApp.
+
+```bash
+# Editar configuración
+nano frontend/src/config/contact.js
+
+# Cambiar número de WhatsApp
+whatsappNumber: '521234567890'  # Tu número con código de país
+```
+
+Ver guía completa: [CONFIGURACION_WHATSAPP.md](CONFIGURACION_WHATSAPP.md)
+
+### Paso 6: Probar
 
 1. Iniciar frontend: `npm run dev`
 2. Abrir: `http://localhost:5173/planes`
 3. Deberías ver la página de planes
-4. Click en "Seleccionar Plan"
-5. Confirmar el cambio
+4. Click en "Contactar Soporte" (botón verde)
+5. Confirmar en el modal
+6. WhatsApp se abre con mensaje predefinido
 
 ---
 

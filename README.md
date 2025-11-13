@@ -226,9 +226,13 @@ Este proyecto incluye un **sistema completo de suscripciones** con 4 planes:
 | PRO | $799/mes | 10 | Ilimitados | API access, soporte prioritario |
 | ENTERPRISE | $1,999/mes | Ilimitados | Ilimitados | White label, soporte dedicado |
 
+**Cambios de Plan:**
+Los cambios de plan se gestionan manualmente a través de WhatsApp para garantizar un control adecuado y verificación de pagos. Los usuarios contactan al soporte mediante WhatsApp para solicitar cambios de plan.
+
 **Para más información:**
 - 📚 [Documentación Completa de Suscripciones](SUBSCRIPTIONS.md)
 - 🚀 [Guía de Implementación](IMPLEMENTACION_SUSCRIPCIONES.md)
+- 📱 [Configuración de WhatsApp](CONFIGURACION_WHATSAPP.md) 🆕
 
 ### Instalación del Sistema de Suscripciones
 
