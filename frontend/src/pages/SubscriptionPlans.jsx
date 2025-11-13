@@ -4,6 +4,7 @@ import { Check, MessageCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import useSubscriptionStore from '../store/subscriptionStore';
 import { CONTACT_CONFIG, getWhatsAppURL } from '../config/contact';
+import { useAuth } from '../contexts/useAuth';
 
 const SubscriptionPlans = () => {
   const navigate = useNavigate();
@@ -11,16 +12,16 @@ const SubscriptionPlans = () => {
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [showContactModal, setShowContactModal] = useState(false);
 
-  // Get user from localStorage (assuming auth stores user info there)
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  // Get user and client data from AuthContext
+  const { user, client } = useAuth();
 
   useEffect(() => {
     fetchPlans();
-    if (user.id) {
+    if (user?.id) {
       fetchUserSubscription(user.id);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [user]);
 
   const handleSelectPlan = (plan) => {
     setSelectedPlan(plan);
@@ -30,11 +31,14 @@ const SubscriptionPlans = () => {
   const handleContactSupport = () => {
     if (!selectedPlan) return;
 
+    // Use catalog/store name from client data, fallback to user name or email
+    const displayName = client?.nombre || user?.nombre || user?.email || 'Cliente';
+
     // Generate WhatsApp message with plan details
     const message = CONTACT_CONFIG.messages.planChangeRequest(
       selectedPlan.name,
-      user.name || user.email,
-      user.email
+      displayName,
+      user?.email || 'No proporcionado'
     );
 
     // Open WhatsApp in new tab
@@ -68,7 +72,7 @@ const SubscriptionPlans = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
+    <div className="min-h-screen bg-gray-50 pt-16 sm:pt-20 py-12 px-4">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
