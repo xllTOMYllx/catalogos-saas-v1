@@ -4,6 +4,8 @@
 
 Este documento describe la implementación completa del sistema de suscripciones para el proyecto Catalogos SaaS v1. El sistema permite a los usuarios suscribirse a diferentes planes con límites específicos de funcionalidades.
 
+> **⚠️ Nota Importante - Cambios de Plan:** Los cambios de plan se gestionan manualmente a través de WhatsApp para garantizar un control adecuado sobre los servicios y verificación de pagos. Los usuarios contactan al soporte mediante WhatsApp para solicitar cambios de plan. Ver [CONFIGURACION_WHATSAPP.md](CONFIGURACION_WHATSAPP.md) para más detalles.
+
 ---
 
 ## 🎯 Objetivos
