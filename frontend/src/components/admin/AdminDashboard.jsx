@@ -173,7 +173,7 @@ function AdminDashboard() {
         try {
           const userObj = JSON.parse(storedUser);
           actualUserId = userObj.id;
-        } catch (e) {
+        } catch {
           // If parsing fails, try using userId directly if it's a number
           actualUserId = !isNaN(userId) ? parseInt(userId) : null;
         }

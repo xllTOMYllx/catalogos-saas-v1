@@ -110,7 +110,7 @@ export class SubscriptionsService {
     maxProducts: number;
   }> {
     const subscription = await this.findByUserId(userId);
-    
+
     // Count actual catalogs (clients) for this user
     const currentCatalogs = await this.clientRepository.count({
       where: { userId },
@@ -118,8 +118,9 @@ export class SubscriptionsService {
 
     const maxCatalogs = subscription.plan.max_catalogs;
     // -1 means unlimited
-    const canCreateCatalog = maxCatalogs === -1 || currentCatalogs < maxCatalogs;
-    
+    const canCreateCatalog =
+      maxCatalogs === -1 || currentCatalogs < maxCatalogs;
+
     // For products, we assume they can add if not at catalog limit
     // More granular product checks can be done per catalog
     const canAddProduct = true; // Will be checked per catalog
@@ -136,14 +137,17 @@ export class SubscriptionsService {
   /**
    * Check if a user can add a product to a specific catalog
    */
-  async canAddProductToCatalog(userId: number, clientId: number): Promise<{
+  async canAddProductToCatalog(
+    userId: number,
+    clientId: number,
+  ): Promise<{
     canAdd: boolean;
     currentProducts: number;
     maxProducts: number;
     reason?: string;
   }> {
     const subscription = await this.findByUserId(userId);
-    
+
     // Count products in this catalog
     const currentProducts = await this.catalogRepository.count({
       where: { clientId },
@@ -152,7 +156,7 @@ export class SubscriptionsService {
     const maxProducts = subscription.plan.max_products_per_catalog;
     // -1 means unlimited
     const canAdd = maxProducts === -1 || currentProducts < maxProducts;
-    
+
     let reason: string | undefined;
     if (!canAdd) {
       reason = `Has alcanzado el límite de ${maxProducts} productos por catálogo de tu plan ${subscription.plan.name}. Actualiza tu plan para agregar más productos.`;

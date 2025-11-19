@@ -39,16 +39,18 @@ export class CatalogsService {
     if (catalogData.clientId) {
       // Get the client to find the userId
       const client = await this.clientsService.findOne(catalogData.clientId);
-      
+
       if (client?.userId) {
-        const productCheck = await this.subscriptionsService.canAddProductToCatalog(
-          client.userId,
-          catalogData.clientId,
-        );
+        const productCheck =
+          await this.subscriptionsService.canAddProductToCatalog(
+            client.userId,
+            catalogData.clientId,
+          );
 
         if (!productCheck.canAdd) {
           throw new ForbiddenException(
-            productCheck.reason || 'Has alcanzado el límite de productos para este catálogo. Actualiza tu plan para agregar más productos.',
+            productCheck.reason ||
+              'Has alcanzado el límite de productos para este catálogo. Actualiza tu plan para agregar más productos.',
           );
         }
       }
