@@ -208,6 +208,14 @@ function LoginRole() {
               Iniciar Sesión
             </button>
           </form>
+          <div className="mt-3 text-center">
+            <button 
+              onClick={() => navigate('/forgot-password')} 
+              className="text-gray-400 hover:text-[#f24427] text-sm underline"
+            >
+              ¿Olvidaste tu contraseña?
+            </button>
+          </div>
           <p className="text-gray-400 text-xs mt-4 text-center">
             ¿No tienes cuenta?{' '}
             <button onClick={() => setMode('register')} className="text-[#f24427] hover:underline">

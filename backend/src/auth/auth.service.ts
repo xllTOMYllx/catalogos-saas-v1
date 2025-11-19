@@ -1,9 +1,21 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, LessThan } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { LoginDto, RegisterDto, AuthResponse } from './auth.dto';
+import * as crypto from 'crypto';
+import {
+  LoginDto,
+  RegisterDto,
+  AuthResponse,
+  ForgotPasswordDto,
+  ResetPasswordDto,
+  VerifyResetTokenDto,
+} from './auth.dto';
 import { UsersService } from '../users/users.service';
 import { ClientsService } from '../clients/clients.service';
+import { PasswordResetToken } from './password-reset-token.entity';
+import { EmailService } from './email.service';
 
 @Injectable()
 export class AuthService {
@@ -11,6 +23,9 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly clientsService: ClientsService,
     private readonly jwtService: JwtService,
+    private readonly emailService: EmailService,
+    @InjectRepository(PasswordResetToken)
+    private readonly resetTokenRepository: Repository<PasswordResetToken>,
   ) {}
 
   async register(registerDto: RegisterDto): Promise<AuthResponse> {
@@ -213,5 +228,179 @@ export class AuthService {
     } catch {
       return false;
     }
+  }
+
+  async forgotPassword(
+    forgotPasswordDto: ForgotPasswordDto,
+  ): Promise<{ success: boolean; message: string }> {
+    const { email } = forgotPasswordDto;
+
+    // Find user by email
+    const user = await this.usersService.findByEmail(email);
+    
+    // Always return success to prevent email enumeration attacks
+    if (!user) {
+      return {
+        success: true,
+        message: 'If the email exists, a password reset link has been sent.',
+      };
+    }
+
+    // Generate secure random token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(resetToken)
+      .digest('hex');
+
+    // Set expiration to 1 hour from now
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + 1);
+
+    // Clean up old/expired tokens for this user
+    await this.resetTokenRepository.delete({
+      userId: user.id,
+    });
+
+    // Save the hashed token to database
+    await this.resetTokenRepository.save({
+      token: hashedToken,
+      userId: user.id,
+      expiresAt,
+      used: false,
+    });
+
+    // Send email with reset link (using the unhashed token)
+    const emailSent = await this.emailService.sendPasswordResetEmail(
+      email,
+      resetToken,
+      user.nombre || 'Usuario',
+    );
+
+    if (!emailSent) {
+      return {
+        success: false,
+        message: 'Failed to send reset email. Please try again later.',
+      };
+    }
+
+    return {
+      success: true,
+      message: 'If the email exists, a password reset link has been sent.',
+    };
+  }
+
+  async verifyResetToken(
+    verifyResetTokenDto: VerifyResetTokenDto,
+  ): Promise<{ success: boolean; message: string }> {
+    const { token } = verifyResetTokenDto;
+
+    // Hash the token to compare with stored hash
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(token)
+      .digest('hex');
+
+    // Find the token in database
+    const resetToken = await this.resetTokenRepository.findOne({
+      where: { token: hashedToken },
+    });
+
+    if (!resetToken) {
+      return {
+        success: false,
+        message: 'Invalid or expired reset token.',
+      };
+    }
+
+    // Check if token is expired
+    if (new Date() > resetToken.expiresAt) {
+      return {
+        success: false,
+        message: 'Reset token has expired. Please request a new one.',
+      };
+    }
+
+    // Check if token has been used
+    if (resetToken.used) {
+      return {
+        success: false,
+        message: 'This reset token has already been used.',
+      };
+    }
+
+    return {
+      success: true,
+      message: 'Token is valid.',
+    };
+  }
+
+  async resetPassword(
+    resetPasswordDto: ResetPasswordDto,
+  ): Promise<{ success: boolean; message: string }> {
+    const { token, newPassword } = resetPasswordDto;
+
+    // Hash the token to find in database
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(token)
+      .digest('hex');
+
+    // Find and validate the token
+    const resetToken = await this.resetTokenRepository.findOne({
+      where: { token: hashedToken },
+      relations: ['user'],
+    });
+
+    if (!resetToken) {
+      return {
+        success: false,
+        message: 'Invalid or expired reset token.',
+      };
+    }
+
+    // Check if token is expired
+    if (new Date() > resetToken.expiresAt) {
+      return {
+        success: false,
+        message: 'Reset token has expired. Please request a new one.',
+      };
+    }
+
+    // Check if token has been used
+    if (resetToken.used) {
+      return {
+        success: false,
+        message: 'This reset token has already been used.',
+      };
+    }
+
+    // Hash the new password
+    const hashedPassword = await this.hashPassword(newPassword);
+
+    // Update user's password
+    await this.usersService.updatePassword(resetToken.userId, hashedPassword);
+
+    // Mark token as used
+    resetToken.used = true;
+    await this.resetTokenRepository.save(resetToken);
+
+    // Clean up old tokens for this user
+    await this.resetTokenRepository.delete({
+      userId: resetToken.userId,
+      id: LessThan(resetToken.id),
+    });
+
+    return {
+      success: true,
+      message: 'Password has been reset successfully. You can now log in with your new password.',
+    };
+  }
+
+  // Clean up expired tokens (should be run periodically)
+  async cleanupExpiredTokens(): Promise<void> {
+    await this.resetTokenRepository.delete({
+      expiresAt: LessThan(new Date()),
+    });
   }
 }
