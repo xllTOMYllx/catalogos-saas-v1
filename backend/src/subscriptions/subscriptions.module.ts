@@ -4,9 +4,14 @@ import { Subscription } from './subscription.entity';
 import { SubscriptionsController } from './subscriptions.controller';
 import { SubscriptionsService } from './subscriptions.service';
 import { SubscriptionPlansModule } from '../subscription-plans/subscription-plans.module';
+import { Client } from '../clients/client.entity';
+import { Catalog } from '../catalogs/catalog.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Subscription]), SubscriptionPlansModule],
+  imports: [
+    TypeOrmModule.forFeature([Subscription, Client, Catalog]),
+    SubscriptionPlansModule,
+  ],
   controllers: [SubscriptionsController],
   providers: [SubscriptionsService],
   exports: [SubscriptionsService],
