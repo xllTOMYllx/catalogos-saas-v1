@@ -40,6 +40,17 @@ export class SubscriptionsController {
     return this.subscriptionsService.checkLimits(+userId);
   }
 
+  @Get('user/:userId/catalog/:catalogId/product-limits')
+  async checkProductLimits(
+    @Param('userId') userId: string,
+    @Param('catalogId') catalogId: string,
+  ) {
+    return this.subscriptionsService.canAddProductToCatalog(
+      +userId,
+      +catalogId,
+    );
+  }
+
   @Post()
   async create(
     @Body() createDto: CreateSubscriptionDto,

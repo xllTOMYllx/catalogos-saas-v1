@@ -82,7 +82,9 @@ describe('SubscriptionsService - Limits Validation', () => {
 
   describe('checkLimits', () => {
     it('should return canCreateCatalog=true when under limit', async () => {
-      jest.spyOn(subscriptionRepository, 'findOne').mockResolvedValue(mockSubscription as any);
+      jest
+        .spyOn(subscriptionRepository, 'findOne')
+        .mockResolvedValue(mockSubscription as any);
       jest.spyOn(clientRepository, 'count').mockResolvedValue(0);
 
       const result = await service.checkLimits(1);
@@ -93,7 +95,9 @@ describe('SubscriptionsService - Limits Validation', () => {
     });
 
     it('should return canCreateCatalog=false when at limit', async () => {
-      jest.spyOn(subscriptionRepository, 'findOne').mockResolvedValue(mockSubscription as any);
+      jest
+        .spyOn(subscriptionRepository, 'findOne')
+        .mockResolvedValue(mockSubscription as any);
       jest.spyOn(clientRepository, 'count').mockResolvedValue(1);
 
       const result = await service.checkLimits(1);
@@ -108,7 +112,9 @@ describe('SubscriptionsService - Limits Validation', () => {
         ...mockSubscription,
         plan: { ...mockSubscriptionPlan, max_catalogs: -1 },
       };
-      jest.spyOn(subscriptionRepository, 'findOne').mockResolvedValue(unlimitedSubscription as any);
+      jest
+        .spyOn(subscriptionRepository, 'findOne')
+        .mockResolvedValue(unlimitedSubscription as any);
       jest.spyOn(clientRepository, 'count').mockResolvedValue(100);
 
       const result = await service.checkLimits(1);
@@ -126,7 +132,9 @@ describe('SubscriptionsService - Limits Validation', () => {
 
   describe('canAddProductToCatalog', () => {
     it('should return canAdd=true when under product limit', async () => {
-      jest.spyOn(subscriptionRepository, 'findOne').mockResolvedValue(mockSubscription as any);
+      jest
+        .spyOn(subscriptionRepository, 'findOne')
+        .mockResolvedValue(mockSubscription as any);
       jest.spyOn(catalogRepository, 'count').mockResolvedValue(10);
 
       const result = await service.canAddProductToCatalog(1, 1);
@@ -137,7 +145,9 @@ describe('SubscriptionsService - Limits Validation', () => {
     });
 
     it('should return canAdd=false when at product limit', async () => {
-      jest.spyOn(subscriptionRepository, 'findOne').mockResolvedValue(mockSubscription as any);
+      jest
+        .spyOn(subscriptionRepository, 'findOne')
+        .mockResolvedValue(mockSubscription as any);
       jest.spyOn(catalogRepository, 'count').mockResolvedValue(20);
 
       const result = await service.canAddProductToCatalog(1, 1);
@@ -153,7 +163,9 @@ describe('SubscriptionsService - Limits Validation', () => {
         ...mockSubscription,
         plan: { ...mockSubscriptionPlan, max_products_per_catalog: -1 },
       };
-      jest.spyOn(subscriptionRepository, 'findOne').mockResolvedValue(unlimitedSubscription as any);
+      jest
+        .spyOn(subscriptionRepository, 'findOne')
+        .mockResolvedValue(unlimitedSubscription as any);
       jest.spyOn(catalogRepository, 'count').mockResolvedValue(1000);
 
       const result = await service.canAddProductToCatalog(1, 1);

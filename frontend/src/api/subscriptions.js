@@ -32,6 +32,11 @@ export const getUserLimits = async (userId) => {
   return response.data;
 };
 
+export const getProductLimits = async (userId, catalogId) => {
+  const response = await api.get(`/api/subscriptions/user/${userId}/catalog/${catalogId}/product-limits`);
+  return response.data;
+};
+
 export const createSubscription = async (subscriptionData) => {
   const response = await api.post('/api/subscriptions', subscriptionData);
   return response.data;

@@ -3,6 +3,7 @@ import {
   getSubscriptionPlans,
   getUserSubscription,
   getUserLimits,
+  getProductLimits,
   changePlan,
   cancelSubscription,
 } from '../api/subscriptions';
@@ -11,6 +12,7 @@ const useSubscriptionStore = create((set, get) => ({
   plans: [],
   currentSubscription: null,
   limits: null,
+  productLimits: {},
   loading: false,
   error: null,
 
@@ -42,6 +44,21 @@ const useSubscriptionStore = create((set, get) => ({
     try {
       const limits = await getUserLimits(userId);
       set({ limits });
+    } catch (error) {
+      set({ error: error.message });
+    }
+  },
+
+  // Fetch product limits for a specific catalog
+  fetchProductLimits: async (userId, catalogId) => {
+    try {
+      const productLimits = await getProductLimits(userId, catalogId);
+      set((state) => ({
+        productLimits: {
+          ...state.productLimits,
+          [catalogId]: productLimits,
+        },
+      }));
     } catch (error) {
       set({ error: error.message });
     }
@@ -79,9 +96,12 @@ const useSubscriptionStore = create((set, get) => ({
     return limits?.canCreateCatalog ?? true;
   },
 
-  canAddProduct: () => {
-    const { limits } = get();
-    return limits?.canAddProduct ?? true;
+  canAddProduct: (catalogId) => {
+    const { productLimits } = get();
+    if (!catalogId) {
+      return true;
+    }
+    return productLimits[catalogId]?.canAdd ?? true;
   },
 
   // Reset store
@@ -90,6 +110,7 @@ const useSubscriptionStore = create((set, get) => ({
       plans: [],
       currentSubscription: null,
       limits: null,
+      productLimits: {},
       loading: false,
       error: null,
     });

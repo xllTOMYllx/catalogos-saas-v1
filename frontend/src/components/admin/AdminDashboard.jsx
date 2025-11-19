@@ -6,6 +6,7 @@ import ProductList from './ProductList';
 import ProductCard from '../ProductCard';
 import CustomizationForm from './CustomizationForm';
 import SubscriptionLimitIndicator from '../SubscriptionLimitIndicator';
+import ProductLimitIndicator from '../ProductLimitIndicator';
 import toast from 'react-hot-toast';  // Para feedback
 import './../../styles/AdminDashboard.css';  // Estilos específicos del dashboard
 
@@ -162,7 +163,7 @@ function AdminDashboard() {
       </div>
     </div>
 
-    {/* Subscription Limit Indicator */}
+    {/* Subscription Limit Indicators */}
     {!readOnly && (() => {
       const userId = localStorage.getItem('userId');
       const storedUser = localStorage.getItem('user');
@@ -179,7 +180,16 @@ function AdminDashboard() {
         }
       }
       
-      return actualUserId ? <div className="mb-6"><SubscriptionLimitIndicator userId={actualUserId} /></div> : null;
+      // Get clientId for product limit indicator
+      const clientId = localStorage.getItem('clientId');
+      const actualClientId = clientId && !isNaN(clientId) ? parseInt(clientId) : null;
+      
+      return actualUserId ? (
+        <div className="mb-6 space-y-4">
+          <SubscriptionLimitIndicator userId={actualUserId} />
+          {actualClientId && <ProductLimitIndicator userId={actualUserId} catalogId={actualClientId} />}
+        </div>
+      ) : null;
     })()}
 
     {/* Preview Tab: Mini-Grid + Stats */}
