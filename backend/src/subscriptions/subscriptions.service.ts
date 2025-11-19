@@ -43,11 +43,16 @@ export class SubscriptionsService {
     return subscription;
   }
 
-  async findByUserId(userId: number): Promise<Subscription> {
+  async findByUserId(userId: number): Promise<Subscription | null> {
     const subscription = await this.subscriptionRepository.findOne({
       where: { userId },
       relations: ['plan'],
     });
+    return subscription;
+  }
+
+  async findByUserIdOrThrow(userId: number): Promise<Subscription> {
+    const subscription = await this.findByUserId(userId);
     if (!subscription) {
       throw new NotFoundException(`Subscription for user ${userId} not found`);
     }
@@ -86,7 +91,7 @@ export class SubscriptionsService {
   }
 
   async changePlan(userId: number, planId: number): Promise<Subscription> {
-    const subscription = await this.findByUserId(userId);
+    const subscription = await this.findByUserIdOrThrow(userId);
     const newPlan = await this.subscriptionPlansService.findOne(planId);
 
     subscription.planId = newPlan.id;
@@ -96,7 +101,7 @@ export class SubscriptionsService {
   }
 
   async cancel(userId: number): Promise<Subscription> {
-    const subscription = await this.findByUserId(userId);
+    const subscription = await this.findByUserIdOrThrow(userId);
     subscription.status = 'cancelled';
     subscription.auto_renew = false;
     return this.subscriptionRepository.save(subscription);
@@ -111,12 +116,20 @@ export class SubscriptionsService {
   }> {
     const subscription = await this.findByUserId(userId);
 
+    // If no subscription exists, provide default FREE plan limits
+    let maxCatalogs = 1;
+    let maxProducts = 20;
+    
+    if (subscription && subscription.plan) {
+      maxCatalogs = subscription.plan.max_catalogs;
+      maxProducts = subscription.plan.max_products_per_catalog;
+    }
+
     // Count actual catalogs (clients) for this user
     const currentCatalogs = await this.clientRepository.count({
       where: { userId },
     });
 
-    const maxCatalogs = subscription.plan.max_catalogs;
     // -1 means unlimited
     const canCreateCatalog =
       maxCatalogs === -1 || currentCatalogs < maxCatalogs;
@@ -130,7 +143,7 @@ export class SubscriptionsService {
       canAddProduct,
       currentCatalogs,
       maxCatalogs,
-      maxProducts: subscription.plan.max_products_per_catalog,
+      maxProducts,
     };
   }
 
@@ -148,18 +161,26 @@ export class SubscriptionsService {
   }> {
     const subscription = await this.findByUserId(userId);
 
+    // Default to FREE plan limits if no subscription
+    let maxProducts = 20;
+    let planName = 'FREE';
+    
+    if (subscription && subscription.plan) {
+      maxProducts = subscription.plan.max_products_per_catalog;
+      planName = subscription.plan.name;
+    }
+
     // Count products in this catalog
     const currentProducts = await this.catalogRepository.count({
       where: { clientId },
     });
 
-    const maxProducts = subscription.plan.max_products_per_catalog;
     // -1 means unlimited
     const canAdd = maxProducts === -1 || currentProducts < maxProducts;
 
     let reason: string | undefined;
     if (!canAdd) {
-      reason = `Has alcanzado el límite de ${maxProducts} productos por catálogo de tu plan ${subscription.plan.name}. Actualiza tu plan para agregar más productos.`;
+      reason = `Has alcanzado el límite de ${maxProducts} productos por catálogo de tu plan ${planName}. Actualiza tu plan para agregar más productos.`;
     }
 
     return {

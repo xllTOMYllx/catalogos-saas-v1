@@ -9,6 +9,8 @@ import { JwtStrategy } from './jwt.strategy';
 import { EmailService } from './email.service';
 import { UsersModule } from '../users/users.module';
 import { ClientsModule } from '../clients/clients.module';
+import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
+import { SubscriptionPlansModule } from '../subscription-plans/subscription-plans.module';
 import { PasswordResetToken } from './password-reset-token.entity';
 
 @Module({
@@ -16,6 +18,8 @@ import { PasswordResetToken } from './password-reset-token.entity';
     TypeOrmModule.forFeature([PasswordResetToken]),
     UsersModule,
     ClientsModule,
+    SubscriptionsModule,
+    SubscriptionPlansModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],

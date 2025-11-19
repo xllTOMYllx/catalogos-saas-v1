@@ -14,6 +14,8 @@ import {
 } from './auth.dto';
 import { UsersService } from '../users/users.service';
 import { ClientsService } from '../clients/clients.service';
+import { SubscriptionsService } from '../subscriptions/subscriptions.service';
+import { SubscriptionPlansService } from '../subscription-plans/subscription-plans.service';
 import { PasswordResetToken } from './password-reset-token.entity';
 import { EmailService } from './email.service';
 
@@ -22,6 +24,8 @@ export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly clientsService: ClientsService,
+    private readonly subscriptionsService: SubscriptionsService,
+    private readonly subscriptionPlansService: SubscriptionPlansService,
     private readonly jwtService: JwtService,
     private readonly emailService: EmailService,
     @InjectRepository(PasswordResetToken)
@@ -49,6 +53,21 @@ export class AuthService {
         nombre: registerDto.nombre,
         role: 'client',
       });
+
+      // Create default FREE subscription for new user
+      try {
+        const freePlan = await this.subscriptionPlansService.findByName('FREE');
+        await this.subscriptionsService.create({
+          userId: user.id,
+          planId: freePlan.id,
+          status: 'active',
+          auto_renew: true,
+        });
+      } catch (subscriptionError) {
+        console.error('Failed to create default subscription:', subscriptionError);
+        // Continue registration even if subscription creation fails
+        // The user will get default limits from the fallback logic
+      }
 
       // Create client (business) for this user
       const client = await this.clientsService.create({

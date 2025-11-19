@@ -32,7 +32,7 @@ export class SubscriptionsController {
 
   @Get('user/:userId')
   async findByUserId(@Param('userId') userId: string): Promise<Subscription> {
-    return this.subscriptionsService.findByUserId(+userId);
+    return this.subscriptionsService.findByUserIdOrThrow(+userId);
   }
 
   @Get('user/:userId/limits')
