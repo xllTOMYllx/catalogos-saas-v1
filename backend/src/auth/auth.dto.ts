@@ -40,6 +40,29 @@ export class RegisterDto {
   telefono?: string;
 }
 
+export class ForgotPasswordDto {
+  @IsEmail()
+  @IsNotEmpty()
+  email: string;
+}
+
+export class ResetPasswordDto {
+  @IsString()
+  @IsNotEmpty()
+  token: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(6)
+  newPassword: string;
+}
+
+export class VerifyResetTokenDto {
+  @IsString()
+  @IsNotEmpty()
+  token: string;
+}
+
 export interface AuthResponse {
   success: boolean;
   token?: string;

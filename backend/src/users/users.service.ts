@@ -36,4 +36,8 @@ export class UsersService {
     const result = await this.usersRepository.delete(id);
     return (result.affected ?? 0) > 0;
   }
+
+  async updatePassword(id: number, newPassword: string): Promise<void> {
+    await this.usersRepository.update(id, { password: newPassword });
+  }
 }

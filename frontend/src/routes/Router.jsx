@@ -5,6 +5,8 @@ import LandingPage from "../pages/LandingPage";
 import CatalogPage from "../pages/CatalogPage";
 import AdminDashboard from "../components/admin/AdminDashboard";
 import LoginRole from "../components/auth/LoginRole";
+import ForgotPassword from "../components/auth/ForgotPassword";
+import ResetPassword from "../components/auth/ResetPassword";
 import Nosotros from "../pages/Nosotros";
 import Contacto from "../pages/Contacto";
 import Carrito from "../pages/Carrito";
@@ -26,6 +28,9 @@ export function Router() {
                     <Route path="/contacto" element={<Contacto />} />
                     <Route path="/carrito" element={<Carrito />} />
                     <Route path="/login-role" element={<LoginRole />} />
+                    <Route path="/login" element={<LoginRole />} />
+                    <Route path="/forgot-password" element={<ForgotPassword />} />
+                    <Route path="/reset-password" element={<ResetPassword />} />
                     
                     {/* Admin genérico si lo necesitas */}
                     <Route path="/admin" element={<AdminDashboard />} />

@@ -1,15 +1,19 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt.strategy';
+import { EmailService } from './email.service';
 import { UsersModule } from '../users/users.module';
 import { ClientsModule } from '../clients/clients.module';
+import { PasswordResetToken } from './password-reset-token.entity';
 
 @Module({
   imports: [
+    TypeOrmModule.forFeature([PasswordResetToken]),
     UsersModule,
     ClientsModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
@@ -31,7 +35,7 @@ import { ClientsModule } from '../clients/clients.module';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy, EmailService],
   exports: [AuthService, JwtStrategy, PassportModule],
 })
 export class AuthModule {}
