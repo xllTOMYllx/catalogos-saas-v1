@@ -21,17 +21,30 @@ export class EmailService {
     if (!emailUser || !emailPassword) {
       // Use Ethereal for testing if no credentials configured
       this.logger.warn('No email credentials found. Using Ethereal test account...');
-      const testAccount = await nodemailer.createTestAccount();
-      this.transporter = nodemailer.createTransport({
-        host: 'smtp.ethereal.email',
-        port: 587,
-        secure: false,
-        auth: {
-          user: testAccount.user,
-          pass: testAccount.pass,
-        },
-      });
-      this.logger.log(`Ethereal test account created: ${testAccount.user}`);
+      try {
+        const testAccount = await nodemailer.createTestAccount();
+        this.transporter = nodemailer.createTransport({
+          host: 'smtp.ethereal.email',
+          port: 587,
+          secure: false,
+          auth: {
+            user: testAccount.user,
+            pass: testAccount.pass,
+          },
+        });
+        this.logger.log(`Ethereal test account created: ${testAccount.user}`);
+      } catch (error) {
+        // If Ethereal fails (network issue), create a local test transport
+        this.logger.warn('Failed to connect to Ethereal. Using local test transport.');
+        this.transporter = nodemailer.createTransport({
+          host: 'localhost',
+          port: 1025,
+          secure: false,
+          ignoreTLS: true,
+        });
+        this.logger.warn('⚠️  Email transport configured but no SMTP server available. Emails will not be sent.');
+        this.logger.warn('💡 To enable emails, configure EMAIL_USER and EMAIL_PASSWORD in .env');
+      }
     } else {
       // Use configured email service
       this.transporter = nodemailer.createTransport({
@@ -68,13 +81,30 @@ export class EmailService {
       
       // Log preview URL for Ethereal
       if (info.messageId && info.messageId.includes('ethereal')) {
-        this.logger.log(`Preview URL: ${nodemailer.getTestMessageUrl(info)}`);
+        const previewUrl = nodemailer.getTestMessageUrl(info);
+        if (previewUrl) {
+          this.logger.log(`📧 Preview URL: ${previewUrl}`);
+        }
       }
 
-      this.logger.log(`Password reset email sent to ${email}`);
+      this.logger.log(`✅ Password reset email sent to ${email}`);
+      this.logger.log(`🔗 Reset URL: ${resetUrl}`);
       return true;
     } catch (error) {
-      this.logger.error(`Failed to send email to ${email}:`, error);
+      this.logger.error(`❌ Failed to send email to ${email}:`, error);
+      // In development without email configured, still log the token for testing
+      if (!this.configService.get<string>('EMAIL_USER')) {
+        const frontendUrl = this.configService.get<string>(
+          'FRONTEND_URL',
+          'http://localhost:5173',
+        );
+        const resetUrl = `${frontendUrl}/reset-password?token=${resetToken}`;
+        this.logger.warn(`⚠️  Email not sent, but you can use this URL for testing:`);
+        this.logger.warn(`🔗 ${resetUrl}`);
+        this.logger.warn(`📝 Token: ${resetToken}`);
+        // Return true so the user flow isn't interrupted in development
+        return true;
+      }
       return false;
     }
   }
