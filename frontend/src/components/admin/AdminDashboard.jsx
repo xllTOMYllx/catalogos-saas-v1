@@ -5,6 +5,7 @@ import { ArrowLeft, Save, Eye, Lock } from 'lucide-react';  // Íconos
 import ProductList from './ProductList';
 import ProductCard from '../ProductCard';
 import CustomizationForm from './CustomizationForm';
+import SubscriptionLimitIndicator from '../SubscriptionLimitIndicator';
 import toast from 'react-hot-toast';  // Para feedback
 import './../../styles/AdminDashboard.css';  // Estilos específicos del dashboard
 
@@ -160,6 +161,26 @@ function AdminDashboard() {
         <p className="text-gray-400 text-sm sm:text-base">Productos: {getTotalProducts()} | Stock Total: {getTotalStock()}</p>
       </div>
     </div>
+
+    {/* Subscription Limit Indicator */}
+    {!readOnly && (() => {
+      const userId = localStorage.getItem('userId');
+      const storedUser = localStorage.getItem('user');
+      let actualUserId = null;
+      
+      // Try to get numeric user ID from stored user object
+      if (storedUser) {
+        try {
+          const userObj = JSON.parse(storedUser);
+          actualUserId = userObj.id;
+        } catch (e) {
+          // If parsing fails, try using userId directly if it's a number
+          actualUserId = !isNaN(userId) ? parseInt(userId) : null;
+        }
+      }
+      
+      return actualUserId ? <div className="mb-6"><SubscriptionLimitIndicator userId={actualUserId} /></div> : null;
+    })()}
 
     {/* Preview Tab: Mini-Grid + Stats */}
         {activeTab === 'preview' && (

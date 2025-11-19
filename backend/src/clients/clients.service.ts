@@ -1,13 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Client } from './client.entity';
+import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 
 @Injectable()
 export class ClientsService {
   constructor(
     @InjectRepository(Client)
     private clientsRepository: Repository<Client>,
+    private subscriptionsService: SubscriptionsService,
   ) {}
 
   async findAll(): Promise<Client[]> {
@@ -29,6 +31,21 @@ export class ClientsService {
   }
 
   async create(clientData: Partial<Client>): Promise<Client> {
+    // Validate subscription limits if userId is provided
+    if (clientData.userId) {
+      const limits = await this.subscriptionsService.checkLimits(
+        clientData.userId,
+      );
+
+      if (!limits.canCreateCatalog) {
+        const maxCatalogs =
+          limits.maxCatalogs === -1 ? 'ilimitados' : limits.maxCatalogs;
+        throw new ForbiddenException(
+          `Has alcanzado el límite de ${maxCatalogs} catálogos de tu plan actual (tienes ${limits.currentCatalogs}). Actualiza tu plan para crear más catálogos.`,
+        );
+      }
+    }
+
     const client = this.clientsRepository.create(clientData);
     return this.clientsRepository.save(client);
   }

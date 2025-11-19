@@ -1,9 +1,11 @@
 import { useForm } from 'react-hook-form';
 import { useAdminStore } from '../../store/adminStore';
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import toast from 'react-hot-toast';  // Para feedback
 import { uploadApi } from '../../api/upload';
+import SubscriptionLimitModal from '../SubscriptionLimitModal';
+import { isSubscriptionLimitError, parseSubscriptionError } from '../../utils/subscriptionErrors';
 
 function ProductForm({ onClose, editingId }) {
   const activeCatalog = useAdminStore((state) => state.getActiveCatalog());
@@ -11,6 +13,7 @@ function ProductForm({ onClose, editingId }) {
   const { register, handleSubmit, reset, setValue } = useForm();
   const products = activeCatalog.products || [];
   const editingProduct = products.find(p => p.id === editingId);
+  const [limitError, setLimitError] = useState(null);
 
   useEffect(() => {
     if (editingProduct) {
@@ -35,7 +38,13 @@ function ProductForm({ onClose, editingId }) {
       }
       onClose();
     } catch (error) {
-      toast.error('Error: ' + error.message);
+      // Check if it's a subscription limit error
+      if (isSubscriptionLimitError(error)) {
+        const errorInfo = parseSubscriptionError(error);
+        setLimitError(errorInfo);
+      } else {
+        toast.error('Error: ' + error.message);
+      }
     }
   };
 
@@ -60,10 +69,21 @@ function ProductForm({ onClose, editingId }) {
   });
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-[#121516] p-6 rounded-lg w-full max-w-md">
-        <h3 className="text-xl font-bold mb-4">{editingId ? 'Editar Producto' : 'Agregar Producto'}</h3>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <>
+      <SubscriptionLimitModal
+        isOpen={!!limitError}
+        onClose={() => {
+          setLimitError(null);
+          onClose();
+        }}
+        title={limitError?.title}
+        message={limitError?.message}
+        type={limitError?.type}
+      />
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-[#121516] p-6 rounded-lg w-full max-w-md">
+          <h3 className="text-xl font-bold mb-4">{editingId ? 'Editar Producto' : 'Agregar Producto'}</h3>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <input {...register('nombre', { required: 'Nombre requerido' })} placeholder="Nombre" className="w-full p-2 bg-[#171819] text-white rounded" />
           <textarea {...register('description')} placeholder="Descripción" className="w-full p-2 bg-[#171819] text-white rounded h-20" />
           <input {...register('precio', { required: true, min: 0 })} type="number" placeholder="Precio" className="w-full p-2 bg-[#171819] text-white rounded" />
@@ -83,6 +103,7 @@ function ProductForm({ onClose, editingId }) {
         </form>
       </div>
     </div>
+    </>
   );
 }
 
