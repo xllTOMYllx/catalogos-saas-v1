@@ -119,7 +119,7 @@ export class SubscriptionsService {
     // If no subscription exists, provide default FREE plan limits
     let maxCatalogs = 1;
     let maxProducts = 20;
-    
+
     if (subscription && subscription.plan) {
       maxCatalogs = subscription.plan.max_catalogs;
       maxProducts = subscription.plan.max_products_per_catalog;
@@ -164,7 +164,7 @@ export class SubscriptionsService {
     // Default to FREE plan limits if no subscription
     let maxProducts = 20;
     let planName = 'FREE';
-    
+
     if (subscription && subscription.plan) {
       maxProducts = subscription.plan.max_products_per_catalog;
       planName = subscription.plan.name;

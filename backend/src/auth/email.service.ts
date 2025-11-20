@@ -16,11 +16,16 @@ export class EmailService {
   private async initializeTransporter() {
     const emailUser = this.configService.get<string>('EMAIL_USER');
     const emailPassword = this.configService.get<string>('EMAIL_PASSWORD');
-    const emailService = this.configService.get<string>('EMAIL_SERVICE', 'gmail');
+    const emailService = this.configService.get<string>(
+      'EMAIL_SERVICE',
+      'gmail',
+    );
 
     if (!emailUser || !emailPassword) {
       // Use Ethereal for testing if no credentials configured
-      this.logger.warn('No email credentials found. Using Ethereal test account...');
+      this.logger.warn(
+        'No email credentials found. Using Ethereal test account...',
+      );
       try {
         const testAccount = await nodemailer.createTestAccount();
         this.transporter = nodemailer.createTransport({
@@ -35,15 +40,21 @@ export class EmailService {
         this.logger.log(`Ethereal test account created: ${testAccount.user}`);
       } catch (error) {
         // If Ethereal fails (network issue), create a local test transport
-        this.logger.warn('Failed to connect to Ethereal. Using local test transport.');
+        this.logger.warn(
+          'Failed to connect to Ethereal. Using local test transport.',
+        );
         this.transporter = nodemailer.createTransport({
           host: 'localhost',
           port: 1025,
           secure: false,
           ignoreTLS: true,
         });
-        this.logger.warn('⚠️  Email transport configured but no SMTP server available. Emails will not be sent.');
-        this.logger.warn('💡 To enable emails, configure EMAIL_USER and EMAIL_PASSWORD in .env');
+        this.logger.warn(
+          '⚠️  Email transport configured but no SMTP server available. Emails will not be sent.',
+        );
+        this.logger.warn(
+          '💡 To enable emails, configure EMAIL_USER and EMAIL_PASSWORD in .env',
+        );
       }
     } else {
       // Use configured email service
@@ -71,14 +82,21 @@ export class EmailService {
       const resetUrl = `${frontendUrl}/reset-password?token=${resetToken}`;
 
       const mailOptions = {
-        from: this.configService.get<string>('EMAIL_FROM', '"Catálogos SaaS" <noreply@catalogos-saas.com>'),
+        from: this.configService.get<string>(
+          'EMAIL_FROM',
+          '"Catálogos SaaS" <noreply@catalogos-saas.com>',
+        ),
         to: email,
         subject: 'Recuperación de Contraseña - Catálogos SaaS',
-        html: this.getPasswordResetEmailTemplate(userName, resetUrl, resetToken),
+        html: this.getPasswordResetEmailTemplate(
+          userName,
+          resetUrl,
+          resetToken,
+        ),
       };
 
       const info = await this.transporter.sendMail(mailOptions);
-      
+
       // Log preview URL for Ethereal
       if (info.messageId && info.messageId.includes('ethereal')) {
         const previewUrl = nodemailer.getTestMessageUrl(info);
@@ -99,7 +117,9 @@ export class EmailService {
           'http://localhost:5173',
         );
         const resetUrl = `${frontendUrl}/reset-password?token=${resetToken}`;
-        this.logger.warn(`⚠️  Email not sent, but you can use this URL for testing:`);
+        this.logger.warn(
+          `⚠️  Email not sent, but you can use this URL for testing:`,
+        );
         this.logger.warn(`🔗 ${resetUrl}`);
         this.logger.warn(`📝 Token: ${resetToken}`);
         // Return true so the user flow isn't interrupted in development

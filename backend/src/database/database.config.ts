@@ -5,6 +5,7 @@ import { Product } from '../products/product.entity';
 import { Catalog } from '../catalogs/catalog.entity';
 import { Subscription } from '../subscriptions/subscription.entity';
 import { SubscriptionPlan } from '../subscription-plans/subscription-plan.entity';
+import { PasswordResetToken } from '../auth/password-reset-token.entity';
 
 /**
  * Database configuration for TypeORM
@@ -19,7 +20,15 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME || 'catalogos_saas',
-  entities: [User, Client, Product, Catalog, Subscription, SubscriptionPlan],
+  entities: [
+    User,
+    Client,
+    Product,
+    Catalog,
+    Subscription,
+    SubscriptionPlan,
+    PasswordResetToken,
+  ],
   synchronize: false, // Disable auto-sync to use existing database schema
   logging: process.env.NODE_ENV !== 'production' ? ['error'] : false,
 };
