@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { authApi } from '../../api/auth';
 import toast from 'react-hot-toast';
+import { getValidationError } from '../../utils/validation';
 
 function ForgotPassword() {
   const [email, setEmail] = useState('');
@@ -13,6 +14,12 @@ function ForgotPassword() {
     
     if (!email) {
       return toast.error('Por favor ingresa tu email.');
+    }
+
+    // Validate email format
+    const emailError = getValidationError('Email', email, 'email');
+    if (emailError) {
+      return toast.error(emailError);
     }
 
     setIsLoading(true);
