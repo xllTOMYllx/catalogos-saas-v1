@@ -18,6 +18,7 @@ import { Product } from './products/product.entity';
 import { Catalog } from './catalogs/catalog.entity';
 import { Subscription } from './subscriptions/subscription.entity';
 import { SubscriptionPlan } from './subscription-plans/subscription-plan.entity';
+import { PasswordResetToken } from './auth/password-reset-token.entity';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { SubscriptionPlan } from './subscription-plans/subscription-plan.entity'
           Catalog,
           Subscription,
           SubscriptionPlan,
+          PasswordResetToken,
         ],
         synchronize: false,
         logging:

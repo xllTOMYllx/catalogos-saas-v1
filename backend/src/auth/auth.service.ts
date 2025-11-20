@@ -64,7 +64,10 @@ export class AuthService {
           auto_renew: true,
         });
       } catch (subscriptionError) {
-        console.error('Failed to create default subscription:', subscriptionError);
+        console.error(
+          'Failed to create default subscription:',
+          subscriptionError,
+        );
         // Continue registration even if subscription creation fails
         // The user will get default limits from the fallback logic
       }
@@ -256,7 +259,7 @@ export class AuthService {
 
     // Find user by email
     const user = await this.usersService.findByEmail(email);
-    
+
     // Always return success to prevent email enumeration attacks
     if (!user) {
       return {
@@ -315,10 +318,7 @@ export class AuthService {
     const { token } = verifyResetTokenDto;
 
     // Hash the token to compare with stored hash
-    const hashedToken = crypto
-      .createHash('sha256')
-      .update(token)
-      .digest('hex');
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
 
     // Find the token in database
     const resetToken = await this.resetTokenRepository.findOne({
@@ -360,10 +360,7 @@ export class AuthService {
     const { token, newPassword } = resetPasswordDto;
 
     // Hash the token to find in database
-    const hashedToken = crypto
-      .createHash('sha256')
-      .update(token)
-      .digest('hex');
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
 
     // Find and validate the token
     const resetToken = await this.resetTokenRepository.findOne({
@@ -412,7 +409,8 @@ export class AuthService {
 
     return {
       success: true,
-      message: 'Password has been reset successfully. You can now log in with your new password.',
+      message:
+        'Password has been reset successfully. You can now log in with your new password.',
     };
   }
 
