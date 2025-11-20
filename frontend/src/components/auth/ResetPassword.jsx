@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { authApi } from '../../api/auth';
 import toast from 'react-hot-toast';
+import PasswordInput from '../PasswordInput';
 
 function ResetPassword() {
   const [searchParams] = useSearchParams();
@@ -132,39 +133,28 @@ function ResetPassword() {
         </p>
         
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="newPassword" className="block text-gray-300 mb-2">
-              Nueva Contraseña
-            </label>
-            <input
-              id="newPassword"
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="Mínimo 6 caracteres"
-              className="w-full p-3 bg-[#171819] text-white rounded border border-gray-600 focus:border-[#f24427] focus:outline-none"
-              required
-              minLength={6}
-              disabled={isLoading}
-            />
-          </div>
+          <PasswordInput
+            id="newPassword"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            placeholder="Mínimo 6 caracteres"
+            label="Nueva Contraseña"
+            required={true}
+            minLength={6}
+            disabled={isLoading}
+            showStrengthIndicator={true}
+          />
           
-          <div>
-            <label htmlFor="confirmPassword" className="block text-gray-300 mb-2">
-              Confirmar Contraseña
-            </label>
-            <input
-              id="confirmPassword"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Repite tu contraseña"
-              className="w-full p-3 bg-[#171819] text-white rounded border border-gray-600 focus:border-[#f24427] focus:outline-none"
-              required
-              minLength={6}
-              disabled={isLoading}
-            />
-          </div>
+          <PasswordInput
+            id="confirmPassword"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="Repite tu contraseña"
+            label="Confirmar Contraseña"
+            required={true}
+            minLength={6}
+            disabled={isLoading}
+          />
           
           <button 
             type="submit" 

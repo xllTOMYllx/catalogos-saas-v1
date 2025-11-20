@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAdminStore } from '../../store/adminStore';
 import { useAuth } from '../../contexts/useAuth';
 import toast from 'react-hot-toast';
+import PasswordInput from '../PasswordInput';
+import { getValidationError } from '../../utils/validation';
 
 // Helper simple para generar slug seguro a partir del nombre del negocio
 const makeSlug = (text) => {
@@ -19,6 +21,7 @@ function LoginRole() {
   const [mode, setMode] = useState(''); // '', 'register', 'login', 'user'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [nombre, setNombre] = useState('');
   const [negocioNombre, setNegocioNombre] = useState('');
   const [telefono, setTelefono] = useState('');
@@ -43,12 +46,46 @@ function LoginRole() {
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    
+    // Validate all required fields
     if (!email || !password || !nombre || !negocioNombre) {
       return toast.error('Completa todos los campos requeridos.');
     }
 
+    // Validate email format
+    const emailError = getValidationError('Email', email, 'email');
+    if (emailError) {
+      return toast.error(emailError);
+    }
+
+    // Validate name format
+    const nombreError = getValidationError('Nombre', nombre, 'name');
+    if (nombreError) {
+      return toast.error(nombreError);
+    }
+
+    // Validate business name format
+    const negocioError = getValidationError('Nombre del negocio', negocioNombre, 'businessName');
+    if (negocioError) {
+      return toast.error(negocioError);
+    }
+
+    // Validate phone format (if provided)
+    if (telefono) {
+      const telefonoError = getValidationError('Teléfono', telefono, 'phone');
+      if (telefonoError) {
+        return toast.error(telefonoError);
+      }
+    }
+
+    // Validate password length
     if (password.length < 6) {
       return toast.error('La contraseña debe tener al menos 6 caracteres.');
+    }
+
+    // Validate password confirmation
+    if (password !== confirmPassword) {
+      return toast.error('Las contraseñas no coinciden.');
     }
 
     try {
@@ -123,46 +160,80 @@ function LoginRole() {
         <div className="bg-[#121516] p-8 rounded-lg w-full max-w-md">
           <h2 className="text-2xl font-bold text-white mb-6 text-center">Crear Nueva Cuenta</h2>
           <form onSubmit={handleRegister} className="space-y-4">
-            <input
-              type="text"
-              value={nombre}
-              onChange={(e) => setNombre(e.target.value)}
-              placeholder="Tu Nombre Completo"
-              className="w-full p-3 bg-[#171819] text-white rounded border border-gray-600 focus:border-[#f24427]"
-              required
-            />
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email"
-              className="w-full p-3 bg-[#171819] text-white rounded border border-gray-600 focus:border-[#f24427]"
-              required
-            />
-            <input
-              type="password"
+            <div>
+              <label htmlFor="register-nombre" className="block text-gray-300 mb-2">
+                Nombre Completo
+              </label>
+              <input
+                id="register-nombre"
+                type="text"
+                value={nombre}
+                onChange={(e) => setNombre(e.target.value)}
+                placeholder="Tu Nombre Completo"
+                className="w-full p-3 bg-[#171819] text-white rounded border border-gray-600 focus:border-[#f24427] focus:outline-none"
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="register-email" className="block text-gray-300 mb-2">
+                Email
+              </label>
+              <input
+                id="register-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="tu-email@ejemplo.com"
+                className="w-full p-3 bg-[#171819] text-white rounded border border-gray-600 focus:border-[#f24427] focus:outline-none"
+                required
+              />
+            </div>
+            <PasswordInput
+              id="register-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Contraseña (mínimo 6 caracteres)"
-              className="w-full p-3 bg-[#171819] text-white rounded border border-gray-600 focus:border-[#f24427]"
-              required
+              label="Contraseña"
+              required={true}
+              minLength={6}
+              showStrengthIndicator={true}
+            />
+            <PasswordInput
+              id="register-confirm-password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Confirmar contraseña"
+              label="Confirmar Contraseña"
+              required={true}
               minLength={6}
             />
-            <input
-              type="text"
-              value={negocioNombre}
-              onChange={(e) => setNegocioNombre(e.target.value)}
-              placeholder="Nombre de tu Negocio"
-              className="w-full p-3 bg-[#171819] text-white rounded border border-gray-600 focus:border-[#f24427]"
-              required
-            />
-            <input
-              type="tel"
-              value={telefono}
-              onChange={(e) => setTelefono(e.target.value)}
-              placeholder="Teléfono (opcional)"
-              className="w-full p-3 bg-[#171819] text-white rounded border border-gray-600 focus:border-[#f24427]"
-            />
+            <div>
+              <label htmlFor="register-negocio" className="block text-gray-300 mb-2">
+                Nombre del Negocio
+              </label>
+              <input
+                id="register-negocio"
+                type="text"
+                value={negocioNombre}
+                onChange={(e) => setNegocioNombre(e.target.value)}
+                placeholder="Nombre de tu Negocio"
+                className="w-full p-3 bg-[#171819] text-white rounded border border-gray-600 focus:border-[#f24427] focus:outline-none"
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="register-telefono" className="block text-gray-300 mb-2">
+                Teléfono (opcional)
+              </label>
+              <input
+                id="register-telefono"
+                type="tel"
+                value={telefono}
+                onChange={(e) => setTelefono(e.target.value)}
+                placeholder="+52 1234567890"
+                className="w-full p-3 bg-[#171819] text-white rounded border border-gray-600 focus:border-[#f24427] focus:outline-none"
+              />
+            </div>
             <button type="submit" className="w-full bg-[#f24427] text-white py-3 rounded hover:bg-[#d6331a] font-semibold">
               Crear Cuenta y Catálogo
             </button>
@@ -188,21 +259,27 @@ function LoginRole() {
         <div className="bg-[#121516] p-8 rounded-lg w-full max-w-md">
           <h2 className="text-2xl font-bold text-white mb-6 text-center">Iniciar Sesión</h2>
           <form onSubmit={handleLogin} className="space-y-4">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email"
-              className="w-full p-3 bg-[#171819] text-white rounded border border-gray-600 focus:border-[#f24427]"
-              required
-            />
-            <input
-              type="password"
+            <div>
+              <label htmlFor="login-email" className="block text-gray-300 mb-2">
+                Email
+              </label>
+              <input
+                id="login-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="tu-email@ejemplo.com"
+                className="w-full p-3 bg-[#171819] text-white rounded border border-gray-600 focus:border-[#f24427] focus:outline-none"
+                required
+              />
+            </div>
+            <PasswordInput
+              id="login-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Contraseña"
-              className="w-full p-3 bg-[#171819] text-white rounded border border-gray-600 focus:border-[#f24427]"
-              required
+              label="Contraseña"
+              required={true}
             />
             <button type="submit" className="w-full bg-[#f24427] text-white py-3 rounded hover:bg-[#d6331a] font-semibold">
               Iniciar Sesión
