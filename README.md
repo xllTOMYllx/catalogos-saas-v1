@@ -40,8 +40,10 @@ catalogos-saas-v1/
 - ✅ Módulo de Productos (CRUD completo)
 - ✅ Módulo de Catálogos (vincular clientes y productos)
 - ✅ Módulo de Autenticación (login/logout)
+- ✅ **Recuperación de Contraseña (email seguro)** 🆕
 - ✅ Módulo de Negocios (personalización legacy)
 - ✅ **Módulo de Suscripciones (planes y límites)** 🆕
+- ✅ Almacenamiento de imágenes en servidor
 - ✅ TypeScript con tipado estricto
 
 ### Frontend (React + Vite)
@@ -141,6 +143,14 @@ DB_USERNAME=postgres
 DB_PASSWORD=postgres
 DB_NAME=catalogos_saas
 NODE_ENV=development
+JWT_SECRET=tu-secreto-jwt
+# Opcional para recuperación de contraseña (usa Ethereal por defecto en desarrollo)
+MAIL_HOST=smtp.example.com
+MAIL_PORT=587
+MAIL_USER=your-email@example.com
+MAIL_PASSWORD=your-email-password
+MAIL_FROM=noreply@example.com
+FRONTEND_URL=http://localhost:5173
 ```
 
 ### 3. Frontend
@@ -192,6 +202,8 @@ El frontend estará disponible en `http://localhost:5173`
 ### Autenticación
 - `POST /api/auth/login` - Iniciar sesión
 - `POST /api/auth/logout` - Cerrar sesión
+- `POST /api/auth/forgot-password` - Solicitar recuperación de contraseña 🆕
+- `POST /api/auth/reset-password` - Restablecer contraseña con token 🆕
 
 ### Negocios (Legacy)
 - `GET /api/business` - Obtener información del negocio por defecto
@@ -230,9 +242,9 @@ Este proyecto incluye un **sistema completo de suscripciones** con 4 planes:
 Los cambios de plan se gestionan manualmente a través de WhatsApp para garantizar un control adecuado y verificación de pagos. Los usuarios contactan al soporte mediante WhatsApp para solicitar cambios de plan.
 
 **Para más información:**
-- 📚 [Documentación Completa de Suscripciones](SUBSCRIPTIONS.md)
-- 🚀 [Guía de Implementación](IMPLEMENTACION_SUSCRIPCIONES.md)
-- 📱 [Configuración de WhatsApp](CONFIGURACION_WHATSAPP.md) 🆕
+- 📚 [Documentación Completa de Suscripciones](Changes_Documentation/Subscriptions/SUBSCRIPTIONS.md)
+- 🚀 [Guía de Implementación](Changes_Documentation/Subscriptions/IMPLEMENTACION_SUSCRIPCIONES.md)
+- 📱 [Configuración de WhatsApp](Changes_Documentation/WhatsApp_Integration/CONFIGURACION_WHATSAPP.md)
 
 ### Instalación del Sistema de Suscripciones
 
@@ -245,6 +257,24 @@ cd backend && npm run start:dev
 
 # 3. Agregar ruta en el frontend (ver IMPLEMENTACION_SUSCRIPCIONES.md)
 ```
+
+## Sistema de Recuperación de Contraseña 🆕
+
+El proyecto incluye un **sistema completo de recuperación de contraseña** con las siguientes características:
+
+- ✅ Tokens seguros con expiración de 1 hora
+- ✅ Hash SHA-256 para seguridad
+- ✅ Prevención de enumeración de emails
+- ✅ Emails HTML profesionales
+- ✅ 100% Open Source (Ethereal Email en desarrollo, sin servicios pagos)
+
+**Configuración:**
+- En desarrollo, usa Ethereal Email automáticamente (sin configuración)
+- En producción, configura las variables MAIL_* en el `.env`
+
+**Documentación:**
+- 🔑 [Guía de Configuración](Changes_Documentation/Password_Recovery/PASSWORD_RECOVERY_SETUP.md)
+- 📋 [Resumen de Implementación](Changes_Documentation/Password_Recovery/IMPLEMENTATION_SUMMARY_PASSWORD_RECOVERY.md)
 
 ## Datos de Prueba
 
@@ -373,6 +403,21 @@ cd frontend
 npm run build
 # Los archivos estáticos estarán en dist/
 ```
+
+## 📚 Documentación
+
+Toda la documentación de cambios, implementaciones y mejoras se encuentra organizada en la carpeta `Changes_Documentation/`:
+
+- **Authentication/** - Autenticación, seguridad y gestión de usuarios
+- **Database_Integration/** - Integración de PostgreSQL
+- **General_Fixes/** - Correcciones generales y alineación frontend-backend
+- **Image_Upload/** - Sistema de almacenamiento de imágenes
+- **Password_Recovery/** - Recuperación de contraseña
+- **Product_Limits/** - Límites de productos por plan
+- **Subscriptions/** - Sistema completo de suscripciones
+- **WhatsApp_Integration/** - Integración de WhatsApp para cambios de plan
+
+Ver el [índice completo de documentación](Changes_Documentation/README.md) para más detalles.
 
 ## Contribuir
 
