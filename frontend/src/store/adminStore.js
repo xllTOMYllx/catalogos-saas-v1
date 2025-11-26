@@ -81,7 +81,7 @@ export const useAdminStore = create(
               [slug]: {
                 products: catalogProducts,
                 business: businessData,
-                isReadOnly: false
+                isReadOnly: true // Public catalog views are read-only
               }
             },
             activeId: slug,
