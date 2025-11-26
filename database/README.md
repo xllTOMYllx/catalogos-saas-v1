@@ -32,6 +32,7 @@ Stores business/client information for catalog customization.
 |--------|------|-------------|
 | id | SERIAL | Primary key |
 | nombre | VARCHAR(255) | Business name |
+| slug | VARCHAR(100) | Unique URL-friendly identifier for catalog (e.g., mi-tienda) |
 | logo | VARCHAR(500) | Path to business logo image |
 | color | VARCHAR(7) | Brand color (hex format, e.g., #f24427) |
 | telefono | VARCHAR(20) | Contact phone number |
@@ -45,7 +46,9 @@ Stores business/client information for catalog customization.
 - Many-to-One with `users` (userId → users.id)
 - One-to-Many with `catalogs`
 
-**Indexes:** `idx_clients_userId` on userId column
+**Indexes:** 
+- `idx_clients_userId` on userId column
+- `idx_clients_slug` on slug column (unique)
 
 ---
 
@@ -225,6 +228,8 @@ All products are linked to the default client (UrbanStreet)
 ### Clients (Businesses)
 - `GET /api/clients` - Get all clients
 - `GET /api/clients/:id` - Get client by ID
+- `GET /api/clients/slug/:slug` - Get client by slug (for public catalog URLs)
+- `GET /api/clients/check-slug/:slug` - Check if slug is available
 - `GET /api/clients/user/:userId` - Get all clients for a user
 - `POST /api/clients` - Create new client
 - `PUT /api/clients/:id` - Update client

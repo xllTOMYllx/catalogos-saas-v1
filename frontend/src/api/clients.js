@@ -13,6 +13,18 @@ export const clientsApi = {
     return response.data;
   },
 
+  // Get client by slug
+  getBySlug: async (slug) => {
+    const response = await api.get(`/clients/slug/${slug}`);
+    return response.data;
+  },
+
+  // Check slug availability
+  checkSlugAvailability: async (slug) => {
+    const response = await api.get(`/clients/check-slug/${slug}`);
+    return response.data;
+  },
+
   // Get clients by user ID
   getByUserId: async (userId) => {
     const response = await api.get(`/clients/user/${userId}`);
