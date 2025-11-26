@@ -19,6 +19,9 @@ export class Client {
   @Column()
   nombre: string;
 
+  @Column({ unique: true, nullable: true })
+  slug: string;
+
   @Column({ type: 'text', nullable: true })
   logo: string;
 

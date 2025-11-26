@@ -26,6 +26,74 @@ export const useAdminStore = create(
       loading: false,
       error: null,
 
+      // Load catalog data by slug (for public catalog URLs)
+      loadCatalogBySlug: async (slug) => {
+        const state = get();
+        try {
+          set({ loading: true, error: null });
+          
+          // Try to get client by slug
+          let client = null;
+          try {
+            client = await clientsApi.getBySlug(slug);
+          } catch (err) {
+            console.warn('Could not load client by slug:', err);
+            // Fall back to default catalog
+            return get().loadCatalog('default', 'default');
+          }
+          
+          if (!client) {
+            return get().loadCatalog('default', 'default');
+          }
+          
+          // Load client's catalog entries
+          let catalogProducts = [];
+          try {
+            const catalogEntries = await catalogsApi.getByClientId(client.id);
+            catalogProducts = catalogEntries.map(entry => ({
+              id: entry.product.id,
+              nombre: entry.product.nombre,
+              precio: entry.customPrice || entry.product.precio,
+              description: entry.product.description,
+              ruta: entry.product.ruta,
+              stock: entry.product.stock,
+              category: entry.product.category,
+              catalogId: entry.id,
+              active: entry.active
+            }));
+          } catch (err) {
+            console.error('Error loading catalog entries:', err);
+          }
+          
+          const businessData = {
+            nombre: client.nombre,
+            logo: client.logo,
+            color: client.color,
+            telefono: client.telefono,
+            direccion: client.direccion,
+            descripcion: client.descripcion,
+            slug: client.slug
+          };
+          
+          set({ 
+            catalogs: { 
+              ...state.catalogs,
+              [slug]: {
+                products: catalogProducts,
+                business: businessData,
+                isReadOnly: false
+              }
+            },
+            activeId: slug,
+            clientId: client.id,
+            loading: false 
+          });
+        } catch (error) {
+          console.error('Error loading catalog by slug:', error);
+          set({ loading: false, error: error.message });
+        }
+      },
+
       // Load catalog data for a specific client
       loadCatalog: async (clientId, slug = null) => {
         const state = get();
@@ -54,15 +122,18 @@ export const useAdminStore = create(
             // For client catalogs, load from catalogs API (client-specific)
             const catalogSlug = slug || clientId;
             
-            // Try to get client data by ID
+            // Try to get client data by ID or slug
             let client = null;
             try {
               // If clientId is numeric, fetch by ID
               if (!isNaN(clientId)) {
                 client = await clientsApi.getOne(parseInt(clientId));
+              } else {
+                // Try to fetch by slug
+                client = await clientsApi.getBySlug(clientId);
               }
             } catch (err) {
-              console.warn('Could not load client by ID:', err);
+              console.warn('Could not load client:', err);
             }
             
             // Load client's catalog entries (products they've added)

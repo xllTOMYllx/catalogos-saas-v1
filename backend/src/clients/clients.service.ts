@@ -1,4 +1,8 @@
-import { Injectable, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  ForbiddenException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Client } from './client.entity';
@@ -21,6 +25,20 @@ export class ClientsService {
       where: { id },
       relations: ['user'],
     });
+  }
+
+  async findBySlug(slug: string): Promise<Client | null> {
+    return this.clientsRepository.findOne({
+      where: { slug },
+      relations: ['user'],
+    });
+  }
+
+  async checkSlugAvailability(slug: string): Promise<{ available: boolean }> {
+    const existing = await this.clientsRepository.findOne({
+      where: { slug },
+    });
+    return { available: !existing };
   }
 
   async findByUserId(userId: number): Promise<Client[]> {
@@ -46,11 +64,31 @@ export class ClientsService {
       }
     }
 
+    // Validate slug uniqueness if provided
+    if (clientData.slug) {
+      const existingSlug = await this.findBySlug(clientData.slug);
+      if (existingSlug) {
+        throw new ConflictException(
+          `El slug "${clientData.slug}" ya está en uso. Por favor, elige otro.`,
+        );
+      }
+    }
+
     const client = this.clientsRepository.create(clientData);
     return this.clientsRepository.save(client);
   }
 
   async update(id: number, updates: Partial<Client>): Promise<Client | null> {
+    // If updating slug, validate uniqueness
+    if (updates.slug) {
+      const existingSlug = await this.findBySlug(updates.slug);
+      if (existingSlug && existingSlug.id !== id) {
+        throw new ConflictException(
+          `El slug "${updates.slug}" ya está en uso. Por favor, elige otro.`,
+        );
+      }
+    }
+
     // Remove fields that should not be updated to prevent issues
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const {

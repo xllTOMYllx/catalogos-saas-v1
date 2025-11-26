@@ -7,6 +7,7 @@ import {
   Body,
   Param,
   ParseIntPipe,
+  NotFoundException,
 } from '@nestjs/common';
 import { ClientsService } from './clients.service';
 import { Client } from './client.entity';
@@ -18,6 +19,22 @@ export class ClientsController {
   @Get()
   async findAll(): Promise<Client[]> {
     return this.clientsService.findAll();
+  }
+
+  @Get('slug/:slug')
+  async findBySlug(@Param('slug') slug: string): Promise<Client> {
+    const client = await this.clientsService.findBySlug(slug);
+    if (!client) {
+      throw new NotFoundException(`No se encontró el catálogo "${slug}"`);
+    }
+    return client;
+  }
+
+  @Get('check-slug/:slug')
+  async checkSlugAvailability(
+    @Param('slug') slug: string,
+  ): Promise<{ available: boolean }> {
+    return this.clientsService.checkSlugAvailability(slug);
   }
 
   @Get(':id')
