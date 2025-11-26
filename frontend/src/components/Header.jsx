@@ -36,6 +36,12 @@ export default function Header({ negocio: defaultNegocio }) {
   const staticSegments = ['admin', 'nosotros', 'contacto', 'colecciones', 'login', 'login-role', 'cart', 'checkout'];
   const currentCatalogSlug = first && !staticSegments.includes(first) ? first : null;
 
+  // Detectar si estamos en la landing page o en la página de demo
+  // En estas páginas ocultamos elementos de catálogo/tienda (búsqueda, carrito, colecciones, WhatsApp, LogoPortal)
+  const isLandingPage = location.pathname === '/';
+  const isDemoPage = location.pathname === '/demo';
+  const isSimplifiedNavbar = isLandingPage || isDemoPage;
+
   // Rol y sesión (más robusto)
   const storedRoleRaw = typeof window !== 'undefined' ? (localStorage.getItem('role') || '') : '';
   const storedRole = storedRoleRaw.toLowerCase().trim();
@@ -136,19 +142,23 @@ export default function Header({ negocio: defaultNegocio }) {
               <img src={businessData.logo} alt={`${businessData.nombre} Logo`} className="w-8 h-8 sm:w-10 sm:h-10 mr-2 rounded" />
               <h1 className="font-serif text-white font-semibold text-lg sm:text-xl truncate">{businessData.nombre}</h1>
             </button>
-            <LogoPortal onSwitch={handleCatalogSwitch} />
+            {/* Hide LogoPortal on landing page and demo page */}
+            {!isSimplifiedNavbar && <LogoPortal onSwitch={handleCatalogSwitch} />}
           </div>
 
           <nav className="hidden md:flex items-center gap-5 lg:gap-6 text-white text-sm">
             <button onClick={handleHomeNavigation} className={`hover:text-[#f24427] transition-colors whitespace-nowrap ${isHome ? 'text-[#f24427]' : ''}`}>INICIO</button>
 
-            <NavLink
-              to="/colecciones"
-              className={({ isActive }) => (isActive ? 'text-[#f24427] transition-colors whitespace-nowrap' : 'hover:text-[#f24427] transition-colors whitespace-nowrap')}
-              onClick={handleColecciones}
-            >
-              COLECCIONES
-            </NavLink>
+            {/* Hide COLECCIONES on landing page and demo page */}
+            {!isSimplifiedNavbar && (
+              <NavLink
+                to="/colecciones"
+                className={({ isActive }) => (isActive ? 'text-[#f24427] transition-colors whitespace-nowrap' : 'hover:text-[#f24427] transition-colors whitespace-nowrap')}
+                onClick={handleColecciones}
+              >
+                COLECCIONES
+              </NavLink>
+            )}
 
             <NavLink
               to="/nosotros"
@@ -182,20 +192,22 @@ export default function Header({ negocio: defaultNegocio }) {
             )}
           </nav>
 
-          {/* ...el resto del header no se modifica (buscador, botones, mobile menu) ... */}
+          {/* Desktop action buttons - hide search, cart, and WhatsApp on landing/demo pages */}
           <div className="hidden md:flex items-center gap-4">
-            {/* Form de búsqueda (escritorio) */}
-            <form onSubmit={handleSearchSubmit} className="border border-gray-600 rounded-full flex bg-[#121516] p-1 max-w-xs">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={handleSearch}
-                placeholder="Buscar productos..."
-                className="bg-transparent text-white px-3 py-1 outline-none w-full text-sm"
-                onKeyDown={(e) => e.key === 'Escape' && setSearchQuery('')}
-              />
-              <button type="submit" className="px-3 text-gray-200 hover:text-white">🔎</button>
-            </form>
+            {/* Form de búsqueda (escritorio) - hidden on landing/demo */}
+            {!isSimplifiedNavbar && (
+              <form onSubmit={handleSearchSubmit} className="border border-gray-600 rounded-full flex bg-[#121516] p-1 max-w-xs">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={handleSearch}
+                  placeholder="Buscar productos..."
+                  className="bg-transparent text-white px-3 py-1 outline-none w-full text-sm"
+                  onKeyDown={(e) => e.key === 'Escape' && setSearchQuery('')}
+                />
+                <button type="submit" className="px-3 text-gray-200 hover:text-white">🔎</button>
+              </form>
+            )}
 
             {/* Subscription badge: se muestra sólo si hay user */}
             {user && (
@@ -204,30 +216,36 @@ export default function Header({ negocio: defaultNegocio }) {
               </div>
             )}
 
-            <button onClick={() => setShowCartModal(true)} className="relative p-2 text-white hover:bg-[#f24427] rounded-full">
-              <ShoppingCartIcon className="w-5 h-5" />
-              {totalItems > 0 && <span className="absolute -top-1 -right-1 bg-red-500 text-xs rounded-full h-4 w-4 flex items-center justify-center">{totalItems}</span>}
-            </button>
+            {/* Cart button - hidden on landing/demo */}
+            {!isSimplifiedNavbar && (
+              <button onClick={() => setShowCartModal(true)} className="relative p-2 text-white hover:bg-[#f24427] rounded-full">
+                <ShoppingCartIcon className="w-5 h-5" />
+                {totalItems > 0 && <span className="absolute -top-1 -right-1 bg-red-500 text-xs rounded-full h-4 w-4 flex items-center justify-center">{totalItems}</span>}
+              </button>
+            )}
 
-            <button onClick={() => {
-              // Construye mensaje distinto si hay items o si es contacto general
-              const phone = String(businessData.telefono || businessData.phone || '1234567890').replace(/\D/g, '');
-              let msg;
-              if (items && items.length > 0) {
-                msg = `¡Hola! Mi pedido de ${businessData.nombre}: ${items.map(i => {
-                  const name = i.nombre ?? i.name ?? 'Producto';
-                  const qty = i.quantity ?? 1;
-                  const priceNum = Number(i.price ?? i.precio ?? 0) || 0;
-                  return `${name} x${qty} - ${fmt(priceNum)}`;
-                }).join('\n')} Total: ${fmt(total)}`;
-              } else {
-                msg = `¡Hola! Me interesa información sobre los catálogos de ${businessData.nombre}. ¿Me pueden ayudar, por favor?`;
-              }
-              const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
-              window.open(url, '_blank');
-            }} className="p-2 text-white hover:bg-green-500 rounded-full">
-              <PhoneIcon className="w-5 h-5" />
-            </button>
+            {/* WhatsApp button - hidden on landing/demo */}
+            {!isSimplifiedNavbar && (
+              <button onClick={() => {
+                // Construye mensaje distinto si hay items o si es contacto general
+                const phone = String(businessData.telefono || businessData.phone || '1234567890').replace(/\D/g, '');
+                let msg;
+                if (items && items.length > 0) {
+                  msg = `¡Hola! Mi pedido de ${businessData.nombre}: ${items.map(i => {
+                    const name = i.nombre ?? i.name ?? 'Producto';
+                    const qty = i.quantity ?? 1;
+                    const priceNum = Number(i.price ?? i.precio ?? 0) || 0;
+                    return `${name} x${qty} - ${fmt(priceNum)}`;
+                  }).join('\n')} Total: ${fmt(total)}`;
+                } else {
+                  msg = `¡Hola! Me interesa información sobre los catálogos de ${businessData.nombre}. ¿Me pueden ayudar, por favor?`;
+                }
+                const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+                window.open(url, '_blank');
+              }} className="p-2 text-white hover:bg-green-500 rounded-full">
+                <PhoneIcon className="w-5 h-5" />
+              </button>
+            )}
           </div>
 
           <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="md:hidden p-2 text-white hover:bg-[#f24427] rounded-md">
@@ -264,13 +282,16 @@ export default function Header({ negocio: defaultNegocio }) {
               <div className="py-2 space-y-1">
                 <button onClick={handleHomeNavigation} className="block w-full text-left py-3 px-2 rounded-md text-white/95 hover:text-[#f24427] transition-colors">INICIO</button>
 
-                <NavLink
-                  to="/colecciones"
-                  onClick={() => { handleColecciones(); setIsMobileMenuOpen(false); }}
-                  className={({ isActive }) => isActive ? 'block py-3 px-2 text-[#f24427] font-semibold' : 'block py-3 px-2 text-white/90 hover:text-[#f24427]'}
-                >
-                  COLECCIONES
-                </NavLink>
+                {/* Hide COLECCIONES on landing/demo pages */}
+                {!isSimplifiedNavbar && (
+                  <NavLink
+                    to="/colecciones"
+                    onClick={() => { handleColecciones(); setIsMobileMenuOpen(false); }}
+                    className={({ isActive }) => isActive ? 'block py-3 px-2 text-[#f24427] font-semibold' : 'block py-3 px-2 text-white/90 hover:text-[#f24427]'}
+                  >
+                    COLECCIONES
+                  </NavLink>
+                )}
 
                 <NavLink
                   to="/nosotros"
@@ -313,47 +334,50 @@ export default function Header({ negocio: defaultNegocio }) {
               </div>
             </nav>
 
-            <div className="flex items-center justify-between pt-2 border-t border-gray-800/40">
-              <div className="flex items-center gap-3">
-                <button onClick={() => setShowCartModal(true)} className="relative p-2 bg-white/6 text-white rounded-full hover:bg-white/10 transition">
-                  <ShoppingCartIcon className="w-5 h-5" />
-                  {totalItems > 0 && <span className="absolute -top-1 -right-1 bg-red-500 text-xs rounded-full h-4 w-4 flex items-center justify-center text-white">{totalItems}</span>}
-                </button>
+            {/* Mobile menu footer - hide cart, WhatsApp, and search on landing/demo pages */}
+            {!isSimplifiedNavbar && (
+              <div className="flex items-center justify-between pt-2 border-t border-gray-800/40">
+                <div className="flex items-center gap-3">
+                  <button onClick={() => setShowCartModal(true)} className="relative p-2 bg-white/6 text-white rounded-full hover:bg-white/10 transition">
+                    <ShoppingCartIcon className="w-5 h-5" />
+                    {totalItems > 0 && <span className="absolute -top-1 -right-1 bg-red-500 text-xs rounded-full h-4 w-4 flex items-center justify-center text-white">{totalItems}</span>}
+                  </button>
 
-                <button onClick={() => {
-                  const phone = String(businessData.telefono || businessData.phone || '1234567890').replace(/\D/g, '');
-                  let msg;
-                  if (items && items.length > 0) {
-                    msg = `¡Hola! Mi pedido de ${businessData.nombre}: ${items.map(i => {
-                      const name = i.nombre ?? i.name ?? 'Producto';
-                      const qty = i.quantity ?? 1;
-                      const priceNum = Number(i.price ?? i.precio ?? 0) || 0;
-                      return `${name} x${qty} - ${fmt(priceNum)}`;
-                    }).join('\n')} Total: ${fmt(total)}`;
-                  } else {
-                    msg = `¡Hola! Me interesa información sobre los catálogos de ${businessData.nombre}. ¿Me pueden ayudar, por favor?`;
-                  }
-                  const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
-                  window.open(url, '_blank');
-                }} className="p-2 bg-white/6 text-white rounded-full hover:bg-green-600/80 transition">
-                  <PhoneIcon className="w-5 h-5" />
-                </button>
-              </div>
-
-              <form onSubmit={(e) => { e.preventDefault(); handleSearchSubmit(); }} className="flex-1 ml-3 min-w-0">
-                <div className="flex items-center bg-[#0f1314] rounded-full border border-gray-700 px-2 py-1 min-w-0">
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={handleSearch}
-                    placeholder="Buscar..."
-                    className="bg-transparent text-white px-3 py-1 outline-none flex-1 text-sm min-w-0 truncate"
-                    onKeyDown={(e) => e.key === 'Escape' && setSearchQuery('')}
-                  />
-                  <button type="submit" className="px-3 text-white/90 flex-shrink-0">🔎</button>
+                  <button onClick={() => {
+                    const phone = String(businessData.telefono || businessData.phone || '1234567890').replace(/\D/g, '');
+                    let msg;
+                    if (items && items.length > 0) {
+                      msg = `¡Hola! Mi pedido de ${businessData.nombre}: ${items.map(i => {
+                        const name = i.nombre ?? i.name ?? 'Producto';
+                        const qty = i.quantity ?? 1;
+                        const priceNum = Number(i.price ?? i.precio ?? 0) || 0;
+                        return `${name} x${qty} - ${fmt(priceNum)}`;
+                      }).join('\n')} Total: ${fmt(total)}`;
+                    } else {
+                      msg = `¡Hola! Me interesa información sobre los catálogos de ${businessData.nombre}. ¿Me pueden ayudar, por favor?`;
+                    }
+                    const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+                    window.open(url, '_blank');
+                  }} className="p-2 bg-white/6 text-white rounded-full hover:bg-green-600/80 transition">
+                    <PhoneIcon className="w-5 h-5" />
+                  </button>
                 </div>
-              </form>
-            </div>
+
+                <form onSubmit={(e) => { e.preventDefault(); handleSearchSubmit(); }} className="flex-1 ml-3 min-w-0">
+                  <div className="flex items-center bg-[#0f1314] rounded-full border border-gray-700 px-2 py-1 min-w-0">
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={handleSearch}
+                      placeholder="Buscar..."
+                      className="bg-transparent text-white px-3 py-1 outline-none flex-1 text-sm min-w-0 truncate"
+                      onKeyDown={(e) => e.key === 'Escape' && setSearchQuery('')}
+                    />
+                    <button type="submit" className="px-3 text-white/90 flex-shrink-0">🔎</button>
+                  </div>
+                </form>
+              </div>
+            )}
           </div>
         )}
       </header>
