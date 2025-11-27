@@ -267,7 +267,7 @@ function SuperAdminDashboard() {
                             )}
                             <div>
                               <p className="text-sm font-medium text-white">{client.client.nombre}</p>
-                              <p className="text-xs text-gray-500">/{client.client.slug || 'sin-slug'}</p>
+                              <p className="text-xs text-gray-500">/{client.client.slug || 'Sin slug'}</p>
                             </div>
                           </div>
                         ) : (

@@ -51,7 +51,7 @@ export class AdminService {
         id: user.id,
         email: user.email,
         nombre: user.nombre,
-        isActive: user.isActive ?? true,
+        isActive: user.isActive,
         createdAt: user.createdAt,
         client: client
           ? {
@@ -83,7 +83,7 @@ export class AdminService {
       throw new NotFoundException(`User with ID ${userId} not found`);
     }
 
-    const newStatus = !(user.isActive ?? true);
+    const newStatus = !user.isActive;
     await this.usersService.setActiveStatus(userId, newStatus);
 
     return { success: true, isActive: newStatus };
@@ -138,8 +138,8 @@ export class AdminService {
     totalSubscriptions: number;
   }> {
     const users = await this.usersService.findAllClients();
-    const activeUsers = users.filter((u) => u.isActive ?? true);
-    const inactiveUsers = users.filter((u) => !(u.isActive ?? true));
+    const activeUsers = users.filter((u) => u.isActive);
+    const inactiveUsers = users.filter((u) => !u.isActive);
 
     let totalSubscriptions = 0;
     for (const user of users) {
