@@ -123,6 +123,14 @@ export class AuthService {
       };
     }
 
+    // Check if user is active (skip for admin users)
+    if (user.role !== 'admin' && user.isActive === false) {
+      return {
+        success: false,
+        message: 'Tu cuenta ha sido desactivada. Contacta al administrador.',
+      };
+    }
+
     // Check if password is hashed or plain text (for backward compatibility)
     let isValidPassword = false;
     if (user.password.startsWith('$2b$') || user.password.startsWith('$2a$')) {

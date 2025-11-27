@@ -40,4 +40,16 @@ export class UsersService {
   async updatePassword(id: number, newPassword: string): Promise<void> {
     await this.usersRepository.update(id, { password: newPassword });
   }
+
+  async setActiveStatus(id: number, isActive: boolean): Promise<User | null> {
+    await this.usersRepository.update(id, { isActive });
+    return this.findOne(id);
+  }
+
+  async findAllClients(): Promise<User[]> {
+    return this.usersRepository.find({
+      where: { role: 'client' },
+      order: { createdAt: 'DESC' },
+    });
+  }
 }

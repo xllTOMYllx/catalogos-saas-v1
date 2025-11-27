@@ -5,6 +5,7 @@ import LandingPage from "../pages/LandingPage";
 import DemoPage from "../pages/DemoPage";
 import CatalogPage from "../pages/CatalogPage";
 import AdminDashboard from "../components/admin/AdminDashboard";
+import SuperAdminDashboard from "../pages/SuperAdminDashboard";
 import LoginRole from "../components/auth/LoginRole";
 import ForgotPassword from "../components/auth/ForgotPassword";
 import ResetPassword from "../components/auth/ResetPassword";
@@ -15,6 +16,7 @@ import Carrito from "../pages/Carrito";
 import SubscriptionPlans from "../pages/SubscriptionPlans";
 import MainLayout from "../layouts/MainLayout";
 import ClientLayout from "../layouts/ClientLayout";
+import SuperAdminLayout from "../layouts/SuperAdminLayout";
 
 /**
  * Router principal de la aplicación
@@ -22,6 +24,7 @@ import ClientLayout from "../layouts/ClientLayout";
  * Separación de layouts:
  * - MainLayout: Páginas principales con Header estándar (INICIO, NOSOTROS, CONTACTO)
  * - ClientLayout: Espacio personalizado del cliente con ClientHeader (sin navegación a landing)
+ * - SuperAdminLayout: Panel de administración del sistema con SuperAdminHeader
  * 
  * Los clientes con su propio catálogo tienen un espacio aislado donde:
  * - No ven enlaces a la landing page principal
@@ -53,6 +56,11 @@ export function Router() {
                         
                         {/* Planes de suscripción */}
                         <Route path="/subscription-plans" element={<SubscriptionPlans />} />
+                    </Route>
+
+                    {/* Rutas con SuperAdminLayout (Panel de administración del sistema) */}
+                    <Route element={<SuperAdminLayout />}>
+                        <Route path="/super-admin" element={<SuperAdminDashboard />} />
                     </Route>
 
                     {/* Rutas con ClientLayout (Header específico para espacio de cliente) */}
