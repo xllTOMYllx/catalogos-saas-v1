@@ -61,6 +61,7 @@ export function Router() {
                         <Route path="/:catalogSlug/admin" element={<AdminDashboard />} />
                         <Route path="/:catalogSlug/nosotros" element={<ClientNosotros />} />
                         <Route path="/:catalogSlug/carrito" element={<Carrito />} />
+                        <Route path="/:catalogSlug/subscription-plans" element={<SubscriptionPlans />} />
                         <Route path="/:catalogSlug" element={<CatalogPage />} />
                     </Route>
                 </Routes>
