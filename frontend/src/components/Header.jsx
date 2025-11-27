@@ -40,7 +40,14 @@ export default function Header({ negocio: defaultNegocio }) {
   // En estas páginas ocultamos elementos de catálogo/tienda (búsqueda, carrito, colecciones, WhatsApp, LogoPortal)
   const isLandingPage = location.pathname === '/';
   const isDemoPage = location.pathname === '/demo';
-  const isSimplifiedNavbar = isLandingPage || isDemoPage;
+  
+  // Páginas públicas informativas donde usuarios anónimos solo ven navegación simplificada
+  const isPublicInfoPage = ['/nosotros', '/contacto'].includes(location.pathname);
+  
+  // El navbar simplificado se muestra en:
+  // 1. Landing page y Demo page (siempre)
+  // 2. Páginas públicas informativas cuando el usuario NO está autenticado
+  const isSimplifiedNavbar = isLandingPage || isDemoPage || (isPublicInfoPage && !isAuthenticated);
 
   // Rol y sesión (más robusto)
   const storedRoleRaw = typeof window !== 'undefined' ? (localStorage.getItem('role') || '') : '';
