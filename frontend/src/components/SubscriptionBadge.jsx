@@ -1,10 +1,11 @@
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Crown } from 'lucide-react';
 import useSubscriptionStore from '../store/subscriptionStore';
 
 const SubscriptionBadge = ({ userId }) => {
   const navigate = useNavigate();
+  const { catalogSlug } = useParams();
   const { currentSubscription, fetchUserSubscription } = useSubscriptionStore();
 
   useEffect(() => {
@@ -27,9 +28,19 @@ const SubscriptionBadge = ({ userId }) => {
     return colors[planName] || 'bg-gray-100 text-gray-700';
   };
 
+  const handleNavigate = () => {
+    // If we're in a client context (has catalogSlug), navigate to client-specific subscription-plans
+    // Otherwise, navigate to the global subscription-plans page
+    if (catalogSlug) {
+      navigate(`/${catalogSlug}/subscription-plans`);
+    } else {
+      navigate('/subscription-plans');
+    }
+  };
+
   return (
     <div
-      onClick={() => navigate('/subscription-plans')}
+      onClick={handleNavigate}
       className={`inline-flex items-center px-3 py-1.5 rounded-full cursor-pointer transition-all hover:scale-105 ${getPlanColor(
         currentSubscription.plan?.name
       )}`}
