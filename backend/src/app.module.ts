@@ -12,6 +12,7 @@ import { CatalogsModule } from './catalogs/catalogs.module';
 import { UploadModule } from './upload/upload.module';
 import { SubscriptionPlansModule } from './subscription-plans/subscription-plans.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
+import { AdminModule } from './admin/admin.module';
 import { User } from './users/user.entity';
 import { Client } from './clients/client.entity';
 import { Product } from './products/product.entity';
@@ -58,6 +59,7 @@ import { PasswordResetToken } from './auth/password-reset-token.entity';
     UploadModule,
     SubscriptionPlansModule,
     SubscriptionsModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],

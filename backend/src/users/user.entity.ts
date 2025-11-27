@@ -27,6 +27,9 @@ export class User {
   @Column({ nullable: true })
   nombre: string;
 
+  @Column({ default: true })
+  isActive: boolean;
+
   @CreateDateColumn()
   createdAt: Date;
 

@@ -5,6 +5,7 @@ import { useAuth } from '../../contexts/useAuth';
 import toast from 'react-hot-toast';
 import PasswordInput from '../PasswordInput';
 import { getValidationError } from '../../utils/validation';
+import { Shield } from 'lucide-react';
 
 // Helper simple para generar slug seguro a partir del nombre del negocio
 const makeSlug = (text) => {
@@ -18,7 +19,7 @@ const makeSlug = (text) => {
 };
 
 function LoginRole() {
-  const [mode, setMode] = useState(''); // '', 'register', 'login', 'user'
+  const [mode, setMode] = useState(''); // '', 'register', 'login', 'admin'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -26,21 +27,38 @@ function LoginRole() {
   const [negocioNombre, setNegocioNombre] = useState('');
   const [telefono, setTelefono] = useState('');
   const navigate = useNavigate();
-  const { clearStorage, loadCatalog } = useAdminStore();
+  const { loadCatalog } = useAdminStore();
   const { login: authLogin, register: authRegister } = useAuth();
 
   const handleRoleSelect = (selectedRole) => {
-    if (selectedRole === 'user') {
-      // Usuario: Modo viewer, usa default read-only
-      localStorage.setItem('role', 'user');
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('user');
-      localStorage.removeItem('clientId');
-      clearStorage();  // Reset store a default
-      navigate('/');  // Directo a home
-      toast.success('Modo Usuario: Explora catálogos y carrito.');
-    } else {
-      setMode(selectedRole);
+    setMode(selectedRole);
+  };
+
+  const handleAdminLogin = async (e) => {
+    e.preventDefault();
+    if (!email || !password) {
+      return toast.error('Ingresa email y contraseña.');
+    }
+
+    try {
+      const response = await authLogin(email, password);
+      
+      if (!response.success) {
+        toast.error(response.message || 'Credenciales inválidas.');
+        return;
+      }
+
+      if (response.user?.role !== 'admin') {
+        toast.error('Esta cuenta no tiene permisos de administrador.');
+        return;
+      }
+
+      toast.success('¡Bienvenido, Administrador!');
+      navigate('/super-admin');
+    } catch (err) {
+      console.error('Error en login de admin:', err);
+      const errorMessage = err.response?.data?.message || err.message || 'Error desconocido';
+      toast.error(`No se pudo iniciar sesión: ${errorMessage}`);
     }
   };
 
@@ -307,6 +325,50 @@ function LoginRole() {
     );
   }
 
+  // Admin login form
+  if (mode === 'admin') {
+    return (
+      <div className="min-h-screen bg-[#080c0e] flex items-center justify-center p-4">
+        <div className="bg-[#121516] p-8 rounded-lg w-full max-w-md">
+          <div className="flex items-center justify-center gap-2 mb-6">
+            <Shield className="w-8 h-8 text-[#f24427]" />
+            <h2 className="text-2xl font-bold text-white">Acceso Administrador</h2>
+          </div>
+          <form onSubmit={handleAdminLogin} className="space-y-4">
+            <div>
+              <label htmlFor="admin-email" className="block text-gray-300 mb-2">
+                Email de Administrador
+              </label>
+              <input
+                id="admin-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="admin@test.com"
+                className="w-full p-3 bg-[#171819] text-white rounded border border-gray-600 focus:border-[#f24427] focus:outline-none"
+                required
+              />
+            </div>
+            <PasswordInput
+              id="admin-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Contraseña"
+              label="Contraseña"
+              required={true}
+            />
+            <button type="submit" className="w-full bg-[#f24427] text-white py-3 rounded hover:bg-[#d6331a] font-semibold">
+              Acceder al Panel
+            </button>
+          </form>
+          <button onClick={() => setMode('')} className="w-full mt-4 bg-gray-500 text-white py-2 rounded hover:bg-gray-600">
+            Volver
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   // Role selection (initial screen)
   return (
     <div className="min-h-screen bg-[#080c0e] flex items-center justify-center p-4">
@@ -326,15 +388,16 @@ function LoginRole() {
             Iniciar Sesión (Cliente Existente)
           </button>
           <button 
-            onClick={() => handleRoleSelect('user')} 
-            className="w-full bg-blue-500 text-white py-4 rounded font-semibold hover:bg-blue-600"
+            onClick={() => handleRoleSelect('admin')} 
+            className="w-full bg-gray-700 text-white py-4 rounded font-semibold hover:bg-gray-600 flex items-center justify-center gap-2"
           >
-            Soy Usuario: Explorar Catálogos
+            <Shield className="w-5 h-5" />
+            Administrador del Sistema
           </button>
         </div>
         <p className="text-gray-400 text-xs mt-4 text-center">
           Cliente: Administra tu negocio y catálogo.<br/>
-          Usuario: Explora y compra en catálogos disponibles.
+          Administrador: Gestiona todas las cuentas del sistema.
         </p>
       </div>
     </div>
