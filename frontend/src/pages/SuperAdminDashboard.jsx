@@ -100,7 +100,25 @@ function SuperAdminDashboard() {
       
       if (result.success) {
         toast.success(result.message);
-        // Refresh data
+        
+        // Immediately update the local state with the new subscription info
+        if (result.subscription) {
+          setClients(prev => prev.map(c => 
+            c.id === clientId 
+              ? { 
+                  ...c, 
+                  subscription: {
+                    id: result.subscription.id,
+                    status: result.subscription.status,
+                    planId: result.subscription.planId,
+                    planName: result.subscription.planName,
+                  }
+                } 
+              : c
+          ));
+        }
+        
+        // Refresh all data to ensure consistency
         await fetchData();
       }
     } catch (error) {

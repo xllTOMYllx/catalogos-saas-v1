@@ -64,6 +64,28 @@ const useSubscriptionStore = create((set, get) => ({
     }
   },
 
+  // Refresh all subscription data for a user (useful after plan changes)
+  refreshAllSubscriptionData: async (userId, catalogId = null) => {
+    try {
+      // Reset limits and product limits to force fresh fetch
+      set({ limits: null, productLimits: {} });
+      
+      // Fetch all data in parallel
+      const promises = [
+        get().fetchUserSubscription(userId),
+        get().fetchUserLimits(userId),
+      ];
+      
+      if (catalogId) {
+        promises.push(get().fetchProductLimits(userId, catalogId));
+      }
+      
+      await Promise.all(promises);
+    } catch (error) {
+      console.error('Error refreshing subscription data:', error);
+    }
+  },
+
   // Change user's plan
   changePlan: async (userId, planId) => {
     set({ loading: true, error: null });
