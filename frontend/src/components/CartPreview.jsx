@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { X, Trash2, Minus, Plus } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
 import { useAdminStore } from '../store/adminStore';
@@ -7,15 +7,29 @@ import { useAdminStore } from '../store/adminStore';
 /**
  * CartPreview - Modal compacto usado en el Header cuando el usuario pulsa el icono del carrito.
  * Usa la API de tu store (updateQuantity, removeItem, getTotal).
+ * Navega al carrito correcto según el contexto (cliente vs público).
  */
 export default function CartPreview({ onClose }) {
   const { items = [], getTotal, updateQuantity, removeItem } = useCartStore();
-  const { business } = useAdminStore();
-  const businessPhone = business?.telefono || business?.phone || '1234567890';
+  const { getActiveCatalog } = useAdminStore();
+  const location = useLocation();
+  
+  const activeCatalog = getActiveCatalog();
+  const businessData = activeCatalog?.business || {};
+  const businessPhone = businessData.telefono || businessData.phone || '1234567890';
+  const businessName = businessData.nombre || 'Tienda';
 
   const total = typeof getTotal === 'function' ? getTotal() : 0;
 
   const formatCurrency = (v) => `$${Number(v || 0).toFixed(2)}`;
+
+  // Detectar si estamos en un catálogo de cliente
+  const pathParts = location.pathname.split('/').filter(Boolean);
+  const staticSegments = ['admin', 'nosotros', 'contacto', 'colecciones', 'login', 'login-role', 'cart', 'checkout', 'carrito', 'subscription-plans', 'demo', 'forgot-password', 'reset-password'];
+  const catalogSlug = pathParts[0] && !staticSegments.includes(pathParts[0]) ? pathParts[0] : null;
+  
+  // Determinar la ruta del carrito según el contexto
+  const carritoLink = catalogSlug ? `/${catalogSlug}/carrito` : '/carrito';
 
   const changeQty = (id, qty) => {
     const next = Math.max(1, Number(qty) || 1);
@@ -36,7 +50,7 @@ export default function CartPreview({ onClose }) {
   };
 
   const handleWhatsApp = () => {
-    const msg = `¡Hola! Mi pedido: ${items.map(i => {
+    const msg = `¡Hola! Mi pedido de ${businessName}: ${items.map(i => {
       const name = i.nombre ?? i.name ?? 'Producto';
       const qty = i.quantity ?? 1;
       const price = i.price ?? i.precio ?? 0;
@@ -135,7 +149,7 @@ export default function CartPreview({ onClose }) {
           </div>
 
           <div className="flex gap-2">
-            <Link to="/carrito" onClick={onClose} className="flex-1 text-center bg-transparent border border-gray-700 text-white py-2 rounded-md">
+            <Link to={carritoLink} onClick={onClose} className="flex-1 text-center bg-transparent border border-gray-700 text-white py-2 rounded-md">
               Ver carrito completo
             </Link>
             <button onClick={handleWhatsApp} className="flex-1 bg-[#f24427] text-white py-2 rounded-md font-semibold">

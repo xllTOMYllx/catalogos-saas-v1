@@ -36,6 +36,10 @@ export default function ClientHeader({ catalogSlug }) {
 
   // Determinar si estamos en la página de admin del catálogo
   const isAdminPage = location.pathname.includes('/admin');
+  
+  // Determinar si estamos en la página "Sobre nosotros" o "Contacto" del cliente
+  const isNosotrosPage = location.pathname === `/${catalogSlug}/nosotros`;
+  const isContactoPage = location.pathname === `/${catalogSlug}/contacto`;
 
   // Rol y sesión
   const storedRoleRaw = typeof window !== 'undefined' ? (localStorage.getItem('role') || '') : '';
@@ -66,6 +70,35 @@ export default function ClientHeader({ catalogSlug }) {
     if (catalogSlug) {
       navigate(`/${catalogSlug}/admin`);
     }
+    setIsMobileMenuOpen(false);
+  };
+
+  // Manejar búsqueda - mantenerse dentro del catálogo del cliente
+  const handleSearchSubmit = (e) => {
+    if (e) e.preventDefault();
+    // Aplicar filtro en el store
+    if (typeof filterProducts === 'function') filterProducts(searchQuery);
+    // Navegar al catálogo del cliente con la búsqueda
+    if (catalogSlug) {
+      navigate(`/${catalogSlug}${searchQuery ? `?q=${encodeURIComponent(searchQuery)}` : ''}`);
+    }
+    setIsMobileMenuOpen(false);
+  };
+
+  // Navegar a la sección "Sobre nosotros" del cliente
+  const handleNosotrosNavigation = () => {
+    if (catalogSlug) {
+      navigate(`/${catalogSlug}/nosotros`);
+    }
+    setIsMobileMenuOpen(false);
+  };
+
+  // Contactar por WhatsApp con mensaje personalizado del cliente
+  const handleContactWhatsApp = () => {
+    const phone = String(businessData.telefono || businessData.phone || '1234567890').replace(/\D/g, '');
+    const customMessage = businessData.mensajeContacto || `¡Hola! Estoy viendo el catálogo de ${businessData.nombre} y me gustaría más información.`;
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(customMessage)}`;
+    window.open(url, '_blank');
     setIsMobileMenuOpen(false);
   };
 
@@ -105,9 +138,27 @@ export default function ClientHeader({ catalogSlug }) {
           <nav className="hidden md:flex items-center gap-5 lg:gap-6 text-white text-sm">
             <button 
               onClick={handleCatalogNavigation} 
-              className={`hover:text-[#f24427] transition-colors whitespace-nowrap ${!isAdminPage ? 'text-[#f24427]' : ''}`}
+              className={`hover:text-[#f24427] transition-colors whitespace-nowrap ${!isAdminPage && !isNosotrosPage && !isContactoPage ? 'text-[#f24427]' : ''}`}
             >
-              MI CATÁLOGO
+              CATÁLOGO
+            </button>
+
+            {/* Sobre Nosotros - muestra información del negocio si está disponible */}
+            {businessData.descripcion && (
+              <button 
+                onClick={handleNosotrosNavigation} 
+                className={`hover:text-[#f24427] transition-colors whitespace-nowrap ${isNosotrosPage ? 'text-[#f24427]' : ''}`}
+              >
+                NOSOTROS
+              </button>
+            )}
+
+            {/* Contacto por WhatsApp */}
+            <button 
+              onClick={handleContactWhatsApp} 
+              className="hover:text-[#f24427] transition-colors whitespace-nowrap"
+            >
+              CONTACTO
             </button>
 
             {isAuthenticated && showAdminButton && (
@@ -128,15 +179,18 @@ export default function ClientHeader({ catalogSlug }) {
 
           {/* Desktop action buttons */}
           <div className="hidden md:flex items-center gap-4">
-            {/* Form de búsqueda */}
-            <form onSubmit={(e) => { e.preventDefault(); }} className="border border-gray-600 rounded-full flex bg-[#121516] p-1 max-w-xs">
+            {/* Form de búsqueda - navega dentro del catálogo del cliente */}
+            <form onSubmit={handleSearchSubmit} className="border border-gray-600 rounded-full flex bg-[#121516] p-1 max-w-xs">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={handleSearch}
                 placeholder="Buscar productos..."
                 className="bg-transparent text-white px-3 py-1 outline-none w-full text-sm"
-                onKeyDown={(e) => e.key === 'Escape' && setSearchQuery('')}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') setSearchQuery('');
+                  if (e.key === 'Enter') handleSearchSubmit(e);
+                }}
               />
               <button type="submit" className="px-3 text-gray-200 hover:text-white">🔎</button>
             </form>
@@ -154,7 +208,7 @@ export default function ClientHeader({ catalogSlug }) {
               {totalItems > 0 && <span className="absolute -top-1 -right-1 bg-red-500 text-xs rounded-full h-4 w-4 flex items-center justify-center">{totalItems}</span>}
             </button>
 
-            {/* WhatsApp button */}
+            {/* WhatsApp button - usa el mensaje personalizado o mensaje con carrito */}
             <button onClick={() => {
               const phone = String(businessData.telefono || businessData.phone || '1234567890').replace(/\D/g, '');
               let msg;
@@ -166,7 +220,7 @@ export default function ClientHeader({ catalogSlug }) {
                   return `${name} x${qty} - ${fmt(priceNum)}`;
                 }).join('\n')} Total: ${fmt(total)}`;
               } else {
-                msg = `¡Hola! Me interesa información sobre los productos de ${businessData.nombre}. ¿Me pueden ayudar?`;
+                msg = businessData.mensajeContacto || `¡Hola! Me interesa información sobre los productos de ${businessData.nombre}. ¿Me pueden ayudar?`;
               }
               const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
               window.open(url, '_blank');
@@ -210,9 +264,27 @@ export default function ClientHeader({ catalogSlug }) {
               <div className="py-2 space-y-1">
                 <button 
                   onClick={handleCatalogNavigation} 
-                  className={`block w-full text-left py-3 px-2 rounded-md transition-colors ${!isAdminPage ? 'text-[#f24427] font-semibold' : 'text-white/95 hover:text-[#f24427]'}`}
+                  className={`block w-full text-left py-3 px-2 rounded-md transition-colors ${!isAdminPage && !isNosotrosPage && !isContactoPage ? 'text-[#f24427] font-semibold' : 'text-white/95 hover:text-[#f24427]'}`}
                 >
-                  MI CATÁLOGO
+                  CATÁLOGO
+                </button>
+
+                {/* Sobre Nosotros - muestra información del negocio si está disponible */}
+                {businessData.descripcion && (
+                  <button 
+                    onClick={handleNosotrosNavigation} 
+                    className={`block w-full text-left py-3 px-2 rounded-md transition-colors ${isNosotrosPage ? 'text-[#f24427] font-semibold' : 'text-white/95 hover:text-[#f24427]'}`}
+                  >
+                    NOSOTROS
+                  </button>
+                )}
+
+                {/* Contacto por WhatsApp */}
+                <button 
+                  onClick={handleContactWhatsApp} 
+                  className="block w-full text-left py-3 px-2 rounded-md text-white/95 hover:text-[#f24427] transition-colors"
+                >
+                  CONTACTO
                 </button>
               </div>
 
@@ -256,7 +328,7 @@ export default function ClientHeader({ catalogSlug }) {
                       return `${name} x${qty} - ${fmt(priceNum)}`;
                     }).join('\n')} Total: ${fmt(total)}`;
                   } else {
-                    msg = `¡Hola! Me interesa información sobre los productos de ${businessData.nombre}. ¿Me pueden ayudar?`;
+                    msg = businessData.mensajeContacto || `¡Hola! Me interesa información sobre los productos de ${businessData.nombre}. ¿Me pueden ayudar?`;
                   }
                   const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
                   window.open(url, '_blank');
@@ -265,7 +337,7 @@ export default function ClientHeader({ catalogSlug }) {
                 </button>
               </div>
 
-              <form onSubmit={(e) => { e.preventDefault(); }} className="flex-1 ml-3 min-w-0">
+              <form onSubmit={handleSearchSubmit} className="flex-1 ml-3 min-w-0">
                 <div className="flex items-center bg-[#0f1314] rounded-full border border-gray-700 px-2 py-1 min-w-0">
                   <input
                     type="text"
@@ -273,7 +345,10 @@ export default function ClientHeader({ catalogSlug }) {
                     onChange={handleSearch}
                     placeholder="Buscar..."
                     className="bg-transparent text-white px-3 py-1 outline-none flex-1 text-sm min-w-0 truncate"
-                    onKeyDown={(e) => e.key === 'Escape' && setSearchQuery('')}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Escape') setSearchQuery('');
+                      if (e.key === 'Enter') handleSearchSubmit(e);
+                    }}
                   />
                   <button type="submit" className="px-3 text-white/90 flex-shrink-0">🔎</button>
                 </div>
