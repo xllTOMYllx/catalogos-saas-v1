@@ -110,31 +110,20 @@ export default function ClientHeader({ catalogSlug }) {
               MI CATÁLOGO
             </button>
 
-            {isAuthenticated ? (
-              <div className="flex items-center gap-2">
-                {showAdminButton && (
-                  <button 
-                    onClick={handleAdminNavigation} 
-                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors whitespace-nowrap ${isAdminPage ? 'bg-[#f24427]' : 'bg-gray-600 hover:bg-[#f24427]'}`}
-                  >
-                    ADMIN
-                  </button>
-                )}
-                <button 
-                  onClick={handleLogout} 
-                  className="bg-gray-500 hover:bg-gray-600 px-3 py-1.5 rounded-md text-xs font-semibold transition-colors whitespace-nowrap"
-                >
-                  SALIR
-                </button>
-              </div>
-            ) : (
+            {isAuthenticated && showAdminButton && (
               <button 
-                onClick={handleLogout} 
-                className="bg-gray-500 hover:bg-gray-600 px-3 py-1.5 rounded-md text-xs font-semibold transition-colors whitespace-nowrap"
+                onClick={handleAdminNavigation} 
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors whitespace-nowrap ${isAdminPage ? 'bg-[#f24427]' : 'bg-gray-600 hover:bg-[#f24427]'}`}
               >
-                SALIR
+                ADMIN
               </button>
             )}
+            <button 
+              onClick={handleLogout} 
+              className="bg-gray-500 hover:bg-gray-600 px-3 py-1.5 rounded-md text-xs font-semibold transition-colors whitespace-nowrap"
+            >
+              SALIR
+            </button>
           </nav>
 
           {/* Desktop action buttons */}
@@ -243,7 +232,7 @@ export default function ClientHeader({ catalogSlug }) {
                   onClick={handleLogout} 
                   className="w-full py-3 bg-white/6 text-white rounded-lg font-semibold hover:bg-white/10 transition"
                 >
-                  CERRAR SESIÓN
+                  SALIR
                 </button>
               </div>
             </nav>
