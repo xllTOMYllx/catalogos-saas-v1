@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Minus, Plus, Trash2 } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
 import { useAdminStore } from '../store/adminStore';
@@ -7,17 +7,26 @@ import styles from '../styles/carrito.module.css';
 
 /**
  * Página /carrito con edición completa y resumen.
+ * Soporta tanto la ruta /carrito como /:catalogSlug/carrito
  * Usa la API de cartStore: updateQuantity, removeItem, getTotal, y setState para vaciar.
  */
 export default function CarritoPage() {
   const navigate = useNavigate();
+  const { catalogSlug } = useParams();
   const { items = [], getTotal, updateQuantity, removeItem } = useCartStore();
-  const { business } = useAdminStore();
-  const businessPhone = business?.telefono || business?.phone || '1234567890';
+  const { getActiveCatalog } = useAdminStore();
+  
+  const activeCatalog = getActiveCatalog();
+  const businessData = activeCatalog?.business || {};
+  const businessPhone = businessData.telefono || businessData.phone || '1234567890';
+  const businessName = businessData.nombre || 'Tienda';
 
   const total = typeof getTotal === 'function' ? getTotal() : 0;
 
   const formatCurrency = (v) => `$${Number(v || 0).toFixed(2)}`;
+
+  // Determinar las rutas base según el contexto
+  const collectionLink = catalogSlug ? `/${catalogSlug}` : '/colecciones';
 
   const changeQty = (id, qty) => {
     const next = Math.max(1, Number(qty) || 1);
@@ -35,7 +44,7 @@ export default function CarritoPage() {
   };
 
   const handleWhatsApp = () => {
-    const msg = `¡Hola! Mi pedido: ${items.map(i => {
+    const msg = `¡Hola! Mi pedido de ${businessName}: ${items.map(i => {
       const name = i.nombre ?? i.name ?? 'Producto';
       const qty = i.quantity ?? 1;
       const price = i.price ?? i.precio ?? 0;
@@ -57,7 +66,7 @@ export default function CarritoPage() {
           {items.length === 0 ? (
             <div className={styles.empty}>
               <p>Tu carrito está vacío.</p>
-              <Link to="/colecciones" className={styles.ctaLink}>Ver catálogos</Link>
+              <Link to={collectionLink} className={styles.ctaLink}>Ver catálogo</Link>
             </div>
           ) : (
             items.map(item => {
@@ -98,7 +107,7 @@ export default function CarritoPage() {
 
             <div className={styles.actionsSummary}>
               <button onClick={handleWhatsApp} className={styles.primary}>Enviar por WhatsApp</button>
-              <button onClick={() => navigate('/colecciones')} className={styles.secondary}>Seguir comprando</button>
+              <button onClick={() => navigate(collectionLink)} className={styles.secondary}>Seguir comprando</button>
               <button onClick={handleClear} className={styles.tertiary}>Vaciar carrito</button>
             </div>
           </div>

@@ -9,6 +9,7 @@ import LoginRole from "../components/auth/LoginRole";
 import ForgotPassword from "../components/auth/ForgotPassword";
 import ResetPassword from "../components/auth/ResetPassword";
 import Nosotros from "../pages/Nosotros";
+import ClientNosotros from "../pages/ClientNosotros";
 import Contacto from "../pages/Contacto";
 import Carrito from "../pages/Carrito";
 import SubscriptionPlans from "../pages/SubscriptionPlans";
@@ -58,6 +59,8 @@ export function Router() {
                     {/* Estas rutas tienen su propio header sin navegación a landing page */}
                     <Route element={<ClientLayout />}>
                         <Route path="/:catalogSlug/admin" element={<AdminDashboard />} />
+                        <Route path="/:catalogSlug/nosotros" element={<ClientNosotros />} />
+                        <Route path="/:catalogSlug/carrito" element={<Carrito />} />
                         <Route path="/:catalogSlug" element={<CatalogPage />} />
                     </Route>
                 </Routes>

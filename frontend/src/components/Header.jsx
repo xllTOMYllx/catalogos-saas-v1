@@ -44,10 +44,14 @@ export default function Header({ negocio: defaultNegocio }) {
   // Páginas públicas informativas donde usuarios anónimos solo ven navegación simplificada
   const isPublicInfoPage = ['/nosotros', '/contacto'].includes(location.pathname);
   
+  // Páginas de autenticación donde mostramos navbar simplificado
+  const isAuthPage = ['/login-role', '/login', '/forgot-password', '/reset-password'].includes(location.pathname);
+  
   // El navbar simplificado se muestra en:
   // 1. Landing page y Demo page (siempre)
   // 2. Páginas públicas informativas cuando el usuario NO está autenticado
-  const isSimplifiedNavbar = isLandingPage || isDemoPage || (isPublicInfoPage && !isAuthenticated);
+  // 3. Páginas de autenticación (login-role, login, forgot-password, reset-password)
+  const isSimplifiedNavbar = isLandingPage || isDemoPage || (isPublicInfoPage && !isAuthenticated) || isAuthPage;
 
   // Rol y sesión (más robusto)
   const storedRoleRaw = typeof window !== 'undefined' ? (localStorage.getItem('role') || '') : '';
