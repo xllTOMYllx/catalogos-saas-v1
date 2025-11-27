@@ -11,38 +11,55 @@ import ResetPassword from "../components/auth/ResetPassword";
 import Nosotros from "../pages/Nosotros";
 import Contacto from "../pages/Contacto";
 import Carrito from "../pages/Carrito";
-import Header from "../components/Header";
 import SubscriptionPlans from "../pages/SubscriptionPlans";
-// NOTA: define primero las rutas estáticas para que la ruta dinámica no haga "shadow"
+import MainLayout from "../layouts/MainLayout";
+import ClientLayout from "../layouts/ClientLayout";
 
+/**
+ * Router principal de la aplicación
+ * 
+ * Separación de layouts:
+ * - MainLayout: Páginas principales con Header estándar (INICIO, NOSOTROS, CONTACTO)
+ * - ClientLayout: Espacio personalizado del cliente con ClientHeader (sin navegación a landing)
+ * 
+ * Los clientes con su propio catálogo tienen un espacio aislado donde:
+ * - No ven enlaces a la landing page principal
+ * - Solo ven su catálogo y panel de administración
+ * - La única forma de salir es cerrando sesión
+ */
 export function Router() {
     return (
         <BrowserRouter>
             <AuthProvider>
                 <ScrollToTop />
-                <Header />
                 <Routes>
-                    {/* Rutas estáticas / landing / info */}
-                    <Route path="/" element={<LandingPage />} />
-                    <Route path="/demo" element={<DemoPage />} />
-                    <Route path="/colecciones" element={<CatalogPage />} />
-                    <Route path="/nosotros" element={<Nosotros />} />
-                    <Route path="/contacto" element={<Contacto />} />
-                    <Route path="/carrito" element={<Carrito />} />
-                    <Route path="/login-role" element={<LoginRole />} />
-                    <Route path="/login" element={<LoginRole />} />
-                    <Route path="/forgot-password" element={<ForgotPassword />} />
-                    <Route path="/reset-password" element={<ResetPassword />} />
-                    
-                    {/* Admin genérico si lo necesitas */}
-                    <Route path="/admin" element={<AdminDashboard />} />
+                    {/* Rutas con MainLayout (Header principal con navegación a landing) */}
+                    <Route element={<MainLayout />}>
+                        {/* Rutas estáticas / landing / info */}
+                        <Route path="/" element={<LandingPage />} />
+                        <Route path="/demo" element={<DemoPage />} />
+                        <Route path="/colecciones" element={<CatalogPage />} />
+                        <Route path="/nosotros" element={<Nosotros />} />
+                        <Route path="/contacto" element={<Contacto />} />
+                        <Route path="/carrito" element={<Carrito />} />
+                        <Route path="/login-role" element={<LoginRole />} />
+                        <Route path="/login" element={<LoginRole />} />
+                        <Route path="/forgot-password" element={<ForgotPassword />} />
+                        <Route path="/reset-password" element={<ResetPassword />} />
+                        
+                        {/* Admin genérico (sin slug de catálogo) */}
+                        <Route path="/admin" element={<AdminDashboard />} />
+                        
+                        {/* Planes de suscripción */}
+                        <Route path="/subscription-plans" element={<SubscriptionPlans />} />
+                    </Route>
 
-                    {/* Rutas por catálogo (amigables) */}
-                    <Route path="/:catalogSlug/admin" element={<AdminDashboard />} />
-                    <Route path="/:catalogSlug" element={<CatalogPage />} />
-
-                    {/* Futuras rutas: /user, /cart, /checkout */}
-                    <Route path="/subscription-plans" element={<SubscriptionPlans />} />
+                    {/* Rutas con ClientLayout (Header específico para espacio de cliente) */}
+                    {/* Estas rutas tienen su propio header sin navegación a landing page */}
+                    <Route element={<ClientLayout />}>
+                        <Route path="/:catalogSlug/admin" element={<AdminDashboard />} />
+                        <Route path="/:catalogSlug" element={<CatalogPage />} />
+                    </Route>
                 </Routes>
             </AuthProvider>
         </BrowserRouter>
