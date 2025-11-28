@@ -17,21 +17,28 @@ function ProductList() {
   // Load variant counts for all products
   useEffect(() => {
     const loadVariantCounts = async () => {
-      const counts = {};
-      for (const product of products) {
+      if (products.length === 0) return;
+      
+      // Load variant counts in parallel for better performance
+      const countPromises = products.map(async (product) => {
         try {
           const variants = await productsApi.getVariants(product.id);
-          counts[product.id] = variants?.length || 0;
+          return { id: product.id, count: variants?.length || 0 };
         } catch {
-          counts[product.id] = 0;
+          return { id: product.id, count: 0 };
         }
-      }
+      });
+      
+      const results = await Promise.all(countPromises);
+      const counts = results.reduce((acc, { id, count }) => {
+        acc[id] = count;
+        return acc;
+      }, {});
+      
       setVariantCounts(counts);
     };
 
-    if (products.length > 0) {
-      loadVariantCounts();
-    }
+    loadVariantCounts();
   }, [products]);
 
   const handleDelete = async (id) => {
@@ -52,15 +59,23 @@ function ProductList() {
     setShowForm(false);
     // Refresh variant counts when form closes (in case variants were added/removed)
     const loadVariantCounts = async () => {
-      const counts = {};
-      for (const product of products) {
+      if (products.length === 0) return;
+      
+      const countPromises = products.map(async (product) => {
         try {
           const variants = await productsApi.getVariants(product.id);
-          counts[product.id] = variants?.length || 0;
+          return { id: product.id, count: variants?.length || 0 };
         } catch {
-          counts[product.id] = 0;
+          return { id: product.id, count: 0 };
         }
-      }
+      });
+      
+      const results = await Promise.all(countPromises);
+      const counts = results.reduce((acc, { id, count }) => {
+        acc[id] = count;
+        return acc;
+      }, {});
+      
       setVariantCounts(counts);
     };
     loadVariantCounts();

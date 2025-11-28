@@ -117,38 +117,51 @@ function ProductForm({ onClose, editingId }) {
         toast.success('Producto actualizado.');
       } else {
         const result = await addProduct(productData);
-        productId = result?.id || result?.productId;
+        // addProduct returns the new product with id property
+        productId = result?.id;
+        if (!productId) {
+          console.warn('Could not get product ID from addProduct result');
+        }
         toast.success('Producto agregado.');
       }
 
       // Handle variants if product was saved successfully and we have a productId
       if (productId && showVariants) {
-        // Delete marked variants
-        for (const variantId of variantsToDelete) {
-          try {
-            await productsApi.deleteVariant(variantId);
-          } catch (error) {
-            console.error('Error deleting variant:', error);
-          }
+        const variantErrors = [];
+
+        // Delete marked variants in parallel
+        if (variantsToDelete.length > 0) {
+          const deleteResults = await Promise.allSettled(
+            variantsToDelete.map(variantId => productsApi.deleteVariant(variantId))
+          );
+          deleteResults.forEach((result, index) => {
+            if (result.status === 'rejected') {
+              variantErrors.push(`Error eliminando variante ${variantsToDelete[index]}`);
+            }
+          });
         }
 
-        // Update modified existing variants
-        for (const variant of existingVariants) {
-          if (variant._modified) {
-            try {
-              await productsApi.updateVariant(variant.id, {
+        // Update modified existing variants in parallel
+        const modifiedVariants = existingVariants.filter(v => v._modified);
+        if (modifiedVariants.length > 0) {
+          const updateResults = await Promise.allSettled(
+            modifiedVariants.map(variant => 
+              productsApi.updateVariant(variant.id, {
                 variantType: variant.variantType,
                 variantValue: variant.variantValue,
                 additionalPrice: parseFloat(variant.additionalPrice) || 0,
                 stock: parseInt(variant.stock) || 0,
-              });
-            } catch (error) {
-              console.error('Error updating variant:', error);
+              })
+            )
+          );
+          updateResults.forEach((result, index) => {
+            if (result.status === 'rejected') {
+              variantErrors.push(`Error actualizando variante "${modifiedVariants[index].variantValue}"`);
             }
-          }
+          });
         }
 
-        // Create new variants
+        // Create new variants (bulk operation)
         if (variants.length > 0) {
           try {
             const variantsToCreate = variants.map(v => ({
@@ -162,9 +175,15 @@ function ProductForm({ onClose, editingId }) {
             await productsApi.createVariantsBulk(variantsToCreate);
             toast.success(`${variants.length} variante(s) agregada(s).`);
           } catch (error) {
+            variantErrors.push('Error al crear nuevas variantes');
             console.error('Error creating variants:', error);
-            toast.error('Error al crear variantes: ' + error.message);
           }
+        }
+
+        // Show summary of variant errors if any
+        if (variantErrors.length > 0) {
+          toast.error(`Algunos cambios de variantes fallaron: ${variantErrors.length} error(es)`);
+          console.error('Variant operation errors:', variantErrors);
         }
       }
 
