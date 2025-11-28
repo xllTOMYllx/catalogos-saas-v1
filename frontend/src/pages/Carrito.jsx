@@ -44,6 +44,19 @@ export default function CarritoPage() {
   };
 
   const handleWhatsApp = () => {
+    // Validate that cart has items before sending
+    if (!items || items.length === 0) {
+      alert('Debes agregar productos al carrito antes de enviar tu pedido.');
+      return;
+    }
+    
+    // Validate that we have a phone number
+    const phone = String(businessPhone).replace(/\D/g, '');
+    if (!phone) {
+      alert('No hay número de contacto disponible para esta tienda.');
+      return;
+    }
+    
     const msg = `¡Hola! Mi pedido de ${businessName}: ${items.map(i => {
       const name = i.nombre ?? i.name ?? 'Producto';
       const qty = i.quantity ?? 1;
@@ -51,7 +64,7 @@ export default function CarritoPage() {
       const variantInfo = i.variantInfo ? ` (${i.variantInfo})` : '';
       return `${name}${variantInfo} x${qty} - $${(price).toFixed(2)}`;
     }).join(', ')} Total: $${Number(total).toFixed(2)}`;
-    const url = `https://wa.me/${String(businessPhone).replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`;
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
     window.open(url, '_blank');
   };
 
