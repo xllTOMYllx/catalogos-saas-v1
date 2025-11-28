@@ -215,6 +215,35 @@ Total: $1,217.00
 - El stock se valida tanto a nivel de producto como de variante
 - Los IDs de carrito incluyen los IDs de variantes para diferenciar el mismo producto con diferentes opciones
 
+## Gestión de Variantes en Admin
+
+### Funcionalidades del Panel de Administración
+
+El panel de administración ahora permite gestionar variantes directamente desde el formulario de productos:
+
+1. **Agregar Variantes al Crear Producto**
+   - Click en "Agregar Variantes (Talla, Color, etc.)" para expandir la sección
+   - Seleccionar tipo de variante (Talla, Color, Tamaño, Material, Estilo) o escribir uno personalizado
+   - Agregar valor, precio adicional y stock
+   - Las variantes se crean automáticamente junto con el producto
+
+2. **Editar Variantes de Producto Existente**
+   - Al editar un producto, las variantes existentes se cargan automáticamente
+   - Modificar valor, precio adicional o stock de cualquier variante
+   - Eliminar variantes con el botón X
+   - Agregar nuevas variantes al producto existente
+
+3. **Indicador de Variantes en Lista**
+   - Cada producto muestra un badge con el número de variantes
+   - Ejemplo: "3 variantes" en color púrpura
+   - Se actualiza automáticamente al cerrar el formulario
+
+### Componentes Actualizados
+
+- `ProductForm.jsx` - Formulario con sección de gestión de variantes
+- `ProductList.jsx` - Lista con indicador de variantes por producto
+- `adminStore.js` - Store actualizado para devolver el producto creado
+
 ## Archivos Modificados
 
 ### Backend
@@ -230,7 +259,10 @@ Total: $1,217.00
 ### Frontend
 - `frontend/src/components/ProductCard.jsx` - Click para abrir modal
 - `frontend/src/components/ProductDetailModal.jsx` - Nuevo componente
+- `frontend/src/components/admin/ProductForm.jsx` - Gestión de variantes en formulario
+- `frontend/src/components/admin/ProductList.jsx` - Indicador de variantes
 - `frontend/src/api/products.js` - APIs de variantes
+- `frontend/src/store/adminStore.js` - Devuelve producto creado
 - `frontend/src/store/cartStore.js` - Soporte para variantInfo
 - `frontend/src/pages/Carrito.jsx` - Mostrar variantes
 - `frontend/src/styles/carrito.module.css` - Estilos para variantes
