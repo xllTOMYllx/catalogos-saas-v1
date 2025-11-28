@@ -342,6 +342,9 @@ export const useAdminStore = create(
           active.products = [...active.products, productWithCatalogId];
           const newCatalogs = { ...state.catalogs, [activeId]: active };
           set({ catalogs: newCatalogs, loading: false });
+          
+          // Return the new product so callers can use the ID for variants
+          return newProduct;
         } catch (error) {
           console.error('Error adding product:', error);
           set({ loading: false, error: error.message });
