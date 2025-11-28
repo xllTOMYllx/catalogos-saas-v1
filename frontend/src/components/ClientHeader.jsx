@@ -21,7 +21,7 @@ export default function ClientHeader({ catalogSlug }) {
   const [showCartModal, setShowCartModal] = useState(false);
 
   const { items, getTotal } = useCartStore();
-  const { getActiveCatalog, filterProducts, setActiveCatalogId, activeId, clearStorage } = useAdminStore();
+  const { getActiveCatalog, filterProducts, setActiveCatalogId, activeId, clearStorage, loading } = useAdminStore();
   const { isAuthenticated, logout, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -32,7 +32,24 @@ export default function ClientHeader({ catalogSlug }) {
 
   // Get business data from active catalog
   const activeCatalog = getActiveCatalog();
-  const businessData = activeCatalog?.business || { nombre: 'Mi Catálogo', logo: '/logosinfondo.png', telefono: '1234567890' };
+  
+  // Determine if the currently active catalog matches the route's catalog slug
+  // This helps identify when the correct catalog is loaded vs when we're still showing default data
+  const doesActiveIdMatchSlug = activeId === catalogSlug;
+  const doesBusinessSlugMatch = catalogSlug && activeCatalog?.business?.slug === catalogSlug;
+  const isCatalogMatching = doesActiveIdMatchSlug || doesBusinessSlugMatch;
+  
+  // Show loading state when:
+  // 1. The store is actively loading data, OR
+  // 2. We have a non-default catalog slug but the active catalog doesn't match yet
+  const isNonDefaultCatalog = catalogSlug && catalogSlug !== 'default';
+  const isWaitingForCorrectCatalog = !isCatalogMatching && isNonDefaultCatalog;
+  const isLoadingCatalog = loading || isWaitingForCorrectCatalog;
+  
+  // Use placeholder business data while loading to prevent showing default store data
+  const businessData = isLoadingCatalog 
+    ? { nombre: 'Cargando...', logo: '/logosinfondo.png', telefono: '' }
+    : (activeCatalog?.business || { nombre: 'Mi Catálogo', logo: '/logosinfondo.png', telefono: '1234567890' });
 
   // Determinar si estamos en la página de admin del catálogo
   const isAdminPage = location.pathname.includes('/admin');

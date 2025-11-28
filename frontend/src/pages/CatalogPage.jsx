@@ -20,7 +20,7 @@ function CatalogPage() {
   const { id, catalogSlug } = useParams();
   const incoming = id || catalogSlug;
   const location = useLocation();
-  const { loadCatalog, getActiveCatalog, filterProducts, setActiveCatalogId } = useAdminStore();
+  const { loadCatalog, getActiveCatalog, filterProducts, loading } = useAdminStore();
 
   const [searchParams] = useSearchParams();
   const q = searchParams.get('q') || '';
@@ -80,14 +80,12 @@ function CatalogPage() {
     }
   }, [incoming, loadCatalog, isPublicCollections]);
   
-  // Mantener behavior actual del store si quieres filtrar allí también
+  // Apply search filter when query changes
   useEffect(() => {
-    if (!isPublicCollections) {
-      if (typeof setActiveCatalogId === 'function') setActiveCatalogId('default');
-      // opcional: mantener filterProducts para sincronizar store
-      if (typeof filterProducts === 'function') filterProducts(q);
+    if (!isPublicCollections && typeof filterProducts === 'function') {
+      filterProducts(q);
     }
-  }, [q, filterProducts, setActiveCatalogId, isPublicCollections]);
+  }, [q, filterProducts, isPublicCollections]);
 
   const activeCatalog = getActiveCatalog();
 
@@ -133,6 +131,24 @@ function CatalogPage() {
     descripcion: '',
     direccion: ''
   };
+
+  // Show loading state for client catalogs while loading
+  const isClientCatalog = !isPublicCollections && incoming && incoming !== 'default';
+  const isLoadingClientCatalog = isClientCatalog && loading;
+
+  // Loading state for client catalogs
+  if (isLoadingClientCatalog) {
+    return (
+      <div className="bg-[#080c0e] min-h-screen flex flex-col">
+        <main className="flex-1 pt-16 sm:pt-20 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#f24427] mx-auto mb-4"></div>
+            <p className="text-gray-400">Cargando catálogo...</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-[#080c0e] min-h-screen flex flex-col">

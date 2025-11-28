@@ -5,7 +5,8 @@ import ProtectedRoute from "../components/auth/ProtectedRoute";
 import LandingPage from "../pages/LandingPage";
 import DemoPage from "../pages/DemoPage";
 import CatalogPage from "../pages/CatalogPage";
-import PublicStorePage from "../pages/PublicStorePage";
+import PublicStoreProducts from "../pages/PublicStoreProducts";
+import PublicStoreCarrito from "../pages/PublicStoreCarrito";
 import AdminDashboard from "../components/admin/AdminDashboard";
 import SuperAdminDashboard from "../pages/SuperAdminDashboard";
 import LoginRole from "../components/auth/LoginRole";
@@ -19,6 +20,7 @@ import SubscriptionPlans from "../pages/SubscriptionPlans";
 import MainLayout from "../layouts/MainLayout";
 import ClientLayout from "../layouts/ClientLayout";
 import SuperAdminLayout from "../layouts/SuperAdminLayout";
+import PublicStoreLayout from "../layouts/PublicStoreLayout";
 
 /**
  * Router principal de la aplicación
@@ -46,9 +48,12 @@ export function Router() {
             <AuthProvider>
                 <ScrollToTop />
                 <Routes>
-                    {/* Ruta de Tienda Pública - No requiere autenticación */}
-                    {/* Esta ruta debe estar ANTES de las rutas con layouts para evitar conflictos */}
-                    <Route path="/tienda/:slug" element={<PublicStorePage />} />
+                    {/* Rutas de Tienda Pública - No requiere autenticación */}
+                    {/* Usa PublicStoreLayout con header de tienda pública */}
+                    <Route element={<PublicStoreLayout />}>
+                        <Route path="/tienda/:slug" element={<PublicStoreProducts />} />
+                        <Route path="/tienda/:slug/carrito" element={<PublicStoreCarrito />} />
+                    </Route>
 
                     {/* Rutas con MainLayout (Header principal con navegación a landing) */}
                     <Route element={<MainLayout />}>

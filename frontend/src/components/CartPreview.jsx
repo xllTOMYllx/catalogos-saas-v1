@@ -35,13 +35,18 @@ export default function CartPreview({ onClose, businessData: propBusinessData })
   
   // Check if we're in a public store route (/tienda/:slug)
   const isPublicStore = pathParts[0] === 'tienda' && pathParts[1];
+  const publicStoreSlug = isPublicStore ? pathParts[1] : null;
   const catalogSlug = isPublicStore 
-    ? null  // Public stores don't have catalog-based cart routes
+    ? null  // Public stores use their own cart route
     : (pathParts[0] && !staticSegments.includes(pathParts[0]) ? pathParts[0] : null);
   
   // Determinar la ruta del carrito según el contexto
-  // For public stores, we stay on the same store page (no separate cart route)
-  const carritoLink = catalogSlug ? `/${catalogSlug}/carrito` : '/carrito';
+  // For public stores, navigate to /tienda/:slug/carrito
+  // For client catalogs, navigate to /:catalogSlug/carrito
+  // For default, navigate to /carrito
+  const carritoLink = isPublicStore 
+    ? `/tienda/${publicStoreSlug}/carrito` 
+    : (catalogSlug ? `/${catalogSlug}/carrito` : '/carrito');
 
   const changeQty = (id, qty) => {
     const next = Math.max(1, Number(qty) || 1);
