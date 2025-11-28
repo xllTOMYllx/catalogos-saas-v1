@@ -29,9 +29,15 @@ function CustomizationForm() {
     const fetchClientData = async () => {
       if (!clientId || readOnly) return;
       
+      const parsedClientId = parseInt(clientId, 10);
+      if (isNaN(parsedClientId)) {
+        console.error('Invalid clientId:', clientId);
+        return;
+      }
+      
       try {
         setLoadingClient(true);
-        const client = await clientsApi.getOne(parseInt(clientId));
+        const client = await clientsApi.getOne(parsedClientId);
         setClientData(client);
       } catch (error) {
         console.error('Error fetching client data:', error);

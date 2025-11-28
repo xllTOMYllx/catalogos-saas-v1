@@ -31,39 +31,41 @@ export default function PublicStoreHeader({ businessData = {}, catalogSlug = '' 
     direccion: businessData.direccion || '',
   };
 
-  // Navegar al inicio de la tienda
-  const handleStoreNavigation = () => {
-    setIsMobileMenuOpen(false);
-  };
-
-  // Contactar por WhatsApp
-  const handleContactWhatsApp = () => {
+  // Utility function to open WhatsApp with a message
+  const openWhatsApp = (message) => {
     const phone = String(store.telefono || '').replace(/\D/g, '');
     if (!phone) return;
-    const msg = `¡Hola! Estoy visitando la tienda ${store.nombre} y me gustaría más información.`;
-    const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
-    setIsMobileMenuOpen(false);
   };
 
-  // WhatsApp con carrito
-  const handleWhatsAppWithCart = () => {
-    const phone = String(store.telefono || '').replace(/\D/g, '');
-    if (!phone) return;
-    
-    let msg;
-    if (items && items.length > 0) {
-      msg = `¡Hola! Mi pedido de ${store.nombre}:\n${items.map(i => {
+  // Build WhatsApp message based on cart status
+  const buildWhatsAppMessage = (includeCart = false) => {
+    if (includeCart && items && items.length > 0) {
+      return `¡Hola! Mi pedido de ${store.nombre}:\n${items.map(i => {
         const name = i.nombre ?? i.name ?? 'Producto';
         const qty = i.quantity ?? 1;
         const priceNum = Number(i.price ?? i.precio ?? 0) || 0;
         return `• ${name} x${qty} - ${fmt(priceNum)}`;
       }).join('\n')}\n\nTotal: ${fmt(total)}`;
-    } else {
-      msg = `¡Hola! Me interesa información sobre los productos de ${store.nombre}. ¿Me pueden ayudar?`;
     }
-    const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
-    window.open(url, '_blank');
+    return `¡Hola! Estoy visitando la tienda ${store.nombre} y me gustaría más información.`;
+  };
+
+  // Navegar al inicio de la tienda
+  const handleStoreNavigation = () => {
+    setIsMobileMenuOpen(false);
+  };
+
+  // Contactar por WhatsApp (simple)
+  const handleContactWhatsApp = () => {
+    openWhatsApp(buildWhatsAppMessage(false));
+    setIsMobileMenuOpen(false);
+  };
+
+  // WhatsApp con carrito
+  const handleWhatsAppWithCart = () => {
+    openWhatsApp(buildWhatsAppMessage(true));
   };
 
   return (

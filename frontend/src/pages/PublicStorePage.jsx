@@ -212,7 +212,7 @@ function PublicStorePage() {
                 <div className="flex flex-wrap gap-4 justify-center md:justify-start text-gray-400 text-sm">
                   {store.telefono && (
                     <a 
-                      href={`https://wa.me/${store.telefono.replace(/\D/g, '')}`}
+                      href={`https://wa.me/${String(store.telefono).replace(/\D/g, '')}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-1 hover:text-green-400 transition-colors"
