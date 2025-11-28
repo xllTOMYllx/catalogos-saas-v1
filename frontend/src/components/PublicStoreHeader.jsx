@@ -65,6 +65,11 @@ export default function PublicStoreHeader({ businessData = {}, catalogSlug = '' 
 
   // WhatsApp con carrito
   const handleWhatsAppWithCart = () => {
+    // Validate that cart has items before sending
+    if (!items || items.length === 0) {
+      alert('Debes agregar productos al carrito antes de enviar tu pedido.');
+      return;
+    }
     openWhatsApp(buildWhatsAppMessage(true));
   };
 
@@ -262,7 +267,7 @@ export default function PublicStoreHeader({ businessData = {}, catalogSlug = '' 
       </header>
 
       {/* Cart preview modal */}
-      {showCartModal && <CartPreview onClose={() => setShowCartModal(false)} />}
+      {showCartModal && <CartPreview onClose={() => setShowCartModal(false)} businessData={store} />}
     </>
   );
 }

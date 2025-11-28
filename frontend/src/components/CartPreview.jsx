@@ -8,27 +8,39 @@ import { useAdminStore } from '../store/adminStore';
  * CartPreview - Modal compacto usado en el Header cuando el usuario pulsa el icono del carrito.
  * Usa la API de tu store (updateQuantity, removeItem, getTotal).
  * Navega al carrito correcto según el contexto (cliente vs público).
+ * 
+ * @param {Object} props
+ * @param {Function} props.onClose - Función para cerrar el modal
+ * @param {Object} props.businessData - Datos del negocio (opcional, usado en tiendas públicas)
  */
-export default function CartPreview({ onClose }) {
+export default function CartPreview({ onClose, businessData: propBusinessData }) {
   const { items = [], getTotal, updateQuantity, removeItem } = useCartStore();
   const { getActiveCatalog } = useAdminStore();
   const location = useLocation();
   
+  // Use prop businessData if provided (for public stores), otherwise fall back to adminStore
   const activeCatalog = getActiveCatalog();
-  const businessData = activeCatalog?.business || {};
-  const businessPhone = businessData.telefono || businessData.phone || '1234567890';
+  const storeBusinessData = activeCatalog?.business || {};
+  const businessData = propBusinessData || storeBusinessData;
+  const businessPhone = businessData.telefono || businessData.phone || '';
   const businessName = businessData.nombre || 'Tienda';
 
   const total = typeof getTotal === 'function' ? getTotal() : 0;
 
   const formatCurrency = (v) => `$${Number(v || 0).toFixed(2)}`;
 
-  // Detectar si estamos en un catálogo de cliente
+  // Detectar si estamos en un catálogo de cliente o tienda pública
   const pathParts = location.pathname.split('/').filter(Boolean);
-  const staticSegments = ['admin', 'nosotros', 'contacto', 'colecciones', 'login', 'login-role', 'cart', 'checkout', 'carrito', 'subscription-plans', 'demo', 'forgot-password', 'reset-password'];
-  const catalogSlug = pathParts[0] && !staticSegments.includes(pathParts[0]) ? pathParts[0] : null;
+  const staticSegments = ['admin', 'nosotros', 'contacto', 'colecciones', 'login', 'login-role', 'cart', 'checkout', 'carrito', 'subscription-plans', 'demo', 'forgot-password', 'reset-password', 'tienda'];
+  
+  // Check if we're in a public store route (/tienda/:slug)
+  const isPublicStore = pathParts[0] === 'tienda' && pathParts[1];
+  const catalogSlug = isPublicStore 
+    ? null  // Public stores don't have catalog-based cart routes
+    : (pathParts[0] && !staticSegments.includes(pathParts[0]) ? pathParts[0] : null);
   
   // Determinar la ruta del carrito según el contexto
+  // For public stores, we stay on the same store page (no separate cart route)
   const carritoLink = catalogSlug ? `/${catalogSlug}/carrito` : '/carrito';
 
   const changeQty = (id, qty) => {
@@ -50,13 +62,26 @@ export default function CartPreview({ onClose }) {
   };
 
   const handleWhatsApp = () => {
+    // Validate that cart has items before sending
+    if (!items || items.length === 0) {
+      alert('Debes agregar productos al carrito antes de enviar tu pedido.');
+      return;
+    }
+    
+    // Validate that we have a phone number
+    const phone = String(businessPhone).replace(/\D/g, '');
+    if (!phone) {
+      alert('No hay número de contacto disponible para esta tienda.');
+      return;
+    }
+    
     const msg = `¡Hola! Mi pedido de ${businessName}: ${items.map(i => {
       const name = i.nombre ?? i.name ?? 'Producto';
       const qty = i.quantity ?? 1;
       const price = i.price ?? i.precio ?? 0;
       return `${name} x${qty} - $${(price).toFixed(2)}`;
     }).join(', ')} Total: $${Number(total).toFixed(2)}`;
-    const url = `https://wa.me/${String(businessPhone).replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`;
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
     window.open(url, '_blank');
     if (onClose) onClose();
   };
