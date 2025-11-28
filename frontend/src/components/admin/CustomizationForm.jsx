@@ -1,19 +1,47 @@
 import { useForm } from 'react-hook-form';
 import { useAdminStore } from '../../store/adminStore';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Save, Lock } from 'lucide-react';
 import toast from 'react-hot-toast';  // Para feedback
 import { uploadApi } from '../../api/upload';
+import { clientsApi } from '../../api/clients';
+import StoreVisibilityToggle from './StoreVisibilityToggle';
 
 function CustomizationForm() {
   const activeCatalog = useAdminStore((state) => state.getActiveCatalog());
-  const { updateBusiness, isReadOnly } = useAdminStore();
+  const { updateBusiness, isReadOnly, clientId: storeClientId } = useAdminStore();
   const business = activeCatalog.business;
   const readOnly = isReadOnly();
   
+  // State for client data with isStorePublic
+  const [clientData, setClientData] = useState(null);
+  const [loadingClient, setLoadingClient] = useState(false);
+  
   // ✅ Destructuring completo: incluye reset
   const { register, handleSubmit, setValue, reset, watch } = useForm({ defaultValues: business });
+
+  // Get clientId from store or localStorage
+  const clientId = storeClientId || localStorage.getItem('clientId');
+  
+  // Load client data to get isStorePublic status
+  useEffect(() => {
+    const fetchClientData = async () => {
+      if (!clientId || readOnly) return;
+      
+      try {
+        setLoadingClient(true);
+        const client = await clientsApi.getOne(parseInt(clientId));
+        setClientData(client);
+      } catch (error) {
+        console.error('Error fetching client data:', error);
+      } finally {
+        setLoadingClient(false);
+      }
+    };
+    
+    fetchClientData();
+  }, [clientId, readOnly]);
 
   // ✅ Force load initial si business vacío
   useEffect(() => {
@@ -71,6 +99,25 @@ function CustomizationForm() {
           <p className="text-yellow-300 text-sm">Este es el catálogo por defecto y no se puede modificar. Crea tu propia cuenta de cliente para personalizar tu catálogo.</p>
         </div>
       )}
+      
+      {/* Store Visibility Toggle - Only show for non-readonly catalogs */}
+      {!readOnly && clientId && (
+        <div className="mb-6">
+          {loadingClient ? (
+            <div className="bg-[#171819] rounded-lg p-4 border border-gray-700 animate-pulse">
+              <div className="h-6 bg-gray-700 rounded w-1/3 mb-2"></div>
+              <div className="h-4 bg-gray-700 rounded w-2/3"></div>
+            </div>
+          ) : clientData ? (
+            <StoreVisibilityToggle 
+              clientId={parseInt(clientId)}
+              slug={clientData.slug || business?.slug}
+              initialIsPublic={clientData.isStorePublic || false}
+            />
+          ) : null}
+        </div>
+      )}
+      
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <input 
           {...register('nombre')} 

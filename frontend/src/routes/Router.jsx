@@ -5,6 +5,7 @@ import ProtectedRoute from "../components/auth/ProtectedRoute";
 import LandingPage from "../pages/LandingPage";
 import DemoPage from "../pages/DemoPage";
 import CatalogPage from "../pages/CatalogPage";
+import PublicStorePage from "../pages/PublicStorePage";
 import AdminDashboard from "../components/admin/AdminDashboard";
 import SuperAdminDashboard from "../pages/SuperAdminDashboard";
 import LoginRole from "../components/auth/LoginRole";
@@ -27,6 +28,9 @@ import SuperAdminLayout from "../layouts/SuperAdminLayout";
  * - ClientLayout: Espacio personalizado del cliente con ClientHeader (sin navegación a landing)
  * - SuperAdminLayout: Panel de administración del sistema con SuperAdminHeader
  * 
+ * Rutas públicas:
+ * - /tienda/:slug: Tienda pública accesible sin autenticación (si isStorePublic = true)
+ * 
  * Protección de rutas:
  * - ProtectedRoute: Componente que verifica autenticación antes de mostrar contenido sensible
  * - Previene acceso con botón atrás/adelante del navegador después de cerrar sesión
@@ -42,6 +46,10 @@ export function Router() {
             <AuthProvider>
                 <ScrollToTop />
                 <Routes>
+                    {/* Ruta de Tienda Pública - No requiere autenticación */}
+                    {/* Esta ruta debe estar ANTES de las rutas con layouts para evitar conflictos */}
+                    <Route path="/tienda/:slug" element={<PublicStorePage />} />
+
                     {/* Rutas con MainLayout (Header principal con navegación a landing) */}
                     <Route element={<MainLayout />}>
                         {/* Rutas estáticas / landing / info */}

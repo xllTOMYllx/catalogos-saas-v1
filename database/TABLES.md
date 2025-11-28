@@ -46,14 +46,20 @@ VALUES ('juan@email.com', 'hashed_password', 'client', 'Juan Pérez');
 |-------|------|-------------|-------------|
 | id | SERIAL | ID único del cliente | PRIMARY KEY |
 | nombre | VARCHAR(255) | Nombre del negocio | NOT NULL |
+| slug | VARCHAR(100) | Identificador URL único | UNIQUE, NULL |
 | logo | VARCHAR(500) | Ruta al logo | NULL |
 | color | VARCHAR(7) | Color de marca (hex) | DEFAULT '#f24427' |
 | telefono | VARCHAR(20) | Teléfono de contacto | NULL |
 | direccion | TEXT | Dirección física | NULL |
 | descripcion | TEXT | Descripción del negocio | NULL |
+| is_store_public | BOOLEAN | Tienda pública visible en /tienda/:slug | DEFAULT FALSE |
 | userId | INTEGER | ID del usuario propietario | FK → users.id |
 | createdAt | TIMESTAMP | Fecha de creación | AUTO |
 | updatedAt | TIMESTAMP | Fecha de actualización | AUTO |
+
+### Campos para Tienda Pública
+- **slug**: Identificador único para la URL del catálogo (ej: `mi-tienda`)
+- **is_store_public**: Controla si la tienda es accesible públicamente en `/tienda/:slug`
 
 ### Relaciones
 - `N:1` con **users** (muchos clientes pueden pertenecer a un usuario)
@@ -61,8 +67,12 @@ VALUES ('juan@email.com', 'hashed_password', 'client', 'Juan Pérez');
 
 ### Ejemplo
 ```sql
-INSERT INTO clients (nombre, logo, color, telefono, userId)
-VALUES ('Boutique Elegante', '/logos/boutique.png', '#e91e63', '555-1234', 1);
+-- Crear cliente con tienda pública
+INSERT INTO clients (nombre, slug, logo, color, telefono, userId, is_store_public)
+VALUES ('Boutique Elegante', 'boutique-elegante', '/logos/boutique.png', '#e91e63', '555-1234', 1, TRUE);
+
+-- Activar tienda pública
+UPDATE clients SET is_store_public = TRUE WHERE id = 1;
 ```
 
 ---
