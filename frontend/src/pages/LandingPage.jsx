@@ -97,9 +97,9 @@ function LandingPage() {
                 <div className="bg-[#f24427] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-white text-2xl font-bold">
                   1
                 </div>
-                <h3 className="text-xl font-semibold text-white mb-2">Elige tu Slug</h3>
+                <h3 className="text-xl font-semibold text-white mb-2">Crea tu Cuenta</h3>
                 <p className="text-gray-400">
-                  Selecciona un nombre único para tu catálogo. Por ejemplo: <span className="text-[#f24427]">tuapp.com/mi-tienda</span>
+                  Regístrate con tu nombre, email y datos de tu negocio. Tu URL única se genera automáticamente: <span className="text-[#f24427]">tuapp.com/mi-tienda</span>
                 </p>
               </div>
               <div className="text-center">
