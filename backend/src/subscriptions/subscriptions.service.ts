@@ -72,7 +72,10 @@ export class SubscriptionsService {
     }
 
     const subscription = this.subscriptionRepository.create(createDto);
-    return this.subscriptionRepository.save(subscription);
+    await this.subscriptionRepository.save(subscription);
+
+    // Return with plan relation loaded
+    return this.findByUserIdOrThrow(createDto.userId);
   }
 
   async update(
@@ -95,9 +98,12 @@ export class SubscriptionsService {
     const newPlan = await this.subscriptionPlansService.findOne(planId);
 
     subscription.planId = newPlan.id;
-    subscription.updatedAt = new Date();
+    subscription.plan = newPlan; // Update the relation object as well
 
-    return this.subscriptionRepository.save(subscription);
+    await this.subscriptionRepository.save(subscription);
+
+    // Re-fetch with relations to ensure data consistency
+    return this.findByUserIdOrThrow(userId);
   }
 
   async cancel(userId: number): Promise<Subscription> {
