@@ -55,6 +55,12 @@ Implementación de límites de productos por plan de suscripción.
 - `PRODUCT_LIMITS_UI_REFERENCE.md` - Referencia visual de la interfaz
 - `PR_SUMMARY.md` - Resumen del Pull Request
 
+### 🎨 Product_Variants/ 🆕
+Sistema de variantes de productos (tallas, colores, etc.) y vista de detalle.
+
+**Archivos:**
+- `PRODUCT_VARIANTS.md` - Documentación completa del sistema de variantes
+
 ### 💳 Subscriptions/
 Sistema completo de suscripciones con planes FREE, BASIC, PRO y ENTERPRISE.
 
@@ -84,6 +90,7 @@ Integración de WhatsApp para gestión manual de cambios de plan.
 - **Base de Datos PostgreSQL**: Ver `Database_Integration/`
 - **Sistema de Suscripciones**: Ver `Subscriptions/`
 - **Límites de Productos**: Ver `Product_Limits/`
+- **Variantes de Productos**: Ver `Product_Variants/` 🆕
 - **Carga de Imágenes**: Ver `Image_Upload/`
 - **Recuperación de Contraseña**: Ver `Password_Recovery/`
 - **Integración WhatsApp**: Ver `WhatsApp_Integration/`

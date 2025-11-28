@@ -16,6 +16,7 @@ import { AdminModule } from './admin/admin.module';
 import { User } from './users/user.entity';
 import { Client } from './clients/client.entity';
 import { Product } from './products/product.entity';
+import { ProductVariant } from './products/product-variant.entity';
 import { Catalog } from './catalogs/catalog.entity';
 import { Subscription } from './subscriptions/subscription.entity';
 import { SubscriptionPlan } from './subscription-plans/subscription-plan.entity';
@@ -40,6 +41,7 @@ import { PasswordResetToken } from './auth/password-reset-token.entity';
           User,
           Client,
           Product,
+          ProductVariant,
           Catalog,
           Subscription,
           SubscriptionPlan,

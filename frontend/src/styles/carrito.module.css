@@ -41,6 +41,7 @@
 
 .meta { flex: 1; min-width: 0; }
 .name { margin: 0 0 6px 0; color: #fff; font-weight: 700; }
+.variant { margin: 0 0 6px 0; color: var(--accent); font-size: 0.85rem; font-weight: 500; }
 .unit { margin: 0 0 10px 0; color: var(--muted); font-size: 0.95rem; }
 
 /* cantidades */

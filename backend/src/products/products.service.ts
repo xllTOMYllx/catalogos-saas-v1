@@ -14,8 +14,21 @@ export class ProductsService {
     return this.productsRepository.find();
   }
 
+  async findAllWithVariants(): Promise<Product[]> {
+    return this.productsRepository.find({
+      relations: ['variants'],
+    });
+  }
+
   async findOne(id: number): Promise<Product | null> {
     return this.productsRepository.findOne({ where: { id } });
+  }
+
+  async findOneWithVariants(id: number): Promise<Product | null> {
+    return this.productsRepository.findOne({
+      where: { id },
+      relations: ['variants'],
+    });
   }
 
   async create(product: Partial<Product>): Promise<Product> {
@@ -27,10 +40,11 @@ export class ProductsService {
     // Remove fields that should not be updated to prevent issues
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const {
-      id: _,
-      createdAt,
-      updatedAt,
-      catalogs,
+      id: _id,
+      createdAt: _createdAt,
+      updatedAt: _updatedAt,
+      catalogs: _catalogs,
+      variants: _variants,
       ...cleanUpdates
     } = updates as any;
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument

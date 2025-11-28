@@ -7,12 +7,16 @@ function normalizeProduct(product) {
   const id = product.id ?? product._id ?? `${product.name || product.nombre || Math.random()}`;
   const nombre = product.nombre ?? product.name ?? product.title ?? 'Producto';
   const ruta = product.ruta ?? product.image ?? product.img ?? product.thumbnail ?? '';
+  const variantInfo = product.variantInfo ?? null;
+  const variantIds = product.variantIds ?? [];
   return {
     ...product,
     id,
     nombre,
     price,
     ruta,
+    variantInfo,
+    variantIds,
   };
 }
 
@@ -21,9 +25,10 @@ export const useCartStore = create((set, get) => ({
   // Estado inicial: Array vacío de items
   items: [],
 
-  // Acción: Agregar un producto al carrito (si ya existe, suma cantidad)
+  // Acción: Agregar un producto al carrito (si ya existe con mismas variantes, suma cantidad)
   addItem: (product) => set((state) => {
     const normalized = normalizeProduct(product);
+    // For products with variants, the id includes variant info, so this comparison works correctly
     const existing = state.items.find(item => item.id === normalized.id);
     if (existing) {
       return {

@@ -2,7 +2,7 @@
 
 ## Estructura General
 
-Este documento proporciona un resumen conciso de las 4 tablas principales de la base de datos.
+Este documento proporciona un resumen conciso de las tablas principales de la base de datos.
 
 ---
 
@@ -93,6 +93,7 @@ VALUES ('Boutique Elegante', '/logos/boutique.png', '#e91e63', '555-1234', 1);
 
 ### Relaciones
 - `1:N` con **catalogs** (un producto puede estar en muchos catálogos)
+- `1:N` con **product_variants** (un producto puede tener muchas variantes)
 
 ### Ejemplo
 ```sql
@@ -102,7 +103,57 @@ VALUES ('/products/shirt1.png', 'Camisa Casual', 399.00, 'Camisa 100% algodón',
 
 ---
 
-## 4. 📋 CATALOGS (Catálogos)
+## 4. 🎨 PRODUCT_VARIANTS (Variantes de Productos) 🆕
+
+**Propósito**: Almacenar variantes de productos (tallas, colores, etc.)
+
+### Campos
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| id | SERIAL | ID único de la variante | PRIMARY KEY |
+| productId | INTEGER | ID del producto base | FK → products.id |
+| variantType | VARCHAR(100) | Tipo de variante (ej: 'Talla', 'Color') | NOT NULL |
+| variantValue | VARCHAR(255) | Valor de la variante (ej: 'S', 'M', 'Rojo') | NOT NULL |
+| additionalPrice | DECIMAL(10,2) | Precio adicional de la variante | DEFAULT 0 |
+| stock | INTEGER | Stock específico de la variante | DEFAULT 0 |
+| imageUrl | TEXT | Imagen específica de la variante | NULL |
+| active | BOOLEAN | Si la variante está activa | DEFAULT true |
+| createdAt | TIMESTAMP | Fecha de creación | AUTO |
+| updatedAt | TIMESTAMP | Fecha de actualización | AUTO |
+
+### Constraints Especiales
+- `UNIQUE(productId, variantType, variantValue)`: No se puede repetir la misma combinación de variante
+
+### Tipos de Variante Comunes
+- **Talla**: S, M, L, XL, XXL (ropa)
+- **Talla**: 28, 30, 32, 34, 36 (pantalones)
+- **Color**: Rojo, Azul, Negro, Blanco
+- **Tamaño**: Pequeño, Mediano, Grande
+- **Material**: Algodón, Poliéster, Cuero
+
+### Relaciones
+- `N:1` con **products** (muchas variantes pertenecen a un producto)
+
+### Ejemplo
+```sql
+-- Agregar tallas a una camisa
+INSERT INTO product_variants (productId, variantType, variantValue, additionalPrice, stock)
+VALUES 
+    (2, 'Talla', 'S', 0, 10),
+    (2, 'Talla', 'M', 0, 15),
+    (2, 'Talla', 'L', 0, 12),
+    (2, 'Talla', 'XL', 10.00, 8);  -- Talla XL cuesta $10 más
+
+-- Agregar colores a un gorro
+INSERT INTO product_variants (productId, variantType, variantValue, stock, imageUrl)
+VALUES 
+    (1, 'Color', 'Negro', 20, '/products/cap1-negro.png'),
+    (1, 'Color', 'Rojo', 15, '/products/cap1-rojo.png');
+```
+
+---
+
+## 5. 📋 CATALOGS (Catálogos)
 
 **Propósito**: Vincular clientes con productos (tabla de unión many-to-many)
 
@@ -142,15 +193,15 @@ VALUES (1, 6, true);
 ```
 USERS
   ↓ (1:N)
-CLIENTS ←→ CATALOGS ←→ PRODUCTS
-        (N:N a través de CATALOGS)
+CLIENTS ←→ CATALOGS ←→ PRODUCTS ←→ PRODUCT_VARIANTS
+        (N:N a través de CATALOGS)    (1:N)
 ```
 
 ---
 
 ## 📊 Estadísticas de Datos Iniciales
 
-Después de ejecutar `database/init.sql`:
+Después de ejecutar `database/init.sql` y `database/product_variants_schema.sql`:
 
 | Tabla | Registros | Descripción |
 |-------|-----------|-------------|
@@ -158,6 +209,7 @@ Después de ejecutar `database/init.sql`:
 | clients | 1 | UrbanStreet (negocio por defecto) |
 | products | 9 | Productos de ejemplo (ropa y accesorios) |
 | catalogs | 9 | Todos los productos vinculados al cliente 1 |
+| product_variants | 20+ | Variantes de talla para ropa |
 
 ---
 
