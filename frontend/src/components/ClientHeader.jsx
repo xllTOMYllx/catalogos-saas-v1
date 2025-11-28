@@ -33,12 +33,20 @@ export default function ClientHeader({ catalogSlug }) {
   // Get business data from active catalog
   const activeCatalog = getActiveCatalog();
   
-  // Check if the active catalog matches the current route's catalog slug
-  // This prevents showing default store data when client's catalog is still loading
-  const isCatalogMatching = activeId === catalogSlug || (catalogSlug && activeCatalog?.business?.slug === catalogSlug);
-  const isLoadingCatalog = loading || (!isCatalogMatching && catalogSlug && catalogSlug !== 'default');
+  // Determine if the currently active catalog matches the route's catalog slug
+  // This helps identify when the correct catalog is loaded vs when we're still showing default data
+  const doesActiveIdMatchSlug = activeId === catalogSlug;
+  const doesBusinessSlugMatch = catalogSlug && activeCatalog?.business?.slug === catalogSlug;
+  const isCatalogMatching = doesActiveIdMatchSlug || doesBusinessSlugMatch;
   
-  // Use proper business data based on loading state
+  // Show loading state when:
+  // 1. The store is actively loading data, OR
+  // 2. We have a non-default catalog slug but the active catalog doesn't match yet
+  const isNonDefaultCatalog = catalogSlug && catalogSlug !== 'default';
+  const isWaitingForCorrectCatalog = !isCatalogMatching && isNonDefaultCatalog;
+  const isLoadingCatalog = loading || isWaitingForCorrectCatalog;
+  
+  // Use placeholder business data while loading to prevent showing default store data
   const businessData = isLoadingCatalog 
     ? { nombre: 'Cargando...', logo: '/logosinfondo.png', telefono: '' }
     : (activeCatalog?.business || { nombre: 'Mi Catálogo', logo: '/logosinfondo.png', telefono: '1234567890' });

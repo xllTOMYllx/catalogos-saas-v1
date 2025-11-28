@@ -15,7 +15,17 @@ export default function PublicStoreCarrito() {
   const { storeData, slug } = useOutletContext();
   const { items = [], getTotal, updateQuantity, removeItem } = useCartStore();
   
-  const businessData = storeData || {};
+  // Provide complete default object to prevent undefined property access
+  const businessData = storeData || {
+    id: null,
+    nombre: 'Tienda',
+    logo: '/logosinfondo.png',
+    color: '#f24427',
+    telefono: '',
+    direccion: '',
+    descripcion: '',
+    slug: ''
+  };
   const businessPhone = businessData.telefono || '';
   const businessName = businessData.nombre || 'Tienda';
   const storeColor = businessData.color || '#f24427';

@@ -15,7 +15,17 @@ function PublicStoreProducts() {
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState([]);
 
-  const store = storeData || {};
+  // Provide complete default store object to prevent undefined property access
+  const store = storeData || {
+    id: null,
+    nombre: 'Tienda',
+    logo: '/logosinfondo.png',
+    color: '#f24427',
+    telefono: '',
+    direccion: '',
+    descripcion: '',
+    slug: ''
+  };
 
   useEffect(() => {
     const fetchProducts = async () => {

@@ -19,7 +19,17 @@ export default function ClientLayout() {
   // Load the client's catalog when the layout mounts
   // This ensures the header has the correct data from the start
   useEffect(() => {
-    if (catalogSlug && catalogSlug !== 'default' && activeId !== catalogSlug && !loading) {
+    // Only load catalog if:
+    // 1. We have a catalog slug that's not the default
+    // 2. The currently active catalog doesn't match our slug (need to load)
+    // 3. We're not already loading (prevent duplicate requests)
+    const shouldLoadCatalog = 
+      catalogSlug && 
+      catalogSlug !== 'default' && 
+      activeId !== catalogSlug && 
+      !loading;
+    
+    if (shouldLoadCatalog) {
       const storedClientId = localStorage.getItem('clientId');
       const storedSlug = localStorage.getItem('userId');
       
