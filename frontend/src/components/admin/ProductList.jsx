@@ -1,17 +1,38 @@
 import { useAdminStore } from '../../store/adminStore';
-import { Plus, Lock } from 'lucide-react';  // npm install lucide-react si no tienes
-import { useState } from 'react';
+import { Plus, Lock, Tags } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import ProductForm from './ProductForm';
 import toast from 'react-hot-toast';
+import { productsApi } from '../../api/products';
 
 function ProductList() {
-
   const activeCatalog = useAdminStore((state) => state.getActiveCatalog());
-  const products = activeCatalog.products;  // ✅ Del active catalog
-  const { deleteProduct, isReadOnly } = useAdminStore();  // Actions
+  const products = activeCatalog.products;
+  const { deleteProduct, isReadOnly } = useAdminStore();
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [variantCounts, setVariantCounts] = useState({});
   const readOnly = isReadOnly();
+
+  // Load variant counts for all products
+  useEffect(() => {
+    const loadVariantCounts = async () => {
+      const counts = {};
+      for (const product of products) {
+        try {
+          const variants = await productsApi.getVariants(product.id);
+          counts[product.id] = variants?.length || 0;
+        } catch {
+          counts[product.id] = 0;
+        }
+      }
+      setVariantCounts(counts);
+    };
+
+    if (products.length > 0) {
+      loadVariantCounts();
+    }
+  }, [products]);
 
   const handleDelete = async (id) => {
     if (readOnly) {
@@ -25,6 +46,24 @@ function ProductList() {
     } catch (error) {
       toast.error('Error al eliminar producto: ' + error.message);
     }
+  };
+
+  const handleFormClose = () => {
+    setShowForm(false);
+    // Refresh variant counts when form closes (in case variants were added/removed)
+    const loadVariantCounts = async () => {
+      const counts = {};
+      for (const product of products) {
+        try {
+          const variants = await productsApi.getVariants(product.id);
+          counts[product.id] = variants?.length || 0;
+        } catch {
+          counts[product.id] = 0;
+        }
+      }
+      setVariantCounts(counts);
+    };
+    loadVariantCounts();
   };
 
   return (
@@ -51,7 +90,7 @@ function ProductList() {
       )}
 
       {showForm && (
-        <ProductForm onClose={() => setShowForm(false)} editingId={editingId} />
+        <ProductForm onClose={handleFormClose} editingId={editingId} />
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -61,19 +100,36 @@ function ProductList() {
             {!readOnly && <p className="text-sm mt-2">Haz clic en "Agregar Producto" para comenzar.</p>}
           </div>
         ) : (
-          products.map(product => (  // ✅ Usa products reactivos
+          products.map(product => (
             <div key={product.id} className="bg-[#171819] p-4 rounded-lg">
               <img src={product.ruta} alt={product.nombre} className="w-full h-32 object-cover rounded mb-2" />
               <h4 className="font-bold">{product.nombre}</h4>
-              <p className="text-gray-400 text-sm">{product.description}</p>
-              <p className="text-[#f24427] font-semibold">${product.precio}</p>
-              <p className="text-sm">Stock: {product.stock}</p>
+              <p className="text-gray-400 text-sm line-clamp-2">{product.description}</p>
+              <div className="flex items-center justify-between mt-2">
+                <p className="text-[#f24427] font-semibold">${product.precio}</p>
+                {variantCounts[product.id] > 0 && (
+                  <span className="flex items-center gap-1 text-xs text-purple-400 bg-purple-900/30 px-2 py-1 rounded">
+                    <Tags size={12} />
+                    {variantCounts[product.id]} variante{variantCounts[product.id] !== 1 ? 's' : ''}
+                  </span>
+                )}
+              </div>
+              <p className="text-sm text-gray-400">Stock: {product.stock}</p>
+              {product.category && (
+                <p className="text-xs text-gray-500 mt-1">Categoría: {product.category}</p>
+              )}
               {!readOnly && (
-                <div className="flex gap-2 mt-2">
-                  <button onClick={() => { setShowForm(true); setEditingId(product.id); }} className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600">
+                <div className="flex gap-2 mt-3">
+                  <button 
+                    onClick={() => { setShowForm(true); setEditingId(product.id); }} 
+                    className="flex-1 bg-blue-500 text-white px-3 py-1.5 rounded text-sm hover:bg-blue-600 transition-colors"
+                  >
                     Editar
                   </button>
-                  <button onClick={() => handleDelete(product.id)} className="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600">
+                  <button 
+                    onClick={() => handleDelete(product.id)} 
+                    className="bg-red-500 text-white px-3 py-1.5 rounded text-sm hover:bg-red-600 transition-colors"
+                  >
                     Eliminar
                   </button>
                 </div>
