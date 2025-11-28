@@ -2,6 +2,7 @@ import {
   Injectable,
   ForbiddenException,
   ConflictException,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -32,6 +33,57 @@ export class ClientsService {
       where: { slug },
       relations: ['user'],
     });
+  }
+
+  /**
+   * Find a public store by slug
+   * Only returns the client if isStorePublic is true
+   */
+  async findPublicStore(slug: string): Promise<Client | null> {
+    return this.clientsRepository.findOne({
+      where: { slug, isStorePublic: true },
+      relations: ['user'],
+    });
+  }
+
+  /**
+   * Toggle the public visibility of a client's store
+   */
+  async toggleStoreVisibility(
+    id: number,
+  ): Promise<{ isStorePublic: boolean; slug: string }> {
+    const client = await this.findOne(id);
+    if (!client) {
+      throw new NotFoundException(`Cliente con ID ${id} no encontrado`);
+    }
+
+    const newVisibility = !client.isStorePublic;
+    await this.clientsRepository.update(id, { isStorePublic: newVisibility });
+
+    return {
+      isStorePublic: newVisibility,
+      slug: client.slug,
+    };
+  }
+
+  /**
+   * Set the public visibility of a client's store
+   */
+  async setStoreVisibility(
+    id: number,
+    isPublic: boolean,
+  ): Promise<{ isStorePublic: boolean; slug: string }> {
+    const client = await this.findOne(id);
+    if (!client) {
+      throw new NotFoundException(`Cliente con ID ${id} no encontrado`);
+    }
+
+    await this.clientsRepository.update(id, { isStorePublic: isPublic });
+
+    return {
+      isStorePublic: isPublic,
+      slug: client.slug,
+    };
   }
 
   async checkSlugAvailability(slug: string): Promise<{ available: boolean }> {

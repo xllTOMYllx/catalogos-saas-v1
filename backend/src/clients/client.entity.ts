@@ -37,6 +37,9 @@ export class Client {
   @Column({ nullable: true })
   descripcion: string;
 
+  @Column({ name: 'is_store_public', default: false })
+  isStorePublic: boolean;
+
   @ManyToOne(() => User, (user) => user.clients)
   @JoinColumn({ name: 'userId' })
   user: User;

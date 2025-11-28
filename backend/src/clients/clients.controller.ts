@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Put,
+  Patch,
   Delete,
   Body,
   Param,
@@ -30,6 +31,17 @@ export class ClientsController {
     return client;
   }
 
+  @Get('public-store/:slug')
+  async findPublicStore(@Param('slug') slug: string): Promise<Client> {
+    const client = await this.clientsService.findPublicStore(slug);
+    if (!client) {
+      throw new NotFoundException(
+        `La tienda "${slug}" no está disponible o no es pública`,
+      );
+    }
+    return client;
+  }
+
   @Get('check-slug/:slug')
   async checkSlugAvailability(
     @Param('slug') slug: string,
@@ -52,6 +64,21 @@ export class ClientsController {
   @Post()
   async create(@Body() clientData: Partial<Client>): Promise<Client> {
     return this.clientsService.create(clientData);
+  }
+
+  @Patch(':id/toggle-visibility')
+  async toggleStoreVisibility(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<{ isStorePublic: boolean; slug: string }> {
+    return this.clientsService.toggleStoreVisibility(id);
+  }
+
+  @Patch(':id/set-visibility')
+  async setStoreVisibility(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: { isPublic: boolean },
+  ): Promise<{ isStorePublic: boolean; slug: string }> {
+    return this.clientsService.setStoreVisibility(id, body.isPublic);
   }
 
   @Put(':id')

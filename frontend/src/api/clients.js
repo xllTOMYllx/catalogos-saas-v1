@@ -19,6 +19,24 @@ export const clientsApi = {
     return response.data;
   },
 
+  // Get public store by slug (only returns if isStorePublic is true)
+  getPublicStore: async (slug) => {
+    const response = await api.get(`/clients/public-store/${slug}`);
+    return response.data;
+  },
+
+  // Toggle store visibility
+  toggleStoreVisibility: async (id) => {
+    const response = await api.patch(`/clients/${id}/toggle-visibility`);
+    return response.data;
+  },
+
+  // Set store visibility
+  setStoreVisibility: async (id, isPublic) => {
+    const response = await api.patch(`/clients/${id}/set-visibility`, { isPublic });
+    return response.data;
+  },
+
   // Check slug availability
   checkSlugAvailability: async (slug) => {
     const response = await api.get(`/clients/check-slug/${slug}`);
