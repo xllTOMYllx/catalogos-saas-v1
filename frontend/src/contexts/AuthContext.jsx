@@ -127,16 +127,14 @@ export const AuthProvider = ({ children }) => {
     } finally {
       clearAuth();
       
-      // Limpiar el historial del navegador para prevenir acceso con botón atrás
-      // Reemplazar toda la pila del historial con la página actual
-      if (typeof window !== 'undefined') {
-        // Limpiar cache del navegador para páginas protegidas
-        if ('caches' in window) {
-          caches.keys().then((names) => {
-            names.forEach((name) => {
-              caches.delete(name);
-            });
-          });
+      // Limpiar cache del navegador para páginas protegidas (si está disponible)
+      if (typeof window !== 'undefined' && 'caches' in window) {
+        try {
+          const cacheNames = await caches.keys();
+          await Promise.all(cacheNames.map(name => caches.delete(name)));
+        } catch (cacheError) {
+          // Ignorar errores de cache - no es crítico para el logout
+          console.debug('Cache clearing skipped:', cacheError);
         }
       }
     }

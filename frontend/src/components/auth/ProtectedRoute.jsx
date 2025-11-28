@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { useEffect, useRef } from 'react';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/useAuth';
 
 /**
@@ -22,6 +22,10 @@ export default function ProtectedRoute({
 }) {
   const { isAuthenticated, isLoading, user } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
+  
+  // Referencias para los meta tags para asegurar limpieza correcta
+  const metaTagsRef = useRef([]);
 
   // Prevenir cache del navegador para páginas protegidas
   useEffect(() => {
@@ -41,12 +45,22 @@ export default function ProtectedRoute({
     document.head.appendChild(metaCacheControl);
     document.head.appendChild(metaPragma);
     document.head.appendChild(metaExpires);
+    
+    // Guardar referencias para limpieza
+    metaTagsRef.current = [metaCacheControl, metaPragma, metaExpires];
 
     // Cleanup: remover meta tags cuando el componente se desmonta
     return () => {
-      document.head.removeChild(metaCacheControl);
-      document.head.removeChild(metaPragma);
-      document.head.removeChild(metaExpires);
+      metaTagsRef.current.forEach(meta => {
+        try {
+          if (meta && meta.parentNode) {
+            meta.parentNode.removeChild(meta);
+          }
+        } catch {
+          // Ignorar errores si el elemento ya fue removido
+        }
+      });
+      metaTagsRef.current = [];
     };
   }, []);
 
@@ -58,11 +72,11 @@ export default function ProtectedRoute({
       
       // Listener para el evento popstate (botón atrás/adelante)
       const handlePopState = () => {
-        // Verificar si aún está autenticado
+        // Verificar si aún está autenticado usando el mismo key que AuthContext
         const token = localStorage.getItem('authToken');
         if (!token) {
-          // Si no hay token, redirigir a login
-          window.location.replace(redirectTo);
+          // Si no hay token, usar navigate de React Router para redirigir
+          navigate(redirectTo, { replace: true });
         }
       };
 
@@ -72,7 +86,7 @@ export default function ProtectedRoute({
         window.removeEventListener('popstate', handlePopState);
       };
     }
-  }, [isAuthenticated, location.pathname, redirectTo]);
+  }, [isAuthenticated, location.pathname, redirectTo, navigate]);
 
   // Mostrar loading mientras se verifica la autenticación
   if (isLoading) {
