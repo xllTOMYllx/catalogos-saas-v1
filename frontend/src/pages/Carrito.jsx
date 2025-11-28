@@ -18,7 +18,7 @@ export default function CarritoPage() {
   
   const activeCatalog = getActiveCatalog();
   const businessData = activeCatalog?.business || {};
-  const businessPhone = businessData.telefono || businessData.phone || '1234567890';
+  const businessPhone = businessData.telefono || businessData.phone || '';
   const businessName = businessData.nombre || 'Tienda';
 
   const total = typeof getTotal === 'function' ? getTotal() : 0;
