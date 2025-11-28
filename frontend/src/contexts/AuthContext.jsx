@@ -61,6 +61,8 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('role');
     localStorage.removeItem('userId');
     localStorage.removeItem('clientId');
+    // También limpiar sessionStorage para mayor seguridad
+    sessionStorage.clear();
   };
 
   const login = async (email, password) => {
@@ -124,6 +126,19 @@ export const AuthProvider = ({ children }) => {
       console.error('Logout error:', error);
     } finally {
       clearAuth();
+      
+      // Limpiar el historial del navegador para prevenir acceso con botón atrás
+      // Reemplazar toda la pila del historial con la página actual
+      if (typeof window !== 'undefined') {
+        // Limpiar cache del navegador para páginas protegidas
+        if ('caches' in window) {
+          caches.keys().then((names) => {
+            names.forEach((name) => {
+              caches.delete(name);
+            });
+          });
+        }
+      }
     }
   };
 

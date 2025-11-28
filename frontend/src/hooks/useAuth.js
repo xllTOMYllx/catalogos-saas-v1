@@ -39,6 +39,8 @@ export function useAuth() {
       localStorage.removeItem('userId');
       localStorage.removeItem('clientId');
       localStorage.removeItem('admin-storage');
+      // También limpiar sessionStorage para mayor seguridad
+      sessionStorage.clear();
       setIsAuthenticated(false);
     }
   };
