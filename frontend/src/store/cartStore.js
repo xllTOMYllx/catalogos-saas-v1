@@ -26,20 +26,22 @@ export const useCartStore = create((set, get) => ({
   items: [],
 
   // Acción: Agregar un producto al carrito (si ya existe con mismas variantes, suma cantidad)
-  addItem: (product) => set((state) => {
+  // quantityToAdd: número de unidades a agregar (default: 1)
+  addItem: (product, quantityToAdd = 1) => set((state) => {
     const normalized = normalizeProduct(product);
+    const qty = Math.max(1, quantityToAdd);
     // For products with variants, the id includes variant info, so this comparison works correctly
     const existing = state.items.find(item => item.id === normalized.id);
     if (existing) {
       return {
         items: state.items.map(item =>
           item.id === normalized.id
-            ? { ...item, quantity: (item.quantity || 1) + 1 }
+            ? { ...item, quantity: (item.quantity || 1) + qty }
             : item
         )
       };
     }
-    return { items: [...state.items, { ...normalized, quantity: 1 }] };
+    return { items: [...state.items, { ...normalized, quantity: qty }] };
   }),
 
   // Acción: Remover un item completo

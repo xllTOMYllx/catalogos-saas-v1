@@ -132,13 +132,10 @@ function ProductDetailModal({ isOpen, onClose, product, clientName, clientColor 
         clientName,
         variantInfo: variantInfo || null,
         variantIds: Object.values(selectedVariants).map(v => v.id),
-        quantity,
       };
 
-      // Add item to cart (addItem handles quantity internally)
-      for (let i = 0; i < quantity; i++) {
-        addItem(cartItem);
-      }
+      // Add item to cart with the selected quantity
+      addItem(cartItem, quantity);
 
       // Show success feedback
       onClose();
