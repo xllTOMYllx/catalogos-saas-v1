@@ -21,7 +21,7 @@ export default function ClientHeader({ catalogSlug }) {
   const [showCartModal, setShowCartModal] = useState(false);
 
   const { items, getTotal } = useCartStore();
-  const { getActiveCatalog, filterProducts, setActiveCatalogId, activeId, clearStorage } = useAdminStore();
+  const { getActiveCatalog, filterProducts, setActiveCatalogId, activeId, clearStorage, loading } = useAdminStore();
   const { isAuthenticated, logout, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -32,7 +32,16 @@ export default function ClientHeader({ catalogSlug }) {
 
   // Get business data from active catalog
   const activeCatalog = getActiveCatalog();
-  const businessData = activeCatalog?.business || { nombre: 'Mi Catálogo', logo: '/logosinfondo.png', telefono: '1234567890' };
+  
+  // Check if the active catalog matches the current route's catalog slug
+  // This prevents showing default store data when client's catalog is still loading
+  const isCatalogMatching = activeId === catalogSlug || (catalogSlug && activeCatalog?.business?.slug === catalogSlug);
+  const isLoadingCatalog = loading || (!isCatalogMatching && catalogSlug && catalogSlug !== 'default');
+  
+  // Use proper business data based on loading state
+  const businessData = isLoadingCatalog 
+    ? { nombre: 'Cargando...', logo: '/logosinfondo.png', telefono: '' }
+    : (activeCatalog?.business || { nombre: 'Mi Catálogo', logo: '/logosinfondo.png', telefono: '1234567890' });
 
   // Determinar si estamos en la página de admin del catálogo
   const isAdminPage = location.pathname.includes('/admin');
