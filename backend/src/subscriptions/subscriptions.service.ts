@@ -99,7 +99,6 @@ export class SubscriptionsService {
 
     subscription.planId = newPlan.id;
     subscription.plan = newPlan; // Update the relation object as well
-    subscription.updatedAt = new Date();
 
     await this.subscriptionRepository.save(subscription);
 
