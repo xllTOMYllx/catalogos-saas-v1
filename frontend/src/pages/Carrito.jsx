@@ -48,7 +48,8 @@ export default function CarritoPage() {
       const name = i.nombre ?? i.name ?? 'Producto';
       const qty = i.quantity ?? 1;
       const price = i.price ?? i.precio ?? 0;
-      return `${name} x${qty} - $${(price).toFixed(2)}`;
+      const variantInfo = i.variantInfo ? ` (${i.variantInfo})` : '';
+      return `${name}${variantInfo} x${qty} - $${(price).toFixed(2)}`;
     }).join(', ')} Total: $${Number(total).toFixed(2)}`;
     const url = `https://wa.me/${String(businessPhone).replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`;
     window.open(url, '_blank');
@@ -75,12 +76,16 @@ export default function CarritoPage() {
               const price = item.price ?? item.precio ?? 0;
               const lineTotal = (price * qty) || 0;
               const img = item.ruta ?? item.image ?? 'https://via.placeholder.com/140x140';
+              const variantInfo = item.variantInfo ?? null;
 
               return (
                 <div key={item.id} className={styles.line}>
                   <img src={img} alt={name} className={styles.img} />
                   <div className={styles.meta}>
                     <h3 className={styles.name}>{name}</h3>
+                    {variantInfo && (
+                      <p className={styles.variant}>{variantInfo}</p>
+                    )}
                     <p className={styles.unit}>Precio unitario: <strong>{formatCurrency(price)}</strong></p>
                     <div className={styles.qty}>
                       <button onClick={() => changeQty(item.id, qty - 1)} className={styles.qtyBtn}><Minus /></button>

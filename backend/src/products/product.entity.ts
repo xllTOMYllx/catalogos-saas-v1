@@ -7,6 +7,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { Catalog } from '../catalogs/catalog.entity';
+import { ProductVariant } from './product-variant.entity';
 
 @Entity('products')
 export class Product {
@@ -33,6 +34,9 @@ export class Product {
 
   @OneToMany(() => Catalog, (catalog) => catalog.product)
   catalogs: Catalog[];
+
+  @OneToMany(() => ProductVariant, (variant) => variant.product)
+  variants: ProductVariant[];
 
   @CreateDateColumn()
   createdAt: Date;

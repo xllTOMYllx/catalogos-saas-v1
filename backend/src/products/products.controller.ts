@@ -8,6 +8,7 @@ import {
   Param,
   HttpCode,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import type { Product } from './product.entity';
@@ -17,12 +18,23 @@ export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Get()
-  async findAll(): Promise<Product[]> {
+  async findAll(
+    @Query('includeVariants') includeVariants?: string,
+  ): Promise<Product[]> {
+    if (includeVariants === 'true') {
+      return this.productsService.findAllWithVariants();
+    }
     return this.productsService.findAll();
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<Product | null> {
+  async findOne(
+    @Param('id') id: string,
+    @Query('includeVariants') includeVariants?: string,
+  ): Promise<Product | null> {
+    if (includeVariants === 'true') {
+      return this.productsService.findOneWithVariants(+id);
+    }
     return this.productsService.findOne(+id);
   }
 
