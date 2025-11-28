@@ -122,13 +122,17 @@ export default function Header({ negocio: defaultNegocio }) {
       clearStorage();
       setActiveCatalogId('default');
       toast.success('Sesión cerrada. ¡Hasta pronto!', { duration: 2000 });
-      navigate('/');
+      
+      // Reemplazar el historial para prevenir acceso con botón atrás
+      window.history.replaceState(null, '', '/');
+      navigate('/', { replace: true });
       setIsMobileMenuOpen(false);
     } catch (err) {
       console.error('Error during logout:', err);
       clearStorage();
       setActiveCatalogId('default');
-      navigate('/');
+      window.history.replaceState(null, '', '/');
+      navigate('/', { replace: true });
       setIsMobileMenuOpen(false);
     }
   };

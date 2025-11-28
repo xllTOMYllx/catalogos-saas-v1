@@ -61,6 +61,8 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('role');
     localStorage.removeItem('userId');
     localStorage.removeItem('clientId');
+    // También limpiar sessionStorage para mayor seguridad
+    sessionStorage.clear();
   };
 
   const login = async (email, password) => {
@@ -124,6 +126,17 @@ export const AuthProvider = ({ children }) => {
       console.error('Logout error:', error);
     } finally {
       clearAuth();
+      
+      // Limpiar cache del navegador para páginas protegidas (si está disponible)
+      if (typeof window !== 'undefined' && 'caches' in window) {
+        try {
+          const cacheNames = await caches.keys();
+          await Promise.all(cacheNames.map(name => caches.delete(name)));
+        } catch (cacheError) {
+          // Ignorar errores de cache - no es crítico para el logout
+          console.debug('Cache clearing skipped:', cacheError);
+        }
+      }
     }
   };
 

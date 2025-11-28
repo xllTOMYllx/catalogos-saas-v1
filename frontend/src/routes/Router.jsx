@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "../contexts/AuthContext";
 import ScrollToTop from "../components/ScrollToTop";
+import ProtectedRoute from "../components/auth/ProtectedRoute";
 import LandingPage from "../pages/LandingPage";
 import DemoPage from "../pages/DemoPage";
 import CatalogPage from "../pages/CatalogPage";
@@ -25,6 +26,10 @@ import SuperAdminLayout from "../layouts/SuperAdminLayout";
  * - MainLayout: Páginas principales con Header estándar (INICIO, NOSOTROS, CONTACTO)
  * - ClientLayout: Espacio personalizado del cliente con ClientHeader (sin navegación a landing)
  * - SuperAdminLayout: Panel de administración del sistema con SuperAdminHeader
+ * 
+ * Protección de rutas:
+ * - ProtectedRoute: Componente que verifica autenticación antes de mostrar contenido sensible
+ * - Previene acceso con botón atrás/adelante del navegador después de cerrar sesión
  * 
  * Los clientes con su propio catálogo tienen un espacio aislado donde:
  * - No ven enlaces a la landing page principal
@@ -51,25 +56,42 @@ export function Router() {
                         <Route path="/forgot-password" element={<ForgotPassword />} />
                         <Route path="/reset-password" element={<ResetPassword />} />
                         
-                        {/* Admin genérico (sin slug de catálogo) */}
-                        <Route path="/admin" element={<AdminDashboard />} />
+                        {/* Admin genérico (sin slug de catálogo) - PROTEGIDO */}
+                        <Route path="/admin" element={
+                            <ProtectedRoute>
+                                <AdminDashboard />
+                            </ProtectedRoute>
+                        } />
                         
                         {/* Planes de suscripción */}
                         <Route path="/subscription-plans" element={<SubscriptionPlans />} />
                     </Route>
 
-                    {/* Rutas con SuperAdminLayout (Panel de administración del sistema) */}
+                    {/* Rutas con SuperAdminLayout (Panel de administración del sistema) - PROTEGIDO */}
                     <Route element={<SuperAdminLayout />}>
-                        <Route path="/super-admin" element={<SuperAdminDashboard />} />
+                        <Route path="/super-admin" element={
+                            <ProtectedRoute requiredRole="admin">
+                                <SuperAdminDashboard />
+                            </ProtectedRoute>
+                        } />
                     </Route>
 
                     {/* Rutas con ClientLayout (Header específico para espacio de cliente) */}
                     {/* Estas rutas tienen su propio header sin navegación a landing page */}
                     <Route element={<ClientLayout />}>
-                        <Route path="/:catalogSlug/admin" element={<AdminDashboard />} />
+                        {/* Admin del cliente - PROTEGIDO */}
+                        <Route path="/:catalogSlug/admin" element={
+                            <ProtectedRoute>
+                                <AdminDashboard />
+                            </ProtectedRoute>
+                        } />
                         <Route path="/:catalogSlug/nosotros" element={<ClientNosotros />} />
                         <Route path="/:catalogSlug/carrito" element={<Carrito />} />
-                        <Route path="/:catalogSlug/subscription-plans" element={<SubscriptionPlans />} />
+                        <Route path="/:catalogSlug/subscription-plans" element={
+                            <ProtectedRoute>
+                                <SubscriptionPlans />
+                            </ProtectedRoute>
+                        } />
                         <Route path="/:catalogSlug" element={<CatalogPage />} />
                     </Route>
                 </Routes>
