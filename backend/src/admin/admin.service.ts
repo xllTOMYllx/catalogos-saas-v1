@@ -3,6 +3,7 @@ import { UsersService } from '../users/users.service';
 import { ClientsService } from '../clients/clients.service';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { SubscriptionPlansService } from '../subscription-plans/subscription-plans.service';
+import { Subscription } from '../subscriptions/subscription.entity';
 
 export interface ClientWithDetails {
   id: number;
@@ -92,7 +93,16 @@ export class AdminService {
   async changeUserSubscription(
     userId: number,
     planId: number,
-  ): Promise<{ success: boolean; message: string }> {
+  ): Promise<{
+    success: boolean;
+    message: string;
+    subscription: {
+      id: number;
+      status: string;
+      planId: number;
+      planName: string;
+    };
+  }> {
     const user = await this.usersService.findOne(userId);
     if (!user) {
       throw new NotFoundException(`User with ID ${userId} not found`);
@@ -108,12 +118,16 @@ export class AdminService {
     const existingSubscription =
       await this.subscriptionsService.findByUserId(userId);
 
+    let updatedSubscription: Subscription;
     if (existingSubscription) {
       // Update existing subscription
-      await this.subscriptionsService.changePlan(userId, planId);
+      updatedSubscription = await this.subscriptionsService.changePlan(
+        userId,
+        planId,
+      );
     } else {
       // Create new subscription
-      await this.subscriptionsService.create({
+      updatedSubscription = await this.subscriptionsService.create({
         userId,
         planId,
         status: 'active',
@@ -124,6 +138,12 @@ export class AdminService {
     return {
       success: true,
       message: `Subscription changed to ${plan.name} successfully`,
+      subscription: {
+        id: updatedSubscription.id,
+        status: updatedSubscription.status,
+        planId: plan.id,
+        planName: plan.name,
+      },
     };
   }
 
